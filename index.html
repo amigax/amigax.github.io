@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gaz's Growling Laboratory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bungee+Shade&family=Bungee&family=Inconsolata:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0d0d;
+  --paper: #f5f0e8;
+  --ink: #1a1a1a;
+  --acid: #c8ff00;
+  --hot: #ff2d55;
+  --spark: #ff9500;
+  --ice: #00d4ff;
+  --mist: rgba(200,255,0,0.06);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--paper);
+  font-family: 'Inconsolata', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+  cursor: crosshair;
+}
+
+/* ── NOISE OVERLAY ── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.4;
+}
+
+/* ── ANIMATED GRID BACKGROUND ── */
+.grid-bg {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(200,255,0,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200,255,0,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: gridDrift 20s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes gridDrift {
+  from { transform: translate(0,0); }
+  to   { transform: translate(40px, 40px); }
+}
+
+/* ── BLOB LIGHTS ── */
+.blob {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  opacity: 0.15;
+  animation: blobFloat 8s ease-in-out infinite alternate;
+}
+.blob-1 { width:400px;height:400px;background:var(--acid);top:-100px;left:-100px;animation-delay:0s; }
+.blob-2 { width:300px;height:300px;background:var(--hot);bottom:-80px;right:-80px;animation-delay:-3s; }
+.blob-3 { width:250px;height:250px;background:var(--ice);top:40%;left:60%;animation-delay:-5s; }
+
+@keyframes blobFloat {
+  from { transform: translate(0,0) scale(1); }
+  to   { transform: translate(30px,40px) scale(1.1); }
+}
+
+/* ── HERO ── */
+.hero {
+  position: relative;
+  z-index: 10;
+  padding: 60px 40px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.hero-eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 6px;
+  color: var(--acid);
+  text-transform: uppercase;
+  animation: fadeSlide 0.6s ease both;
+}
+
+.hero-title {
+  font-family: 'Bungee Shade', cursive;
+  font-size: clamp(2.8rem, 8vw, 7rem);
+  line-height: 0.95;
+  color: var(--paper);
+  mix-blend-mode: normal;
+  position: relative;
+  animation: fadeSlide 0.6s 0.1s ease both;
+}
+
+.hero-title .growling {
+  color: var(--acid);
+  display: inline-block;
+  animation: wobble 3s ease-in-out infinite;
+}
+
+@keyframes wobble {
+  0%,100% { transform: skewX(0deg); }
+  25%      { transform: skewX(-2deg); }
+  75%      { transform: skewX(2deg); }
+}
+
+.hero-title .lab {
+  color: var(--hot);
+  -webkit-text-stroke: 2px var(--hot);
+}
+
+.hero-sub {
+  margin-top: 16px;
+  font-size: 0.85rem;
+  color: rgba(245,240,232,0.45);
+  max-width: 480px;
+  line-height: 1.7;
+  animation: fadeSlide 0.6s 0.2s ease both;
+}
+
+@keyframes fadeSlide {
+  from { opacity:0; transform: translateY(20px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+/* ── DIVIDER ── */
+.divider {
+  position: relative;
+  z-index: 10;
+  margin: 30px 40px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.65rem;
+  letter-spacing: 4px;
+  color: var(--acid);
+  text-transform: uppercase;
+}
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--acid), transparent);
+}
+
+/* ── EXPERIMENTS GRID ── */
+.lab-section {
+  position: relative;
+  z-index: 10;
+  padding: 0 40px 60px;
+}
+
+.experiments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2px;
+  margin-top: 20px;
+}
+
+/* ── EXPERIMENT CARD ── */
+.exp-card {
+  position: relative;
+  background: #111;
+  border: 1px solid #222;
+  padding: 24px;
+  text-decoration: none;
+  color: var(--paper);
+  overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: cardIn 0.4s ease both;
+}
+
+.exp-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--card-accent, var(--acid)) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.exp-card:hover {
+  transform: translate(-3px, -3px);
+  border-color: var(--card-accent, var(--acid));
+  z-index: 2;
+}
+
+.exp-card:hover::before { opacity: 0.07; }
+
+.exp-card:hover .card-arrow { transform: translate(4px, -4px); opacity: 1; }
+
+@keyframes cardIn {
+  from { opacity:0; transform: scale(0.96); }
+  to   { opacity:1; transform: scale(1); }
+}
+
+.card-num {
+  font-family: 'Bungee', cursive;
+  font-size: 0.65rem;
+  color: var(--card-accent, var(--acid));
+  letter-spacing: 2px;
+  opacity: 0.6;
+}
+
+.card-title {
+  font-family: 'Bungee', cursive;
+  font-size: 1.05rem;
+  line-height: 1.2;
+  color: var(--paper);
+  word-break: break-word;
+}
+
+.card-file {
+  font-size: 0.7rem;
+  color: rgba(245,240,232,0.3);
+  font-family: 'Inconsolata', monospace;
+}
+
+.card-arrow {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 1.2rem;
+  color: var(--card-accent, var(--acid));
+  opacity: 0;
+  transition: all 0.2s;
+}
+
+.card-tag {
+  display: inline-block;
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border: 1px solid var(--card-accent, var(--acid));
+  color: var(--card-accent, var(--acid));
+  border-radius: 2px;
+  width: fit-content;
+  margin-top: auto;
+}
+
+/* ── LOADING / EMPTY STATES ── */
+.state-msg {
+  grid-column: 1/-1;
+  padding: 60px;
+  text-align: center;
+  color: rgba(245,240,232,0.2);
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+}
+
+.spinner {
+  display: inline-block;
+  width: 16px; height: 16px;
+  border: 2px solid rgba(200,255,0,0.2);
+  border-top-color: var(--acid);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── STATS BAR ── */
+.stats-bar {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  gap: 30px;
+  padding: 16px 40px;
+  border-top: 1px solid #1a1a1a;
+  border-bottom: 1px solid #1a1a1a;
+  margin-bottom: 0;
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  flex-wrap: wrap;
+}
+
+.stat { display: flex; flex-direction: column; gap: 3px; }
+.stat-val { font-family: 'Bungee', cursive; font-size: 1.4rem; color: var(--acid); line-height: 1; }
+.stat-label { color: rgba(245,240,232,0.3); text-transform: uppercase; letter-spacing: 2px; }
+
+/* ── FOOTER ── */
+footer {
+  position: relative;
+  z-index: 10;
+  padding: 20px 40px;
+  border-top: 1px solid #1a1a1a;
+  font-size: 0.65rem;
+  color: rgba(245,240,232,0.15);
+  letter-spacing: 2px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.blink { animation: blink 1.2s step-end infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .hero { padding: 40px 20px 20px; }
+  .divider, .lab-section, .stats-bar, footer { padding-left: 20px; padding-right: 20px; }
+  .hero-title { font-size: 2.5rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+
+<header class="hero">
+  <p class="hero-eyebrow">⚗ amigax.github.io</p>
+  <h1 class="hero-title">
+    Gaz's<br>
+    <span class="growling">Growling</span><br>
+    <span class="lab">Laboratory</span>
+  </h1>
+  <p class="hero-sub">
+    A collection of experiments, prototypes, and digital curiosities —
+    built for fun, deployed into the void, left running.
+  </p>
+</header>
+
+<div class="stats-bar">
+  <div class="stat">
+    <span class="stat-val" id="count">—</span>
+    <span class="stat-label">Experiments</span>
+  </div>
+  <div class="stat">
+    <span class="stat-val" id="last-updated">—</span>
+    <span class="stat-label">Last Updated</span>
+  </div>
+  <div class="stat">
+    <span class="stat-val" style="color:var(--hot)">∞</span>
+    <span class="stat-label">Ideas Remaining</span>
+  </div>
+</div>
+
+<div class="divider">— Experiments —</div>
+
+<section class="lab-section">
+  <div class="experiments-grid" id="grid">
+    <div class="state-msg"><span class="spinner"></span> scanning the lab&hellip;</div>
+  </div>
+</section>
+
+<footer>
+  <span>GAZ'S GROWLING LABORATORY <span class="blink">█</span></span>
+  <span>AUTO-INDEXED FROM GITHUB · amigax/amigax.github.io</span>
+</footer>
+
+<script>
+const REPO = 'amigax/amigax.github.io';
+const API  = `https://api.github.com/repos/${REPO}/git/trees/HEAD?recursive=1`;
+
+// Colour palette cycles per card
+const ACCENTS = ['#c8ff00','#ff2d55','#ff9500','#00d4ff','#bf5fff','#00ffaa','#ff6b35','#fff700'];
+
+// Try to make a human-friendly title from filename
+function titleFromFilename(name) {
+  return name
+    .replace(/\.html?$/i, '')
+    .replace(/[-_]/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+// Tag heuristics
+function tagFromName(name) {
+  const n = name.toLowerCase();
+  if (n.includes('game') || n.includes('viking') || n.includes('midnight') || n.includes('lords')) return 'GAME';
+  if (n.includes('ascii'))   return 'ASCII';
+  if (n.includes('steg'))    return 'STEGO';
+  if (n.includes('tool') || n.includes('util')) return 'TOOL';
+  if (n.includes('demo') || n.includes('test')) return 'DEMO';
+  return 'EXPERIMENT';
+}
+
+async function loadExperiments() {
+  const grid = document.getElementById('grid');
+  try {
+    const res  = await fetch(API);
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+
+    // Filter .html files, exclude index.html itself
+    const files = (data.tree || [])
+      .filter(f => f.type === 'blob' && /\.html?$/i.test(f.path) && f.path !== 'index.html')
+      .sort((a,b) => a.path.localeCompare(b.path));
+
+    document.getElementById('count').textContent = files.length || '0';
+    document.getElementById('last-updated').textContent = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+
+    if (files.length === 0) {
+      grid.innerHTML = '<div class="state-msg">no experiments yet — push some html files!</div>';
+      return;
+    }
+
+    grid.innerHTML = '';
+
+    files.forEach((file, i) => {
+      const accent = ACCENTS[i % ACCENTS.length];
+      const title  = titleFromFilename(file.path.split('/').pop());
+      const tag    = tagFromName(file.path);
+      const url    = `https://amigax.github.io/${file.path}`;
+      const num    = String(i + 1).padStart(3, '0');
+
+      const card = document.createElement('a');
+      card.href  = url;
+      card.className = 'exp-card';
+      card.style.setProperty('--card-accent', accent);
+      card.style.animationDelay = `${i * 0.05}s`;
+      card.setAttribute('target', '_blank');
+      card.setAttribute('rel', 'noopener');
+
+      card.innerHTML = `
+        <span class="card-num">EXP·${num}</span>
+        <span class="card-title">${title}</span>
+        <span class="card-file">${file.path}</span>
+        <span class="card-tag">${tag}</span>
+        <span class="card-arrow">↗</span>
+      `;
+
+      grid.appendChild(card);
+    });
+
+  } catch (err) {
+    grid.innerHTML = `<div class="state-msg">⚠ couldn't reach the github api — check back in a moment<br><small style="opacity:0.4">${err.message}</small></div>`;
+  }
+}
+
+loadExperiments();
+</script>
+</body>
+</html>
