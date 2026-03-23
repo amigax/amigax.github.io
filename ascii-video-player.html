@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASCII VIDEO PLAYER</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&display=swap');
+
+  :root {
+    --bg: #0a0a0a;
+    --fg: #00ff41;
+    --dim: #003d0f;
+    --accent: #ff6b35;
+    --panel: #0f0f0f;
+    --border: #1a1a1a;
+    --glow: 0 0 8px #00ff41aa;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,255,65,0.015) 2px,
+      rgba(0,255,65,0.015) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 4px;
+    color: var(--fg);
+    text-shadow: var(--glow);
+  }
+
+  h1 span { color: var(--accent); }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--dim);
+    box-shadow: none;
+    transition: all 0.3s;
+  }
+  .status-dot.active {
+    background: var(--fg);
+    box-shadow: var(--glow);
+    animation: pulse 1s infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .drop-zone {
+    border: 2px dashed var(--dim);
+    border-radius: 4px;
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .drop-zone:hover, .drop-zone.drag-over {
+    border-color: var(--fg);
+    background: rgba(0,255,65,0.03);
+    box-shadow: inset 0 0 20px rgba(0,255,65,0.05);
+  }
+
+  .drop-zone input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .drop-label {
+    font-size: 0.85rem;
+    color: var(--dim);
+    line-height: 1.8;
+    pointer-events: none;
+  }
+
+  .drop-label strong {
+    display: block;
+    font-size: 1.1rem;
+    color: var(--fg);
+    margin-bottom: 6px;
+    text-shadow: var(--glow);
+  }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  button {
+    background: transparent;
+    border: 1px solid var(--dim);
+    color: var(--fg);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    padding: 6px 14px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  button:hover:not(:disabled) {
+    border-color: var(--fg);
+    background: rgba(0,255,65,0.08);
+    box-shadow: var(--glow);
+  }
+
+  button:disabled { opacity: 0.3; cursor: default; }
+
+  button.primary {
+    border-color: var(--fg);
+    color: var(--bg);
+    background: var(--fg);
+  }
+
+  button.primary:hover:not(:disabled) {
+    background: #00cc33;
+    box-shadow: 0 0 16px #00ff41aa;
+  }
+
+  .slider-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    color: var(--dim);
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 90px;
+    height: 2px;
+    background: var(--dim);
+    outline: none;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--fg);
+    cursor: pointer;
+    box-shadow: var(--glow);
+  }
+
+  select {
+    background: var(--panel);
+    border: 1px solid var(--dim);
+    color: var(--fg);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    padding: 5px 8px;
+    cursor: pointer;
+    outline: none;
+  }
+
+  select:focus { border-color: var(--fg); }
+
+  .ascii-wrap {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    position: relative;
+    min-height: 300px;
+  }
+
+  #ascii-out {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 7px;
+    line-height: 1.0;
+    letter-spacing: 0.5px;
+    white-space: pre;
+    overflow: hidden;
+    padding: 4px;
+    color: var(--fg);
+    background: transparent;
+    border: none;
+    resize: none;
+    outline: none;
+    pointer-events: none;
+  }
+
+  .placeholder-msg {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--dim);
+    font-size: 0.8rem;
+    gap: 8px;
+    pointer-events: none;
+  }
+
+  .placeholder-msg .big { font-size: 3rem; }
+
+  .info-bar {
+    display: flex;
+    gap: 20px;
+    font-size: 0.7rem;
+    color: var(--dim);
+    padding: 4px 0;
+    flex-wrap: wrap;
+  }
+
+  .info-bar span { display: flex; gap: 5px; }
+  .info-bar strong { color: var(--fg); }
+
+  canvas#hidden-canvas { display: none; }
+
+  .colorize { color: var(--accent) !important; }
+
+  /* color mode ASCII */
+  .ascii-color #ascii-out { color: transparent; }
+</style>
+</head>
+<body>
+
+<canvas id="hidden-canvas"></canvas>
+<video id="hidden-video" style="display:none" crossorigin="anonymous"></video>
+
+<header>
+  <div class="status-dot" id="status-dot"></div>
+  <h1>ASCII<span>VID</span></h1>
+  <span style="font-size:0.7rem;color:var(--dim);margin-left:auto">FRAME RENDERER v1.0</span>
+</header>
+
+<div class="main">
+
+  <div class="drop-zone" id="drop-zone">
+    <input type="file" id="file-input" accept="video/*">
+    <div class="drop-label">
+      <strong>[ DROP VIDEO FILE HERE ]</strong>
+      or click to browse — MP4, WebM, OGG supported
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="btn-play" disabled>► PLAY</button>
+    <button id="btn-pause" disabled>⏸ PAUSE</button>
+    <button id="btn-stop" disabled>■ STOP</button>
+
+    <div class="slider-group">
+      COLS
+      <input type="range" id="cols-slider" min="40" max="220" value="120">
+      <strong id="cols-val">120</strong>
+    </div>
+
+    <div class="slider-group">
+      FPS
+      <input type="range" id="fps-slider" min="5" max="30" value="15">
+      <strong id="fps-val">15</strong>
+    </div>
+
+    <select id="charset-sel">
+      <option value="standard">CHARSET: Standard</option>
+      <option value="blocks">CHARSET: Blocks</option>
+      <option value="minimal">CHARSET: Minimal</option>
+      <option value="dense">CHARSET: Dense</option>
+    </select>
+
+    <select id="color-sel">
+      <option value="green">COLOR: Green</option>
+      <option value="white">COLOR: White</option>
+      <option value="amber">COLOR: Amber</option>
+      <option value="cyan">COLOR: Cyan</option>
+    </select>
+  </div>
+
+  <div class="ascii-wrap" id="ascii-wrap">
+    <pre id="ascii-out"></pre>
+    <div class="placeholder-msg" id="placeholder">
+      <span class="big">▶</span>
+      <span>load a video to begin</span>
+    </div>
+  </div>
+
+  <div class="info-bar">
+    <span>COLS <strong id="info-cols">—</strong></span>
+    <span>ROWS <strong id="info-rows">—</strong></span>
+    <span>FPS <strong id="info-fps">—</strong></span>
+    <span>TIME <strong id="info-time">—</strong></span>
+    <span>FRAME <strong id="info-frame">—</strong></span>
+  </div>
+
+</div>
+
+<script>
+const CHARSETS = {
+  standard: ' .\'`^",:;Il!i><~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$',
+  blocks:    ' ░▒▓█',
+  minimal:   ' .:+*#@',
+  dense:     '$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^`\'. '
+};
+
+const COLORS = {
+  green: '#00ff41',
+  white: '#e8e8e8',
+  amber: '#ffb300',
+  cyan:  '#00e5ff'
+};
+
+const video   = document.getElementById('hidden-video');
+const canvas  = document.getElementById('hidden-canvas');
+const ctx     = canvas.getContext('2d', { willReadFrequently: true });
+const out     = document.getElementById('ascii-out');
+const wrap    = document.getElementById('ascii-wrap');
+const placeholder = document.getElementById('placeholder');
+const dot     = document.getElementById('status-dot');
+
+const btnPlay  = document.getElementById('btn-play');
+const btnPause = document.getElementById('btn-pause');
+const btnStop  = document.getElementById('btn-stop');
+
+const colsSlider = document.getElementById('cols-slider');
+const fpsSlider  = document.getElementById('fps-slider');
+const colsVal    = document.getElementById('cols-val');
+const fpsVal     = document.getElementById('fps-val');
+const charsetSel = document.getElementById('charset-sel');
+const colorSel   = document.getElementById('color-sel');
+
+const infoC = document.getElementById('info-cols');
+const infoR = document.getElementById('info-rows');
+const infoF = document.getElementById('info-fps');
+const infoT = document.getElementById('info-time');
+const infoFr= document.getElementById('info-frame');
+
+let animId = null;
+let lastTime = 0;
+let frameCount = 0;
+let playing = false;
+
+function getCols() { return parseInt(colsSlider.value); }
+function getFps()  { return parseInt(fpsSlider.value); }
+function getCharset() { return CHARSETS[charsetSel.value]; }
+
+function frameToAscii() {
+  const cols = getCols();
+  const wrapW = wrap.clientWidth - 8;
+  const wrapH = wrap.clientHeight - 8;
+
+  // Determine char size from font metrics
+  const charW = 4.5;  // approx px per char at 7px mono
+  const charH = 7.0;  // line height
+
+  const rows = Math.floor(wrapH / charH);
+  const actualCols = Math.min(cols, Math.floor(wrapW / charW));
+
+  canvas.width  = actualCols;
+  canvas.height = rows;
+
+  ctx.drawImage(video, 0, 0, actualCols, rows);
+  const data = ctx.getImageData(0, 0, actualCols, rows).data;
+
+  const charset = getCharset();
+  const clen = charset.length - 1;
+  const lines = [];
+
+  for (let y = 0; y < rows; y++) {
+    let line = '';
+    for (let x = 0; x < actualCols; x++) {
+      const i = (y * actualCols + x) * 4;
+      const r = data[i], g = data[i+1], b = data[i+2];
+      // Perceived luminance
+      const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      const idx = Math.round(lum * clen);
+      line += charset[idx];
+    }
+    lines.push(line);
+  }
+
+  out.textContent = lines.join('\n');
+
+  infoC.textContent  = actualCols;
+  infoR.textContent  = rows;
+  const t = video.currentTime;
+  infoT.textContent  = t.toFixed(2) + 's';
+  infoFr.textContent = ++frameCount;
+  infoF.textContent  = getFps();
+}
+
+function renderLoop(ts) {
+  if (!playing) return;
+  const interval = 1000 / getFps();
+  if (ts - lastTime >= interval) {
+    lastTime = ts;
+    if (!video.paused && !video.ended) {
+      frameToAscii();
+    }
+  }
+  animId = requestAnimationFrame(renderLoop);
+}
+
+function startRendering() {
+  if (animId) cancelAnimationFrame(animId);
+  lastTime = 0;
+  animId = requestAnimationFrame(renderLoop);
+}
+
+// File loading
+function loadVideo(file) {
+  if (!file || !file.type.startsWith('video/')) return;
+  const url = URL.createObjectURL(file);
+  video.src = url;
+  video.load();
+  placeholder.style.display = 'none';
+  btnPlay.disabled  = false;
+  btnPause.disabled = false;
+  btnStop.disabled  = false;
+  frameCount = 0;
+}
+
+document.getElementById('file-input').addEventListener('change', e => {
+  loadVideo(e.target.files[0]);
+});
+
+const dropZone = document.getElementById('drop-zone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  loadVideo(e.dataTransfer.files[0]);
+});
+
+btnPlay.addEventListener('click', () => {
+  video.play();
+  playing = true;
+  dot.classList.add('active');
+  startRendering();
+});
+
+btnPause.addEventListener('click', () => {
+  video.pause();
+  playing = false;
+  dot.classList.remove('active');
+  if (animId) cancelAnimationFrame(animId);
+});
+
+btnStop.addEventListener('click', () => {
+  video.pause();
+  video.currentTime = 0;
+  playing = false;
+  dot.classList.remove('active');
+  if (animId) cancelAnimationFrame(animId);
+  out.textContent = '';
+  placeholder.style.display = 'flex';
+  frameCount = 0;
+  infoC.textContent = infoR.textContent = infoF.textContent = infoT.textContent = infoFr.textContent = '—';
+});
+
+video.addEventListener('ended', () => {
+  playing = false;
+  dot.classList.remove('active');
+});
+
+colsSlider.addEventListener('input', () => { colsVal.textContent = colsSlider.value; });
+fpsSlider.addEventListener('input',  () => { fpsVal.textContent  = fpsSlider.value;  });
+
+colorSel.addEventListener('change', () => {
+  const c = COLORS[colorSel.value];
+  document.documentElement.style.setProperty('--fg', c);
+  document.documentElement.style.setProperty('--glow', `0 0 8px ${c}88`);
+  document.documentElement.style.setProperty('--dim', c + '44');
+});
+</script>
+</body>
+</html>
