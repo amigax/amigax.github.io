@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stephie's C-Test Practice</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #f7f3ec;
+    --cream-dark: #ede8df;
+    --ink: #1a1510;
+    --ink-mid: #3d3628;
+    --ink-light: #7a6e5f;
+    --sepia: #8b6914;
+    --sepia-light: #c4a44a;
+    --sepia-pale: #f0e6c8;
+    --red-pen: #c0392b;
+    --green-pen: #27ae60;
+    --blue-pen: #2471a3;
+    --border: #ccc0a8;
+    --shadow: rgba(26,21,16,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Lora', Georgia, serif;
+    min-height: 100vh;
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(139,105,20,0.06) 27px, rgba(139,105,20,0.06) 28px);
+  }
+  header {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 28px 40px 22px;
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    border-bottom: 4px solid var(--sepia-light);
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(196,164,74,0.04) 10px, rgba(196,164,74,0.04) 11px);
+  }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; line-height: 1; }
+  .header-sub { font-family: 'Lora', serif; font-style: italic; color: var(--sepia-light); font-size: 0.95rem; margin-bottom: 2px; }
+  .header-badge { margin-left: auto; background: var(--sepia); color: var(--cream); font-family: 'Source Code Pro', monospace; font-size: 0.7rem; padding: 4px 10px; border-radius: 2px; letter-spacing: 1px; text-transform: uppercase; align-self: flex-start; margin-top: 4px; }
+
+  .nav-link {
+    display: inline-block;
+    margin: 0 40px;
+    padding: 10px 0;
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--sepia);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.15s;
+  }
+  .nav-link:hover { border-bottom-color: var(--sepia); }
+
+  .controls {
+    display: flex;
+    gap: 12px;
+    padding: 20px 40px;
+    background: var(--cream-dark);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .btn { font-family: 'Playfair Display', serif; font-weight: 600; font-size: 0.85rem; padding: 10px 20px; border: 2px solid var(--ink); background: var(--ink); color: var(--cream); cursor: pointer; letter-spacing: 0.3px; transition: all 0.15s ease; border-radius: 2px; }
+  .btn:hover { background: var(--ink-mid); transform: translateY(-1px); box-shadow: 0 4px 12px var(--shadow); }
+  .btn:active { transform: translateY(0); }
+  .btn-outline { background: transparent; color: var(--ink); }
+  .btn-outline:hover { background: var(--ink); color: var(--cream); }
+  .btn-sepia { background: var(--sepia); border-color: var(--sepia); color: #fff; }
+  .btn-sepia:hover { background: #7a5c10; border-color: #7a5c10; }
+  .btn-generate { font-size: 0.95rem; padding: 12px 28px; }
+  .copy-group { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .copy-label { font-family: 'Lora', serif; font-style: italic; font-size: 0.8rem; color: var(--ink-light); }
+
+  .main { max-width: 860px; margin: 0 auto; padding: 36px 40px 60px; }
+
+  .explainer {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--sepia-light);
+    padding: 18px 22px;
+    border-radius: 2px;
+    margin-bottom: 32px;
+    font-size: 0.88rem;
+    color: var(--ink-mid);
+    line-height: 1.7;
+    display: none;
+  }
+  .explainer.visible { display: block; }
+  .explainer strong { color: var(--ink); }
+
+  .placeholder { text-align: center; padding: 80px 0; color: var(--ink-light); font-style: italic; font-size: 1.05rem; }
+  .placeholder-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.35; }
+
+  .passages { display: flex; flex-direction: column; gap: 36px; }
+
+  .passage {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--sepia);
+    padding: 28px 32px;
+    border-radius: 2px;
+    box-shadow: 0 2px 8px var(--shadow);
+    animation: slideIn 0.3s ease both;
+  }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .passage:nth-child(1) { animation-delay: 0.02s; } .passage:nth-child(2) { animation-delay: 0.06s; }
+  .passage:nth-child(3) { animation-delay: 0.10s; } .passage:nth-child(4) { animation-delay: 0.14s; }
+  .passage:nth-child(5) { animation-delay: 0.18s; }
+
+  .passage-num { font-family: 'Source Code Pro', monospace; font-size: 0.68rem; color: var(--sepia); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+  .passage-topic { font-family: 'Playfair Display', serif; font-size: 0.85rem; font-weight: 600; color: var(--ink-light); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .passage-text {
+    font-size: 1.05rem;
+    line-height: 2.1;
+    color: var(--ink);
+  }
+
+  /* The intact first word of a truncated word — shown as plain text */
+  .word-stem { color: var(--ink); }
+
+  /* The input for the missing letters */
+  .ctest-input {
+    font-family: 'Lora', serif;
+    font-size: 1rem;
+    border: none;
+    border-bottom: 2px solid var(--ink-mid);
+    background: transparent;
+    outline: none;
+    padding: 0 1px 1px;
+    color: var(--blue-pen);
+    text-align: left;
+    transition: border-color 0.2s, color 0.2s;
+    vertical-align: baseline;
+    min-width: 18px;
+  }
+  .ctest-input:focus { border-bottom-color: var(--sepia); }
+  .ctest-input.correct   { color: var(--green-pen); border-bottom-color: var(--green-pen); }
+  .ctest-input.incorrect { color: var(--red-pen);   border-bottom-color: var(--red-pen); }
+
+  /* Score row */
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    font-size: 0.82rem;
+    color: var(--ink-light);
+    font-family: 'Source Code Pro', monospace;
+  }
+  .score-val { font-size: 1rem; color: var(--ink); font-weight: 500; }
+
+  /* Answer key */
+  .answer-reveal {
+    display: none;
+    margin-top: 14px;
+    padding: 8px 12px;
+    background: var(--sepia-pale);
+    border-radius: 2px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.8rem;
+    color: var(--sepia);
+    line-height: 1.8;
+  }
+  .answer-reveal.visible { display: block; }
+  .answer-reveal strong { font-family: 'Lora', serif; font-weight: normal; font-style: italic; color: var(--ink-mid); font-size: 0.78rem; display: block; margin-bottom: 3px; }
+
+  .answers-bar { padding: 14px 40px; background: var(--sepia-pale); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); display: none; align-items: center; gap: 10px; font-family: 'Lora', serif; font-size: 0.85rem; color: var(--ink-mid); font-style: italic; }
+  .answers-bar.visible { display: flex; }
+  .answers-bar .dot { color: var(--sepia); font-style: normal; }
+
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--ink); color: var(--cream); font-family: 'Lora', serif; font-size: 0.9rem; padding: 12px 24px; border-radius: 2px; opacity: 0; transition: all 0.25s ease; pointer-events: none; z-index: 1000; border-left: 3px solid var(--sepia-light); white-space: nowrap; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 640px) {
+    header { padding: 20px; flex-wrap: wrap; }
+    .controls { padding: 14px 16px; }
+    .main { padding: 20px 16px 50px; }
+    .copy-group { margin-left: 0; width: 100%; }
+    .header-title { font-size: 1.4rem; }
+    .nav-link { margin: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="header-sub">Stephie's Academic English Practice</div>
+    <div class="header-title">C-Test Exercises</div>
+  </div>
+  <div class="header-badge">TOEFL Prep</div>
+</header>
+
+<a class="nav-link" href="toefl-blanks.html">&#8592; Back to Gap Fill exercises</a>
+
+<div class="controls">
+  <button class="btn btn-generate" onclick="generate()">&#8635; Generate 5 Passages</button>
+  <button class="btn btn-outline" id="toggleAnswersBtn" onclick="toggleAnswers()" style="display:none">Show Answers</button>
+  <button class="btn btn-outline" id="infoBtn" onclick="toggleInfo()">What is a C-Test?</button>
+  <div class="copy-group">
+    <span class="copy-label">Copy:</span>
+    <button class="btn btn-sepia"   id="copyWithoutBtn" onclick="copyPassages(false)" style="display:none">Student Copy</button>
+    <button class="btn btn-outline" id="copyWithBtn"    onclick="copyPassages(true)"  style="display:none">Teacher Copy</button>
+  </div>
+</div>
+
+<div class="answers-bar" id="answersBar">
+  <span class="dot">&#10022;</span>
+  Answer key now visible — the missing letters are shown in gold below each passage.
+</div>
+
+<main class="main">
+
+  <div class="explainer" id="explainer">
+    <strong>How the C-Test works:</strong> The first sentence of each passage is left completely intact.
+    After that, every second word has its <strong>second half removed</strong> — the first half of the word stays visible,
+    and you must type the missing letters into the box. Each passage contains exactly <strong>10 truncated words</strong>.
+    Words of only one or two letters are skipped. The passage is self-contained and drawn from an academic topic.
+  </div>
+
+  <div class="placeholder" id="placeholder">
+    <div class="placeholder-icon">&#9998;</div>
+    Click <em>Generate 5 Passages</em> to begin.<br>
+    <span style="font-size:0.85rem;margin-top:8px;display:block;">Authentic C-test format — exactly as used in TOEFL assessments.</span>
+  </div>
+
+  <div class="passages" id="passages"></div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── PASSAGE POOL ──────────────────────────────────────────────────────────────
+// Each passage: topic + a paragraph of flowing academic prose.
+// The C-test algorithm will handle all truncation automatically.
+const POOL = [
+  {topic: "Earth Science",
+   text: "Tectonic plates move slowly across the Earth's surface, driven by convection currents in the underlying mantle. These massive slabs of rock carry both oceanic and continental crust, and their interactions produce many of the world's most dramatic geological features. Mountain ranges form where plates collide, while deep ocean trenches develop at subduction zones where one plate slides beneath another."},
+
+  {topic: "Biology",
+   text: "Photosynthesis is the process by which plants convert sunlight into chemical energy stored as glucose. Chlorophyll molecules within the chloroplasts absorb light primarily in the red and blue wavelengths, reflecting green light and giving plants their characteristic colour. The glucose produced serves as the primary energy source for the plant's metabolic processes and forms the basis of nearly all food chains on Earth."},
+
+  {topic: "History",
+   text: "The Industrial Revolution began in Britain during the late eighteenth century and spread rapidly throughout Europe and North America. Steam-powered machinery replaced traditional hand production methods, transforming textile manufacturing and iron production beyond recognition. Urbanisation accelerated dramatically as workers migrated from rural villages to rapidly expanding factory towns in search of paid employment."},
+
+  {topic: "Economics",
+   text: "Inflation occurs when the general level of prices for goods and services rises persistently over time, reducing the purchasing power of money. Central banks attempt to control inflation by adjusting interest rates, which influences borrowing costs and consumer spending throughout the economy. Moderate inflation is generally considered acceptable, but high or unpredictable rates can severely disrupt economic planning and investment."},
+
+  {topic: "Astronomy",
+   text: "Black holes are regions of spacetime where gravitational forces are so extreme that nothing, including light, can escape once it crosses the event horizon. They form when massive stars exhaust their nuclear fuel and collapse under their own gravity in a catastrophic explosion known as a supernova. The existence of black holes was first predicted mathematically by Einstein's general theory of relativity before any direct observational evidence was obtained."},
+
+  {topic: "Medicine",
+   text: "Vaccines protect individuals from infectious diseases by training the immune system to recognise and respond rapidly to specific pathogens. When a vaccine is administered, it introduces a harmless form of the pathogen or a fragment of its protein, prompting the body to produce antibodies. These antibodies remain in the body long after vaccination, providing lasting protection against future exposure to the disease."},
+
+  {topic: "Psychology",
+   text: "Memory is not a single unified system but rather a collection of distinct processes that encode, store, and retrieve different types of information. Working memory holds a limited amount of information for immediate use, while long-term memory can retain vast quantities of knowledge indefinitely. The hippocampus, a structure deep within the brain's temporal lobe, plays a crucial role in consolidating new memories and transferring them into long-term storage."},
+
+  {topic: "Climate Science",
+   text: "The greenhouse effect is a natural process in which certain atmospheric gases trap heat from the sun and prevent it from escaping into space. Carbon dioxide, water vapour, and methane are among the most significant greenhouse gases, and their concentrations in the atmosphere have risen markedly since the beginning of the industrial era. Scientists have established a clear link between rising greenhouse gas emissions and the observed increase in average global temperatures."},
+
+  {topic: "Linguistics",
+   text: "Children acquire their native language with remarkable speed and accuracy, typically producing their first words around the age of one and constructing complex sentences by the age of three. Linguists debate whether this rapid acquisition reflects an innate language faculty unique to humans or whether it results primarily from exposure to rich linguistic input during a critical period of development. Both biological predispositions and environmental factors appear to play important roles in shaping a child's linguistic competence."},
+
+  {topic: "Technology",
+   text: "Artificial intelligence systems learn to perform tasks by processing large datasets and identifying statistical patterns that would be impossible for humans to detect manually. Deep learning models, which are loosely inspired by the structure of the human brain, have achieved remarkable results in areas such as image recognition, natural language processing, and medical diagnosis. Despite their impressive capabilities, these systems still struggle with tasks that require common sense reasoning or the ability to generalise from limited examples."},
+
+  {topic: "Archaeology",
+   text: "Radiocarbon dating allows archaeologists to determine the approximate age of organic materials by measuring the decay of radioactive carbon-14 atoms within a sample. Living organisms continuously absorb carbon from the atmosphere, but once they die, the amount of carbon-14 decreases at a known and predictable rate. By comparing the ratio of carbon-14 to stable carbon-12 in a sample, scientists can calculate how much time has elapsed since the organism died."},
+
+  {topic: "Sociology",
+   text: "Social institutions such as the family, education, religion, and government shape individual behaviour by transmitting shared norms and values across generations. Sociologists examine how these institutions maintain social order and reproduce existing patterns of inequality within a society. Conflict theorists argue that dominant social groups use institutions to preserve their power and privilege, while functionalists emphasise the role of institutions in promoting stability and cohesion."},
+
+  {topic: "Philosophy",
+   text: "Epistemology is the branch of philosophy concerned with the nature, sources, and limits of human knowledge. Rationalist philosophers such as Descartes argued that certain foundational truths can be known through reason alone, independent of sensory experience. Empiricists like Locke and Hume, by contrast, maintained that all genuine knowledge ultimately derives from observation and experience of the physical world."},
+
+  {topic: "Nutrition Science",
+   text: "Carbohydrates are the body's primary source of energy, broken down during digestion into glucose that fuels cellular processes throughout the body. Complex carbohydrates found in whole grains, legumes, and vegetables are digested more slowly than simple sugars, producing a gradual and sustained release of energy. Dietary fibre, a type of carbohydrate that the body cannot fully digest, plays an important role in maintaining digestive health and reducing the risk of chronic disease."},
+
+  {topic: "Neuroscience",
+   text: "The human brain contains approximately eighty-six billion neurons, each connected to thousands of others through specialised junctions called synapses. Electrical signals travel along neurons and trigger the release of chemical messengers known as neurotransmitters at these synaptic connections, allowing information to pass rapidly across neural networks. The strength of synaptic connections changes in response to experience, a process known as synaptic plasticity that underlies learning and memory."},
+
+  {topic: "Environmental Science",
+   text: "Coral reefs are among the most biologically diverse ecosystems on Earth, supporting an estimated quarter of all marine species despite covering less than one percent of the ocean floor. They are constructed by tiny colonial animals called polyps, which secrete calcium carbonate skeletons that accumulate over centuries to form the complex reef structure. Rising ocean temperatures caused by climate change lead to coral bleaching, a stress response in which corals expel the symbiotic algae that provide them with nutrients and colour."},
+
+  {topic: "Literature",
+   text: "Narrative fiction uses plot, character, setting, and point of view to construct imagined worlds that readers inhabit during the act of reading. Authors make deliberate choices about perspective and narrative voice that fundamentally shape how readers interpret events and form emotional connections with characters. The tension between showing and telling — between dramatising scenes in detail and summarising information efficiently — is one of the central craft challenges facing any writer of fiction."},
+
+  {topic: "Political Science",
+   text: "Democratic systems of government are founded on the principle that political authority derives ultimately from the consent of the governed, expressed through free and fair elections. Constitutional frameworks constrain the exercise of power by distributing authority among separate branches of government and protecting fundamental individual rights from majority interference. The health of a democracy depends not only on its formal institutions but also on a civic culture that values tolerance, accountability, and the peaceful transfer of power."},
+
+  {topic: "Chemistry",
+   text: "Chemical reactions involve the breaking and forming of bonds between atoms, resulting in the transformation of reactants into products with different properties. The rate at which a reaction proceeds depends on several factors, including the concentration of the reactants, the temperature of the system, and the presence of a catalyst. Catalysts accelerate reactions by providing an alternative pathway with a lower activation energy, but they are not consumed in the process and can be recovered unchanged."},
+
+  {topic: "Architecture",
+   text: "Gothic cathedrals represent one of the greatest achievements of medieval European engineering and craftsmanship, combining structural innovation with profound spiritual ambition. The development of the pointed arch, ribbed vault, and flying buttress allowed builders to construct walls of unprecedented height and lightness, replacing the heavy stone of Romanesque buildings with vast expanses of stained glass. These luminous interiors were designed to evoke the divine and to overwhelm the senses of worshippers entering from the dark streets outside."}
+];
+
+// ── C-TEST ALGORITHM ─────────────────────────────────────────────────────────
+// Splits text into tokens (words + surrounding punctuation/spaces).
+// Leaves first sentence intact. Then every second eligible word gets truncated.
+// Returns array of segments: {type:'text'|'intact'|'truncated', value, missing, full}
+
+function applyCtest(text) {
+  // Split into sentences first to protect sentence 1
+  const sentenceEnd = text.search(/[.!?]\s/);
+  const firstSentence = sentenceEnd >= 0 ? text.slice(0, sentenceEnd + 1) : text;
+  const rest = sentenceEnd >= 0 ? text.slice(sentenceEnd + 1) : '';
+
+  // Tokenise the rest into words and non-words
+  const tokens = [];
+  const regex = /([a-zA-Z'-]+)|([^a-zA-Z'-]+)/g;
+  let m;
+  while ((m = regex.exec(rest)) !== null) {
+    if (m[1]) tokens.push({type: 'word', value: m[1]});
+    else       tokens.push({type: 'space', value: m[2]});
+  }
+
+  // Apply truncation: every second word (skip 1-2 letter words, hyphenated short parts)
+  let wordCount = 0;
+  let truncCount = 0;
+  const processed = [];
+
+  for (const tok of tokens) {
+    if (tok.type === 'space') {
+      processed.push({type: 'text', value: tok.value});
+      continue;
+    }
+    wordCount++;
+    // Only truncate every second word, and only if word is long enough
+    const eligible = wordCount % 2 === 0 && tok.value.length >= 3 && truncCount < 10;
+    if (eligible) {
+      const cutAt = Math.ceil(tok.value.length / 2);
+      const stem   = tok.value.slice(0, cutAt);
+      const missing = tok.value.slice(cutAt);
+      processed.push({type: 'truncated', stem, missing, full: tok.value});
+      truncCount++;
+    } else {
+      processed.push({type: 'intact', value: tok.value});
+    }
+  }
+
+  return {firstSentence, segments: processed, truncCount};
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let current = [];
+let answersVisible = false;
+
+// ── GENERATE ──────────────────────────────────────────────────────────────────
+function generate() {
+  answersVisible = false;
+  const shuffled = [...POOL].sort(() => Math.random() - 0.5);
+  current = shuffled.slice(0, 5).map(p => {
+    const ctest = applyCtest(p.text);
+    return {...p, ctest};
+  });
+
+  document.getElementById('placeholder').style.display = 'none';
+  document.getElementById('answersBar').classList.remove('visible');
+  document.getElementById('toggleAnswersBtn').style.display = '';
+  document.getElementById('toggleAnswersBtn').textContent = 'Show Answers';
+  document.getElementById('copyWithoutBtn').style.display = '';
+  document.getElementById('copyWithBtn').style.display = '';
+
+  const container = document.getElementById('passages');
+  container.innerHTML = '';
+
+  current.forEach((p, pIdx) => {
+    const div = document.createElement('div');
+    div.className = 'passage';
+
+    // Build answer key list
+    const answers = p.ctest.segments
+      .filter(s => s.type === 'truncated')
+      .map(s => s.full);
+
+    div.innerHTML = `
+      <div class="passage-num">Passage ${pIdx + 1}</div>
+      <div class="passage-topic">${esc(p.topic)}</div>
+      <div class="passage-text" id="ptext-${pIdx}"></div>
+      <div class="score-row">
+        Score: <span class="score-val" id="score-${pIdx}">0</span> / ${p.ctest.truncCount}
+      </div>
+      <div class="answer-reveal" id="ans-${pIdx}">
+        <strong>Answer key (missing letters only):</strong>
+        ${answers.map((w,i) => `<span title="${esc(w)}">${i+1}. …${esc(p.ctest.segments.filter(s=>s.type==='truncated')[i].missing)}</span>`).join('&nbsp;&nbsp;')}
+      </div>
+    `;
+    container.appendChild(div);
+
+    // Render passage text with inputs
+    renderPassageText(p, pIdx);
+  });
+}
+
+function renderPassageText(p, pIdx) {
+  const container = document.getElementById(`ptext-${pIdx}`);
+  const frag = document.createDocumentFragment();
+
+  // First sentence — intact
+  frag.appendChild(document.createTextNode(p.ctest.firstSentence + ' '));
+
+  let inputIdx = 0;
+  p.ctest.segments.forEach((seg, sIdx) => {
+    if (seg.type === 'text') {
+      frag.appendChild(document.createTextNode(seg.value));
+    } else if (seg.type === 'intact') {
+      frag.appendChild(document.createTextNode(seg.value));
+    } else {
+      // Truncated: show stem + input
+      const span = document.createElement('span');
+      span.style.whiteSpace = 'nowrap';
+
+      const stemNode = document.createTextNode(seg.stem);
+      span.appendChild(stemNode);
+
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.className = 'ctest-input';
+      inp.autocomplete = 'off';
+      inp.autocorrect = 'off';
+      inp.autocapitalize = 'off';
+      inp.spellcheck = false;
+      inp.dataset.answer = seg.missing.toLowerCase();
+      inp.dataset.full = seg.full.toLowerCase();
+      inp.dataset.pidx = pIdx;
+      // Size to missing portion
+      inp.style.width = Math.max(seg.missing.length * 0.62, 1.2) + 'em';
+      inp.addEventListener('input', () => { onInput(inp); });
+      span.appendChild(inp);
+
+      frag.appendChild(span);
+      inputIdx++;
+    }
+  });
+
+  container.appendChild(frag);
+}
+
+function onInput(inp) {
+  const val = inp.value.toLowerCase();
+  const ans = inp.dataset.answer;
+  if (!val) {
+    inp.classList.remove('correct', 'incorrect');
+  } else if (val === ans) {
+    inp.classList.add('correct');
+    inp.classList.remove('incorrect');
+  } else {
+    inp.classList.add('incorrect');
+    inp.classList.remove('correct');
+  }
+  updateScore(parseInt(inp.dataset.pidx));
+}
+
+function updateScore(pIdx) {
+  const passage = document.getElementById(`ptext-${pIdx}`);
+  const inputs  = passage.querySelectorAll('.ctest-input');
+  const correct = Array.from(inputs).filter(i => i.classList.contains('correct')).length;
+  document.getElementById(`score-${pIdx}`).textContent = correct;
+}
+
+// ── TOGGLE ANSWERS ────────────────────────────────────────────────────────────
+function toggleAnswers() {
+  answersVisible = !answersVisible;
+  current.forEach((_, idx) => {
+    document.getElementById(`ans-${idx}`)?.classList.toggle('visible', answersVisible);
+  });
+  document.getElementById('toggleAnswersBtn').textContent = answersVisible ? 'Hide Answers' : 'Show Answers';
+  document.getElementById('answersBar').classList.toggle('visible', answersVisible);
+}
+
+// ── INFO TOGGLE ───────────────────────────────────────────────────────────────
+function toggleInfo() {
+  const el = document.getElementById('explainer');
+  el.classList.toggle('visible');
+  document.getElementById('infoBtn').textContent = el.classList.contains('visible') ? 'Hide Info' : 'What is a C-Test?';
+}
+
+// ── COPY ──────────────────────────────────────────────────────────────────────
+function copyPassages(withAnswers) {
+  if (!current.length) return;
+  let text = '';
+  current.forEach((p, idx) => {
+    text += `Passage ${idx + 1}  [${p.topic}]\n\n`;
+    text += p.ctest.firstSentence + ' ';
+    p.ctest.segments.forEach(seg => {
+      if (seg.type === 'text')     text += seg.value;
+      else if (seg.type === 'intact') text += seg.value;
+      else text += seg.stem + '_'.repeat(seg.missing.length);
+    });
+    text += '\n';
+    if (withAnswers) {
+      const ans = p.ctest.segments.filter(s => s.type === 'truncated').map(s => s.full);
+      text += `\nAnswers: ${ans.join(', ')}\n`;
+    }
+    text += '\n---\n\n';
+  });
+  navigator.clipboard.writeText(text)
+    .then(() => showToast(withAnswers ? '\u2713 Teacher copy (with answers) copied!' : '\u2713 Student copy copied!'))
+    .catch(() => showToast('Copy failed \u2014 try Ctrl+C'));
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
