@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOEFL Gap Fill Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #f7f3ec;
+    --cream-dark: #ede8df;
+    --ink: #1a1510;
+    --ink-mid: #3d3628;
+    --ink-light: #7a6e5f;
+    --sepia: #8b6914;
+    --sepia-light: #c4a44a;
+    --sepia-pale: #f0e6c8;
+    --red-pen: #c0392b;
+    --green-pen: #27ae60;
+    --blue-pen: #2471a3;
+    --border: #ccc0a8;
+    --shadow: rgba(26,21,16,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Lora', Georgia, serif;
+    min-height: 100vh;
+    padding: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(139,105,20,0.06) 27px, rgba(139,105,20,0.06) 28px);
+  }
+
+  header {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 28px 40px 22px;
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    border-bottom: 4px solid var(--sepia-light);
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(196,164,74,0.04) 10px,
+      rgba(196,164,74,0.04) 11px
+    );
+  }
+
+  .header-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1;
+  }
+
+  .header-sub {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    color: var(--sepia-light);
+    font-size: 0.95rem;
+    margin-bottom: 2px;
+  }
+
+  .header-badge {
+    margin-left: auto;
+    background: var(--sepia);
+    color: var(--cream);
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border-radius: 2px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    align-self: flex-start;
+    margin-top: 4px;
+  }
+
+  .controls {
+    display: flex;
+    gap: 12px;
+    padding: 20px 40px;
+    background: var(--cream-dark);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .btn {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 10px 20px;
+    border: 2px solid var(--ink);
+    background: var(--ink);
+    color: var(--cream);
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: all 0.15s ease;
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn:hover {
+    background: var(--ink-mid);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--shadow);
+  }
+
+  .btn:active { transform: translateY(0); }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--ink);
+  }
+  .btn-outline:hover {
+    background: var(--ink);
+    color: var(--cream);
+  }
+
+  .btn-sepia {
+    background: var(--sepia);
+    border-color: var(--sepia);
+    color: #fff;
+  }
+  .btn-sepia:hover { background: #7a5c10; border-color: #7a5c10; }
+
+  .btn-generate {
+    font-size: 0.95rem;
+    padding: 12px 28px;
+  }
+
+  .copy-group {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .copy-label {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    color: var(--ink-light);
+  }
+
+  .main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 36px 40px 60px;
+  }
+
+  .placeholder {
+    text-align: center;
+    padding: 80px 0;
+    color: var(--ink-light);
+    font-style: italic;
+    font-size: 1.05rem;
+  }
+
+  .placeholder-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.35;
+  }
+
+  .exercises {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .exercise {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--sepia);
+    padding: 24px 28px;
+    border-radius: 2px;
+    box-shadow: 0 2px 8px var(--shadow);
+    animation: slideIn 0.3s ease both;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .exercise:nth-child(1) { animation-delay: 0.02s; }
+  .exercise:nth-child(2) { animation-delay: 0.05s; }
+  .exercise:nth-child(3) { animation-delay: 0.08s; }
+  .exercise:nth-child(4) { animation-delay: 0.11s; }
+  .exercise:nth-child(5) { animation-delay: 0.14s; }
+  .exercise:nth-child(6) { animation-delay: 0.17s; }
+  .exercise:nth-child(7) { animation-delay: 0.2s; }
+  .exercise:nth-child(8) { animation-delay: 0.23s; }
+  .exercise:nth-child(9) { animation-delay: 0.26s; }
+  .exercise:nth-child(10) { animation-delay: 0.29s; }
+
+  .exercise-num {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.68rem;
+    color: var(--sepia);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .exercise-topic {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--ink-light);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .exercise-text {
+    font-size: 1rem;
+    line-height: 1.85;
+    color: var(--ink);
+  }
+
+  .blank-wrap {
+    display: inline-block;
+    position: relative;
+    vertical-align: bottom;
+    margin: 0 2px;
+  }
+
+  .blank-input {
+    font-family: 'Lora', serif;
+    font-size: 0.92rem;
+    border: none;
+    border-bottom: 2px solid var(--ink-mid);
+    background: transparent;
+    outline: none;
+    padding: 0 2px 1px;
+    color: var(--blue-pen);
+    min-width: 40px;
+    text-align: center;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .blank-input:focus {
+    border-bottom-color: var(--sepia);
+  }
+
+  .blank-input.correct {
+    color: var(--green-pen);
+    border-bottom-color: var(--green-pen);
+  }
+
+  .blank-input.incorrect {
+    color: var(--red-pen);
+    border-bottom-color: var(--red-pen);
+  }
+
+  .answer-reveal {
+    display: none;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.8rem;
+    color: var(--sepia);
+    background: var(--sepia-pale);
+    padding: 1px 5px;
+    border-radius: 2px;
+    margin-top: 14px;
+    line-height: 1.6;
+  }
+
+  .answer-reveal.visible { display: block; }
+  .answer-reveal strong { color: var(--sepia); }
+
+  .show-answers-active .answer-reveal { display: block; }
+
+  .answers-bar {
+    padding: 16px 40px;
+    background: var(--sepia-pale);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    display: none;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Lora', serif;
+    font-size: 0.85rem;
+    color: var(--ink-mid);
+    font-style: italic;
+  }
+
+  .answers-bar.visible { display: flex; }
+  .answers-bar .dot { color: var(--sepia); font-style: normal; font-size: 1.2rem; }
+
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: var(--cream);
+    font-family: 'Lora', serif;
+    font-size: 0.9rem;
+    padding: 12px 24px;
+    border-radius: 2px;
+    opacity: 0;
+    transition: all 0.25s ease;
+    pointer-events: none;
+    z-index: 1000;
+    border-left: 3px solid var(--sepia-light);
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  @media (max-width: 640px) {
+    header { padding: 20px; flex-wrap: wrap; }
+    .controls { padding: 14px 16px; }
+    .main { padding: 20px 16px 50px; }
+    .copy-group { margin-left: 0; width: 100%; }
+    .header-title { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="header-sub">Academic English Practice</div>
+    <div class="header-title">Gap Fill Exercises</div>
+  </div>
+  <div class="header-badge">TOEFL Prep</div>
+</header>
+
+<div class="controls">
+  <button class="btn btn-generate" onclick="generateExercises()">⟳ Generate 10 Exercises</button>
+  <button class="btn btn-outline" id="toggleAnswersBtn" onclick="toggleAnswers()" style="display:none">Show Answers</button>
+
+  <div class="copy-group">
+    <span class="copy-label">Copy:</span>
+    <button class="btn btn-sepia" id="copyWithoutBtn" onclick="copyExercises(false)" style="display:none">Student Copy</button>
+    <button class="btn btn-outline" id="copyWithBtn" onclick="copyExercises(true)" style="display:none">Teacher Copy</button>
+  </div>
+</div>
+
+<div class="answers-bar" id="answersBar">
+  <span class="dot">✦</span>
+  Answer key is now visible — scroll through each exercise to review.
+</div>
+
+<main class="main">
+  <div class="placeholder" id="placeholder">
+    <div class="placeholder-icon">✎</div>
+    Click <em>Generate 10 Exercises</em> to begin.<br>
+    <span style="font-size:0.85rem; margin-top:8px; display:block;">Academic passages across science, history, economics & more.</span>
+  </div>
+  <div class="exercises" id="exercises"></div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+// Each sentence: full text + array of [word, blankedForm] pairs to blank out
+// blankedForm uses _ chars for hidden letters, showing first letter(s)
+
+const pool = [
+  // SCIENCE — Earth & Geology
+  { topic: "Earth Science", sentence: "Shield volcanoes are broad, gently sloping mountains formed by repeated eruptions of low-viscosity lava. Because the lava flows easily, it spreads over large areas before cooling and hardening.", blanks: [["Because","Be_ _ _ _ _"],["flows","fl_ _ _"],["easily","eas_ _ _"],["over","ov_ _"],["before","be_ _ _ _"]] },
+  { topic: "Earth Science", sentence: "Tectonic plates move continuously across the Earth's surface, driven by convection currents in the mantle. When two plates collide, mountain ranges or deep ocean trenches can form.", blanks: [["continuously","cont_ _ _ _ _ _ _ _"],["driven","dri_ _ _"],["collide","col_ _ _ _"],["mountain","mou_ _ _ _ _"],["trenches","tre_ _ _ _ _"]] },
+  { topic: "Earth Science", sentence: "Glaciers form when more snow accumulates over winter than melts in summer, eventually compressing into dense ice. They shape landscapes by carving valleys and depositing sediment as they retreat.", blanks: [["accumulates","acc_ _ _ _ _ _ _ _"],["eventually","eve_ _ _ _ _ _ _"],["compressing","com_ _ _ _ _ _ _ _"],["depositing","dep_ _ _ _ _ _ _"],["retreat","ret_ _ _ _"]] },
+  { topic: "Climate Science", sentence: "The greenhouse effect occurs when gases such as carbon dioxide trap heat from the sun within the Earth's atmosphere. Without this natural process, average surface temperatures would be significantly lower.", blanks: [["greenhouse","gre_ _ _ _ _ _ _"],["dioxide","dio_ _ _ _"],["trap","tr_ _"],["atmosphere","atm_ _ _ _ _ _ _ _"],["significantly","sig_ _ _ _ _ _ _ _ _ _"]] },
+  { topic: "Oceanography", sentence: "Ocean currents regulate global climate by distributing heat from the equator toward the poles. Surface currents are mainly driven by wind, while deep currents are influenced by differences in water density and temperature.", blanks: [["regulate","reg_ _ _ _ _"],["distributing","dis_ _ _ _ _ _ _ _ _"],["equator","equ_ _ _ _"],["influenced","inf_ _ _ _ _ _ _"],["density","den_ _ _ _"]] },
+
+  // BIOLOGY
+  { topic: "Biology", sentence: "Photosynthesis is the process by which plants convert sunlight into chemical energy stored in glucose. Chlorophyll, the pigment responsible for the green colour of plants, absorbs light primarily in the red and blue wavelengths.", blanks: [["convert","con_ _ _ _"],["chemical","che_ _ _ _ _"],["Chlorophyll","Chl_ _ _ _ _ _ _ _"],["responsible","res_ _ _ _ _ _ _ _"],["wavelengths","wav_ _ _ _ _ _ _ _"]] },
+  { topic: "Biology", sentence: "Natural selection favours individuals whose traits allow them to survive and reproduce more successfully in their environment. Over many generations, beneficial traits become more common within a population.", blanks: [["favours","fav_ _ _ _"],["survive","sur_ _ _ _"],["reproduce","rep_ _ _ _ _ _ _"],["beneficial","ben_ _ _ _ _ _ _"],["population","pop_ _ _ _ _ _ _ _"]] },
+  { topic: "Biology", sentence: "Mitosis is the process by which a cell divides to produce two genetically identical daughter cells, each containing the same number of chromosomes as the parent. This process is essential for growth and tissue repair.", blanks: [["divides","div_ _ _ _"],["genetically","gen_ _ _ _ _ _ _ _"],["identical","ide_ _ _ _ _ _"],["chromosomes","chr_ _ _ _ _ _ _ _ _"],["essential","ess_ _ _ _ _ _"]] },
+  { topic: "Ecology", sentence: "Biodiversity refers to the variety of life forms within a given ecosystem, including the diversity of species, genes, and habitats. High biodiversity generally makes ecosystems more resilient to environmental disturbances.", blanks: [["variety","var_ _ _ _"],["ecosystem","eco_ _ _ _ _ _"],["diversity","div_ _ _ _ _ _"],["resilient","res_ _ _ _ _ _"],["disturbances","dis_ _ _ _ _ _ _ _ _ _"]] },
+
+  // HISTORY & ARCHAEOLOGY
+  { topic: "Ancient History", sentence: "The Roman Empire reached its greatest territorial extent under Emperor Trajan in the early second century CE. At its peak, the empire encompassed diverse cultures, languages, and legal systems across three continents.", blanks: [["territorial","ter_ _ _ _ _ _ _ _"],["encompassed","enc_ _ _ _ _ _ _ _"],["diverse","div_ _ _ _"],["languages","lan_ _ _ _ _ _"],["continents","con_ _ _ _ _ _ _ _"]] },
+  { topic: "Archaeology", sentence: "Archaeological excavations rely on systematic methods to carefully expose and document artefacts without damaging them. Stratigraphy, the study of distinct soil layers, allows researchers to establish the relative age of objects found at a site.", blanks: [["systematic","sys_ _ _ _ _ _ _"],["document","doc_ _ _ _ _"],["Stratigraphy","Str_ _ _ _ _ _ _ _ _ _"],["distinct","dis_ _ _ _ _"],["establish","est_ _ _ _ _ _ _"]] },
+  { topic: "History", sentence: "The Industrial Revolution began in Britain during the late eighteenth century and transformed manufacturing through the introduction of steam power and mechanisation. Urbanisation accelerated as workers moved from rural areas to cities in search of factory employment.", blanks: [["transformed","tra_ _ _ _ _ _ _ _"],["introduction","int_ _ _ _ _ _ _ _ _"],["mechanisation","mec_ _ _ _ _ _ _ _ _ _ _"],["Urbanisation","Urb_ _ _ _ _ _ _ _ _"],["employment","emp_ _ _ _ _ _ _"]] },
+  { topic: "History", sentence: "The Silk Road was a network of ancient trade routes connecting East Asia with the Mediterranean world. Merchants transported not only goods such as silk and spices but also ideas, religions, and technologies across vast distances.", blanks: [["network","net_ _ _ _"],["connecting","con_ _ _ _ _ _ _"],["transported","tra_ _ _ _ _ _ _ _"],["religions","rel_ _ _ _ _ _"],["distances","dis_ _ _ _ _ _ _"]] },
+
+  // ECONOMICS & SOCIETY
+  { topic: "Economics", sentence: "Inflation occurs when the general price level of goods and services rises over time, reducing the purchasing power of a currency. Central banks commonly respond by raising interest rates to slow consumer spending.", blanks: [["general","gen_ _ _ _"],["reducing","red_ _ _ _ _"],["purchasing","pur_ _ _ _ _ _ _"],["commonly","com_ _ _ _ _"],["consumer","con_ _ _ _ _"]] },
+  { topic: "Economics", sentence: "Supply and demand determine the price of goods in a free market economy. When supply exceeds demand, prices tend to fall; conversely, when demand outpaces supply, prices typically rise.", blanks: [["determine","det_ _ _ _ _ _ _"],["exceeds","exc_ _ _ _"],["conversely","con_ _ _ _ _ _ _"],["outpaces","out_ _ _ _ _"],["typically","typ_ _ _ _ _ _"]] },
+  { topic: "Sociology", sentence: "Social mobility describes the ability of individuals or groups to move between different levels of social stratification within a society. Factors such as education, wealth, and family background strongly influence one's prospects for upward mobility.", blanks: [["describes","des_ _ _ _ _ _"],["stratification","str_ _ _ _ _ _ _ _ _ _ _"],["education","edu_ _ _ _ _ _"],["background","bac_ _ _ _ _ _ _ _"],["prospects","pro_ _ _ _ _ _"]] },
+  { topic: "Global Trade", sentence: "Globalisation has accelerated the exchange of goods, capital, and information across national borders. Critics argue that it can increase economic inequality between nations, while proponents emphasise its role in raising living standards.", blanks: [["accelerated","acc_ _ _ _ _ _ _ _"],["capital","cap_ _ _ _"],["inequality","ine_ _ _ _ _ _ _"],["proponents","pro_ _ _ _ _ _"],["emphasise","emp_ _ _ _ _ _ _"]] },
+
+  // PHYSICS
+  { topic: "Physics", sentence: "Newton's first law of motion states that an object will remain at rest or continue moving at constant velocity unless acted upon by an external force. This property of matter is known as inertia.", blanks: [["remain","rem_ _ _"],["constant","con_ _ _ _ _"],["velocity","vel_ _ _ _ _"],["external","ext_ _ _ _ _"],["inertia","ine_ _ _ _"]] },
+  { topic: "Physics", sentence: "Electromagnetic waves travel through a vacuum at approximately 300,000 kilometres per second. The visible spectrum is only a small portion of the full electromagnetic spectrum, which also includes radio waves, microwaves, and X-rays.", blanks: [["Electromagnetic","Ele_ _ _ _ _ _ _ _ _ _ _ _"],["approximately","app_ _ _ _ _ _ _ _ _ _"],["spectrum","spe_ _ _ _ _"],["microwaves","mic_ _ _ _ _ _ _"],["includes","inc_ _ _ _ _"]] },
+  { topic: "Physics", sentence: "Thermodynamics is the branch of physics concerned with the relationships between heat, work, and energy. The second law states that in any energy transfer, some energy is always lost as heat, increasing the entropy of the system.", blanks: [["concerned","con_ _ _ _ _ _"],["relationships","rel_ _ _ _ _ _ _ _ _ _"],["transfer","tra_ _ _ _ _"],["increasing","inc_ _ _ _ _ _ _ _"],["entropy","ent_ _ _ _"]] },
+
+  // CHEMISTRY
+  { topic: "Chemistry", sentence: "Covalent bonds form when two atoms share electrons, allowing each atom to achieve a stable electron configuration. These bonds are typically stronger than ionic bonds and are found in molecules such as water and carbon dioxide.", blanks: [["electrons","ele_ _ _ _ _ _"],["achieve","ach_ _ _ _"],["configuration","con_ _ _ _ _ _ _ _ _ _ _"],["typically","typ_ _ _ _ _ _"],["molecules","mol_ _ _ _ _ _"]] },
+  { topic: "Chemistry", sentence: "Catalysts increase the rate of a chemical reaction by providing an alternative pathway with a lower activation energy. Unlike reactants, a catalyst is not consumed during the reaction and can be recovered at the end.", blanks: [["increase","inc_ _ _ _ _"],["providing","pro_ _ _ _ _ _"],["alternative","alt_ _ _ _ _ _ _ _"],["activation","act_ _ _ _ _ _ _"],["recovered","rec_ _ _ _ _ _"]] },
+
+  // ASTRONOMY
+  { topic: "Astronomy", sentence: "Black holes form when massive stars exhaust their nuclear fuel and collapse under gravity, creating regions of space where the gravitational pull is so strong that nothing, not even light, can escape.", blanks: [["exhaust","exh_ _ _ _"],["collapse","col_ _ _ _ _"],["gravitational","gra_ _ _ _ _ _ _ _ _ _"],["regions","reg_ _ _ _"],["escape","esc_ _ _"]] },
+  { topic: "Astronomy", sentence: "The life cycle of a star begins with the gravitational collapse of a cloud of gas and dust known as a nebula. Depending on the star's mass, it may end its life as a white dwarf, a neutron star, or a black hole.", blanks: [["gravitational","gra_ _ _ _ _ _ _ _ _ _"],["collapse","col_ _ _ _ _"],["Depending","Dep_ _ _ _ _ _"],["neutron","neu_ _ _ _"],["existence","exi_ _ _ _ _ _"]] },
+
+  // LINGUISTICS & COMMUNICATION
+  { topic: "Linguistics", sentence: "Language acquisition in children occurs naturally through exposure to their native tongue during a critical period of development. Research suggests that bilingual children develop cognitive advantages related to attention and mental flexibility.", blanks: [["acquisition","acq_ _ _ _ _ _ _ _"],["exposure","exp_ _ _ _ _"],["critical","cri_ _ _ _ _"],["bilingual","bil_ _ _ _ _ _"],["flexibility","fle_ _ _ _ _ _ _ _"]] },
+  { topic: "Communication", sentence: "Nonverbal communication, including facial expressions, posture, and gestures, conveys a significant portion of the meaning in face-to-face interactions. Cultural differences can cause misunderstandings when nonverbal cues are interpreted differently.", blanks: [["expressions","exp_ _ _ _ _ _ _ _"],["conveys","con_ _ _ _"],["significant","sig_ _ _ _ _ _ _ _"],["interactions","int_ _ _ _ _ _ _ _ _"],["misunderstandings","mis_ _ _ _ _ _ _ _ _ _ _ _ _ _"]] },
+
+  // TECHNOLOGY
+  { topic: "Technology", sentence: "Artificial intelligence enables computers to perform tasks that traditionally required human intelligence, such as recognising speech, translating languages, and making decisions based on complex data.", blanks: [["traditionally","tra_ _ _ _ _ _ _ _ _ _"],["required","req_ _ _ _ _"],["recognising","rec_ _ _ _ _ _ _ _ _"],["translating","tra_ _ _ _ _ _ _ _ _"],["decisions","dec_ _ _ _ _ _"]] },
+  { topic: "Technology", sentence: "Cybersecurity involves protecting computer systems and networks from digital attacks that aim to access, alter, or destroy sensitive information. As technology advances, threats become increasingly sophisticated, requiring constant vigilance.", blanks: [["protecting","pro_ _ _ _ _ _ _"],["sensitive","sen_ _ _ _ _ _"],["sophisticated","sop_ _ _ _ _ _ _ _ _ _ _"],["requires","req_ _ _ _ _"],["vigilance","vig_ _ _ _ _ _"]] },
+
+  // ENVIRONMENT
+  { topic: "Environment", sentence: "Deforestation is the large-scale removal of forests, often to create agricultural land or to harvest timber. This process releases stored carbon into the atmosphere and threatens biodiversity by destroying natural habitats.", blanks: [["removal","rem_ _ _ _"],["agricultural","agr_ _ _ _ _ _ _ _ _"],["releases","rel_ _ _ _ _"],["threatens","thr_ _ _ _ _ _ _"],["destroying","des_ _ _ _ _ _ _"]] },
+  { topic: "Environment", sentence: "Renewable energy sources such as solar, wind, and hydroelectric power offer alternatives to fossil fuels that produce fewer greenhouse gas emissions. Their expanded use is considered essential for mitigating climate change.", blanks: [["alternatives","alt_ _ _ _ _ _ _ _ _"],["emissions","emi_ _ _ _ _ _"],["expanded","exp_ _ _ _ _"],["mitigating","mit_ _ _ _ _ _ _"],["essential","ess_ _ _ _ _ _"]] },
+
+  // MEDICINE & HEALTH
+  { topic: "Medicine", sentence: "Vaccines stimulate the immune system to produce antibodies against specific pathogens without causing the disease itself. This acquired immunity protects individuals and reduces the overall transmission of infectious diseases within a community.", blanks: [["stimulate","sti_ _ _ _ _ _"],["antibodies","ant_ _ _ _ _ _ _"],["pathogens","pat_ _ _ _ _ _"],["acquired","acq_ _ _ _ _"],["transmission","tra_ _ _ _ _ _ _ _ _"]] },
+  { topic: "Medicine", sentence: "Antibiotics are medicines used to treat bacterial infections by either killing bacteria or inhibiting their growth. Overuse of antibiotics has led to the emergence of resistant strains, which pose a serious global health challenge.", blanks: [["bacterial","bac_ _ _ _ _ _"],["inhibiting","inh_ _ _ _ _ _ _"],["Overuse","Ove_ _ _ _"],["resistant","res_ _ _ _ _ _"],["challenge","cha_ _ _ _ _ _ _"]] },
+
+  // PSYCHOLOGY
+  { topic: "Psychology", sentence: "Cognitive behavioural therapy helps patients identify and change negative thought patterns that contribute to mental health disorders such as anxiety and depression. It is widely regarded as an effective, evidence-based treatment.", blanks: [["identify","ide_ _ _ _ _"],["negative","neg_ _ _ _ _"],["contribute","con_ _ _ _ _ _ _ _"],["depression","dep_ _ _ _ _ _ _"],["evidence-based","evi_ _ _ _ _-bas_ _"]] },
+  { topic: "Psychology", sentence: "Memory consolidation is the process by which newly acquired information is stabilised and integrated into long-term memory. Sleep plays a critical role in this process, as the brain replays and organises experiences during rest.", blanks: [["consolidation","con_ _ _ _ _ _ _ _ _ _"],["stabilised","sta_ _ _ _ _ _ _"],["integrated","int_ _ _ _ _ _ _ _"],["critical","cri_ _ _ _ _"],["organises","org_ _ _ _ _ _"]] },
+
+  // MATHEMATICS & LOGIC
+  { topic: "Mathematics", sentence: "Statistics is the branch of mathematics concerned with collecting, analysing, and interpreting numerical data to draw conclusions and make predictions. Probability theory underpins many statistical methods and is fundamental to understanding uncertainty.", blanks: [["concerned","con_ _ _ _ _ _"],["analysing","ana_ _ _ _ _ _"],["interpreting","int_ _ _ _ _ _ _ _ _"],["predictions","pre_ _ _ _ _ _ _ _"],["fundamental","fun_ _ _ _ _ _ _ _"]] },
+  { topic: "Mathematics", sentence: "Algorithms are step-by-step procedures used to solve problems or perform computations. The efficiency of an algorithm is measured by its time complexity, which describes how its running time grows as the size of the input increases.", blanks: [["procedures","pro_ _ _ _ _ _ _ _"],["computations","com_ _ _ _ _ _ _ _ _"],["efficiency","eff_ _ _ _ _ _ _"],["complexity","com_ _ _ _ _ _ _"],["increases","inc_ _ _ _ _ _"]] },
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let currentExercises = [];
+let answersVisible = false;
+
+// ─── LOGIC ───────────────────────────────────────────────────────────────────
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function generateExercises() {
+  answersVisible = false;
+  currentExercises = shuffle(pool).slice(0, 10);
+
+  const btn = document.getElementById('toggleAnswersBtn');
+  btn.textContent = 'Show Answers';
+  btn.style.display = '';
+  document.getElementById('copyWithoutBtn').style.display = '';
+  document.getElementById('copyWithBtn').style.display = '';
+  document.getElementById('answersBar').classList.remove('visible');
+  document.getElementById('placeholder').style.display = 'none';
+
+  const container = document.getElementById('exercises');
+  container.innerHTML = '';
+
+  currentExercises.forEach((ex, idx) => {
+    const div = document.createElement('div');
+    div.className = 'exercise';
+    div.dataset.idx = idx;
+
+    // Build sentence HTML with inline inputs
+    let html = buildSentenceHTML(ex, idx);
+
+    // Build answer key
+    const answerList = ex.blanks.map(([word]) => word).join(' · ');
+
+    div.innerHTML = `
+      <div class="exercise-num">Exercise ${idx + 1}</div>
+      <div class="exercise-topic">${ex.topic}</div>
+      <div class="exercise-text">${html}</div>
+      <div class="answer-reveal" id="ans-${idx}">
+        <strong>Answers:</strong> ${answerList}
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  // Wire up input checking
+  currentExercises.forEach((ex, idx) => {
+    ex.blanks.forEach(([word], bIdx) => {
+      const input = document.getElementById(`inp-${idx}-${bIdx}`);
+      if (!input) return;
+      input.addEventListener('input', () => checkInput(input, word));
+      // auto-size
+      input.addEventListener('input', () => autoSize(input));
+      autoSize(input);
+    });
+  });
+}
+
+function buildSentenceHTML(ex, exIdx) {
+  // Replace each target word in the sentence with a blank input
+  let sentence = ex.sentence;
+  let html = '';
+  let remaining = sentence;
+
+  // We need to replace words in order of appearance
+  // Build a list of {word, blanked, position} then replace in order
+  const replacements = ex.blanks.map(([word, blanked]) => {
+    const regex = new RegExp(`\\b${escapeRegex(word)}\\b`);
+    const match = regex.exec(remaining);
+    return { word, blanked, index: match ? match.index : -1, length: word.length };
+  }).sort((a, b) => a.index - b.index);
+
+  let cursor = 0;
+  replacements.forEach((rep, bIdx) => {
+    const pos = rep.index;
+    if (pos < 0) return;
+    html += escapeHtml(remaining.substring(cursor, pos));
+    // find the real bIdx in the original ex.blanks order
+    const origBIdx = ex.blanks.findIndex(([w]) => w === rep.word);
+    const size = Math.max(rep.word.length + 1, 6);
+    html += `<span class="blank-wrap">
+      <input class="blank-input" id="inp-${exIdx}-${origBIdx}" type="text"
+        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+        style="width:${size * 0.65}em" placeholder="${rep.blanked}" data-answer="${rep.word.toLowerCase()}">
+    </span>`;
+    cursor = pos + rep.word.length;
+    remaining = sentence; // re-work from original each time? no — we need sequential
+  });
+
+  // Rebuild properly: iterate through sentence replacing each blank in turn
+  return buildSequential(ex, exIdx);
+}
+
+function buildSequential(ex, exIdx) {
+  let sentence = ex.sentence;
+  let result = '';
+  let searchFrom = 0;
+
+  ex.blanks.forEach(([word, blanked], bIdx) => {
+    const regex = new RegExp(`\\b${escapeRegex(word)}\\b`);
+    const slice = sentence.substring(searchFrom);
+    const match = regex.exec(slice);
+    if (!match) return;
+    const absPos = searchFrom + match.index;
+    result += escapeHtml(sentence.substring(searchFrom, absPos));
+    const size = Math.max(word.length + 2, 7);
+    result += `<span class="blank-wrap"><input class="blank-input" id="inp-${exIdx}-${bIdx}" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="width:${size * 0.62}em" placeholder="${blanked}" data-answer="${word.toLowerCase()}"></span>`;
+    searchFrom = absPos + word.length;
+  });
+
+  result += escapeHtml(sentence.substring(searchFrom));
+  return result;
+}
+
+function autoSize(input) {
+  const len = Math.max(input.value.length, input.placeholder.length, 6);
+  input.style.width = (len * 0.62) + 'em';
+}
+
+function checkInput(input, word) {
+  const val = input.value.trim().toLowerCase();
+  if (val === '') {
+    input.classList.remove('correct', 'incorrect');
+  } else if (val === word.toLowerCase()) {
+    input.classList.add('correct');
+    input.classList.remove('incorrect');
+  } else {
+    input.classList.add('incorrect');
+    input.classList.remove('correct');
+  }
+}
+
+function toggleAnswers() {
+  answersVisible = !answersVisible;
+  const btn = document.getElementById('toggleAnswersBtn');
+  const bar = document.getElementById('answersBar');
+
+  currentExercises.forEach((_, idx) => {
+    const el = document.getElementById(`ans-${idx}`);
+    if (el) el.classList.toggle('visible', answersVisible);
+  });
+
+  btn.textContent = answersVisible ? 'Hide Answers' : 'Show Answers';
+  bar.classList.toggle('visible', answersVisible);
+}
+
+function copyExercises(withAnswers) {
+  if (!currentExercises.length) return;
+  let text = '';
+
+  currentExercises.forEach((ex, idx) => {
+    text += `Exercise ${idx + 1}  [${ex.topic}]\n`;
+    // Build plain-text version of sentence with blanks
+    let sentence = ex.sentence;
+    ex.blanks.forEach(([word, blanked]) => {
+      const regex = new RegExp(`\\b${escapeRegex(word)}\\b`);
+      sentence = sentence.replace(regex, blanked);
+    });
+    text += sentence + '\n';
+    if (withAnswers) {
+      const ans = ex.blanks.map(([w]) => w).join(', ');
+      text += `Answers: ${ans}\n`;
+    }
+    text += '\n';
+  });
+
+  navigator.clipboard.writeText(text).then(() => {
+    showToast(withAnswers ? 'Teacher copy (with answers) copied!' : 'Student copy (no answers) copied!');
+  }).catch(() => {
+    showToast('Copy failed — please use Ctrl+C');
+  });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+</script>
+</body>
+</html>
