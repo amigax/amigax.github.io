@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stephie's Gap Fill Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #f7f3ec;
+    --cream-dark: #ede8df;
+    --ink: #1a1510;
+    --ink-mid: #3d3628;
+    --ink-light: #7a6e5f;
+    --sepia: #8b6914;
+    --sepia-light: #c4a44a;
+    --sepia-pale: #f0e6c8;
+    --red-pen: #c0392b;
+    --green-pen: #27ae60;
+    --blue-pen: #2471a3;
+    --border: #ccc0a8;
+    --shadow: rgba(26,21,16,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Lora', Georgia, serif;
+    min-height: 100vh;
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(139,105,20,0.06) 27px, rgba(139,105,20,0.06) 28px);
+  }
+  header {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 28px 40px 22px;
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    border-bottom: 4px solid var(--sepia-light);
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(196,164,74,0.04) 10px, rgba(196,164,74,0.04) 11px);
+  }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; line-height: 1; }
+  .header-sub { font-family: 'Lora', serif; font-style: italic; color: var(--sepia-light); font-size: 0.95rem; margin-bottom: 2px; }
+  .header-badge { margin-left: auto; background: var(--sepia); color: var(--cream); font-family: 'Source Code Pro', monospace; font-size: 0.7rem; padding: 4px 10px; border-radius: 2px; letter-spacing: 1px; text-transform: uppercase; align-self: flex-start; margin-top: 4px; }
+  .controls { display: flex; gap: 12px; padding: 20px 40px; background: var(--cream-dark); border-bottom: 1px solid var(--border); flex-wrap: wrap; align-items: center; }
+  .btn { font-family: 'Playfair Display', serif; font-weight: 600; font-size: 0.85rem; padding: 10px 20px; border: 2px solid var(--ink); background: var(--ink); color: var(--cream); cursor: pointer; letter-spacing: 0.3px; transition: all 0.15s ease; border-radius: 2px; }
+  .btn:hover { background: var(--ink-mid); transform: translateY(-1px); box-shadow: 0 4px 12px var(--shadow); }
+  .btn:active { transform: translateY(0); }
+  .btn-outline { background: transparent; color: var(--ink); }
+  .btn-outline:hover { background: var(--ink); color: var(--cream); }
+  .btn-sepia { background: var(--sepia); border-color: var(--sepia); color: #fff; }
+  .btn-sepia:hover { background: #7a5c10; border-color: #7a5c10; }
+  .btn-generate { font-size: 0.95rem; padding: 12px 28px; }
+  .copy-group { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .copy-label { font-family: 'Lora', serif; font-style: italic; font-size: 0.8rem; color: var(--ink-light); }
+  .main { max-width: 860px; margin: 0 auto; padding: 36px 40px 60px; }
+  .placeholder { text-align: center; padding: 80px 0; color: var(--ink-light); font-style: italic; font-size: 1.05rem; }
+  .placeholder-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.35; }
+  .exercises { display: flex; flex-direction: column; gap: 28px; }
+  .exercise { background: #fff; border: 1px solid var(--border); border-left: 4px solid var(--sepia); padding: 24px 28px; border-radius: 2px; box-shadow: 0 2px 8px var(--shadow); animation: slideIn 0.3s ease both; }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .exercise:nth-child(1)  { animation-delay: 0.02s; } .exercise:nth-child(2)  { animation-delay: 0.05s; }
+  .exercise:nth-child(3)  { animation-delay: 0.08s; } .exercise:nth-child(4)  { animation-delay: 0.11s; }
+  .exercise:nth-child(5)  { animation-delay: 0.14s; } .exercise:nth-child(6)  { animation-delay: 0.17s; }
+  .exercise:nth-child(7)  { animation-delay: 0.20s; } .exercise:nth-child(8)  { animation-delay: 0.23s; }
+  .exercise:nth-child(9)  { animation-delay: 0.26s; } .exercise:nth-child(10) { animation-delay: 0.29s; }
+  .exercise-num { font-family: 'Source Code Pro', monospace; font-size: 0.68rem; color: var(--sepia); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+  .exercise-topic { font-family: 'Playfair Display', serif; font-size: 0.8rem; font-weight: 600; color: var(--ink-light); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .exercise-text { font-size: 1rem; line-height: 1.95; color: var(--ink); }
+  .blank-wrap { display: inline-block; position: relative; vertical-align: bottom; margin: 0 2px; }
+  .blank-input { font-family: 'Lora', serif; font-size: 0.92rem; border: none; border-bottom: 2px solid var(--ink-mid); background: transparent; outline: none; padding: 0 2px 1px; color: var(--blue-pen); min-width: 40px; text-align: center; transition: border-color 0.2s, color 0.2s; }
+  .blank-input:focus { border-bottom-color: var(--sepia); }
+  .blank-input.correct   { color: var(--green-pen); border-bottom-color: var(--green-pen); }
+  .blank-input.incorrect { color: var(--red-pen);   border-bottom-color: var(--red-pen); }
+  .word-bank { display: none; margin-top: 14px; padding: 8px 12px; background: #eef4fb; border: 1px solid #b5d4f4; border-radius: 2px; font-family: 'Source Code Pro', monospace; font-size: 0.82rem; color: var(--blue-pen); line-height: 1.8; }
+  .word-bank.visible { display: block; }
+  .word-bank strong { color: var(--ink-mid); font-family: 'Lora', serif; font-size: 0.78rem; font-style: italic; font-weight: normal; display: block; margin-bottom: 4px; } font-family: 'Source Code Pro', monospace; font-size: 0.8rem; color: var(--sepia); background: var(--sepia-pale); padding: 6px 10px; border-radius: 2px; margin-top: 14px; line-height: 1.6; }
+  .answer-reveal.visible { display: block; }
+  .answers-bar { padding: 16px 40px; background: var(--sepia-pale); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); display: none; align-items: center; gap: 12px; font-family: 'Lora', serif; font-size: 0.85rem; color: var(--ink-mid); font-style: italic; }
+  .answers-bar.visible { display: flex; }
+  .answers-bar .dot { color: var(--sepia); font-style: normal; font-size: 1.2rem; }
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--ink); color: var(--cream); font-family: 'Lora', serif; font-size: 0.9rem; padding: 12px 24px; border-radius: 2px; opacity: 0; transition: all 0.25s ease; pointer-events: none; z-index: 1000; border-left: 3px solid var(--sepia-light); white-space: nowrap; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  @media (max-width: 640px) { header { padding: 20px; flex-wrap: wrap; } .controls { padding: 14px 16px; } .main { padding: 20px 16px 50px; } .copy-group { margin-left: 0; width: 100%; } .header-title { font-size: 1.4rem; } }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="header-sub">Stephie's Academic English Practice</div>
+    <div class="header-title">Gap Fill Exercises</div>
+  </div>
+  <div class="header-badge">TOEFL Prep</div>
+</header>
+<div class="controls">
+  <button class="btn btn-generate" onclick="generateExercises()">&#8635; Generate 10 Exercises</button>
+  <button class="btn btn-outline" id="toggleAnswersBtn" onclick="toggleAnswers()" style="display:none">Show Answers</button>
+  <button class="btn btn-outline" id="toggleChoicesBtn" onclick="toggleChoices()" style="display:none">Show Choices (easier)</button>
+  <div class="copy-group">
+    <span class="copy-label">Copy:</span>
+    <button class="btn btn-sepia"   id="copyWithoutBtn" onclick="copyExercises(false)" style="display:none">Student Copy</button>
+    <button class="btn btn-outline" id="copyWithBtn"    onclick="copyExercises(true)"  style="display:none">Teacher Copy</button>
+  </div>
+</div>
+<div class="answers-bar" id="answersBar">
+  <span class="dot">&#10022;</span>
+  Answer key is now visible — scroll through each exercise to review.
+</div>
+<main class="main">
+  <div class="placeholder" id="placeholder">
+    <div class="placeholder-icon">&#9998;</div>
+    Click <em>Generate 10 Exercises</em> to begin.<br>
+    <span style="font-size:0.85rem;margin-top:8px;display:block;">60 exercises across science, history, economics &amp; more — shuffled fresh each time.</span>
+  </div>
+  <div class="exercises" id="exercises"></div>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const POOL = [
+  // ── EARTH SCIENCE ──────────────────────────────────────────────────────────
+  {topic:"Earth Science",
+   sentence:"Shield volcanoes are broad, gently sloping mountains formed by repeated eruptions of low-viscosity lava. Because the lava flows easily, it spreads over large areas before cooling and hardening.",
+   blanks:[["eruptions","er_ _ _ _ _ _ _"],["viscosity","vi_ _ _ _ _ _ _"],["Because","Be_ _ _ _ _"],["spreads","sp_ _ _ _ _"],["hardening","ha_ _ _ _ _ _ _"]]},
+  {topic:"Earth Science",
+   sentence:"Tectonic plates move continuously across Earth's surface, driven by convection currents deep within the mantle. When two plates collide, the resulting pressure can produce mountain ranges or trigger powerful earthquakes.",
+   blanks:[["continuously","co_ _ _ _ _ _ _ _ _ _"],["convection","co_ _ _ _ _ _ _ _"],["collide","co_ _ _ _ _"],["resulting","re_ _ _ _ _ _ _"],["earthquakes","ea_ _ _ _ _ _ _ _ _"]]},
+  {topic:"Earth Science",
+   sentence:"Glaciers form when annual snowfall consistently exceeds the rate of melting, allowing layers to compress into dense ice over centuries. As they advance, glaciers carve distinctive U-shaped valleys and deposit moraines along their margins.",
+   blanks:[["consistently","co_ _ _ _ _ _ _ _ _ _"],["compress","co_ _ _ _ _ _"],["distinctive","di_ _ _ _ _ _ _ _ _"],["deposit","de_ _ _ _ _"],["moraines","mo_ _ _ _ _ _"]]},
+  {topic:"Oceanography",
+   sentence:"Ocean currents redistribute thermal energy across the globe by transporting warm surface water toward the poles and returning cold deep water to the tropics. This circulation profoundly influences regional climates and marine biodiversity.",
+   blanks:[["redistribute","re_ _ _ _ _ _ _ _ _ _"],["transporting","tr_ _ _ _ _ _ _ _ _ _"],["circulation","ci_ _ _ _ _ _ _ _ _"],["profoundly","pr_ _ _ _ _ _ _ _ _"],["biodiversity","bi_ _ _ _ _ _ _ _ _ _"]]},
+  {topic:"Climate Science",
+   sentence:"The greenhouse effect occurs when atmospheric gases such as carbon dioxide and methane absorb infrared radiation emitted by the Earth's surface, preventing heat from escaping into space. Human industrial activity has significantly intensified this natural process.",
+   blanks:[["atmospheric","at_ _ _ _ _ _ _ _ _"],["infrared","in_ _ _ _ _ _"],["emitted","em_ _ _ _ _"],["preventing","pr_ _ _ _ _ _ _ _ _"],["intensified","in_ _ _ _ _ _ _ _ _ _"]]},
+
+  // ── BIOLOGY ────────────────────────────────────────────────────────────────
+  {topic:"Biology",
+   sentence:"Photosynthesis enables plants to convert solar energy into chemical energy stored in glucose molecules. This process occurs primarily in the chloroplasts and requires both sunlight and carbon dioxide as essential inputs.",
+   blanks:[["convert","co_ _ _ _ _"],["chemical","ch_ _ _ _ _ _"],["chloroplasts","ch_ _ _ _ _ _ _ _ _ _"],["requires","re_ _ _ _ _ _"],["essential","es_ _ _ _ _ _ _"]]},
+  {topic:"Biology",
+   sentence:"Natural selection operates on heritable variation within a population, favouring individuals whose traits enhance their survival and reproductive success in a given environment. Over successive generations, advantageous traits become increasingly prevalent.",
+   blanks:[["heritable","he_ _ _ _ _ _ _"],["favouring","fa_ _ _ _ _ _ _"],["reproductive","re_ _ _ _ _ _ _ _ _ _"],["successive","su_ _ _ _ _ _ _ _"],["prevalent","pr_ _ _ _ _ _ _"]]},
+  {topic:"Biology",
+   sentence:"During mitosis, a parent cell duplicates its genetic material and divides to produce two daughter cells that are genetically identical to the original. This process is fundamental to growth, tissue repair, and asexual reproduction.",
+   blanks:[["duplicates","du_ _ _ _ _ _ _ _"],["genetic","ge_ _ _ _ _"],["identical","id_ _ _ _ _ _ _"],["fundamental","fu_ _ _ _ _ _ _ _ _"],["asexual","as_ _ _ _ _"]]},
+  {topic:"Ecology",
+   sentence:"Biodiversity within an ecosystem encompasses the variety of species, the genetic diversity within those species, and the range of habitats they occupy. Higher levels of biodiversity generally confer greater resilience against environmental disturbances.",
+   blanks:[["encompasses","en_ _ _ _ _ _ _ _ _"],["genetic","ge_ _ _ _ _"],["habitats","ha_ _ _ _ _ _"],["confer","co_ _ _ _"],["resilience","re_ _ _ _ _ _ _ _"]]},
+  {topic:"Microbiology",
+   sentence:"Bacteria reproduce through binary fission, a process in which a single cell replicates its DNA and divides into two genetically identical daughter cells. Under favourable conditions, some bacterial populations can double in number within twenty minutes.",
+   blanks:[["reproduce","re_ _ _ _ _ _ _"],["replicates","re_ _ _ _ _ _ _ _"],["identical","id_ _ _ _ _ _ _"],["favourable","fa_ _ _ _ _ _ _ _"],["populations","po_ _ _ _ _ _ _ _ _"]]},
+
+  // ── PHYSICS ────────────────────────────────────────────────────────────────
+  {topic:"Physics",
+   sentence:"Newton's first law of motion states that an object will remain at rest or continue moving at a constant velocity unless acted upon by an external net force. This property of matter is known as inertia.",
+   blanks:[["remain","re_ _ _ _"],["constant","co_ _ _ _ _ _"],["velocity","ve_ _ _ _ _ _"],["external","ex_ _ _ _ _ _"],["inertia","in_ _ _ _ _"]]},
+  {topic:"Physics",
+   sentence:"Electromagnetic waves travel through a vacuum at approximately three hundred thousand kilometres per second, a value denoted by the symbol c. The visible spectrum represents only a narrow portion of the full electromagnetic spectrum, which also encompasses radio waves, X-rays, and gamma rays.",
+   blanks:[["approximately","ap_ _ _ _ _ _ _ _ _ _"],["denoted","de_ _ _ _ _"],["represents","re_ _ _ _ _ _ _ _ _"],["encompasses","en_ _ _ _ _ _ _ _ _"],["spectrum","sp_ _ _ _ _ _"]]},
+  {topic:"Physics",
+   sentence:"The second law of thermodynamics states that in any spontaneous process, the total entropy of an isolated system tends to increase over time. This principle explains why heat flows naturally from hotter bodies to cooler ones and why perpetual motion machines are impossible.",
+   blanks:[["spontaneous","sp_ _ _ _ _ _ _ _ _"],["isolated","is_ _ _ _ _ _"],["entropy","en_ _ _ _ _"],["perpetual","pe_ _ _ _ _ _ _"],["impossible","im_ _ _ _ _ _ _ _"]]},
+  {topic:"Physics",
+   sentence:"Quantum mechanics describes the behaviour of particles at the subatomic level, where classical Newtonian physics no longer applies. One of its most counterintuitive features is the wave-particle duality, which suggests that electrons exhibit properties of both waves and particles simultaneously.",
+   blanks:[["subatomic","su_ _ _ _ _ _"],["classical","cl_ _ _ _ _ _ _"],["counterintuitive","co_ _ _ _ _ _ _ _ _ _ _ _ _ _"],["duality","du_ _ _ _ _"],["simultaneously","si_ _ _ _ _ _ _ _ _ _ _ _"]]},
+
+  // ── CHEMISTRY ──────────────────────────────────────────────────────────────
+  {topic:"Chemistry",
+   sentence:"Covalent bonds form when two atoms share one or more pairs of electrons, allowing each atom to attain a stable electron configuration. Such bonds are typically stronger than ionic bonds and are found in a vast range of organic and inorganic molecules.",
+   blanks:[["electrons","el_ _ _ _ _ _ _"],["attain","at_ _ _ _"],["configuration","co_ _ _ _ _ _ _ _ _ _ _"],["typically","ty_ _ _ _ _ _ _"],["inorganic","in_ _ _ _ _ _ _"]]},
+  {topic:"Chemistry",
+   sentence:"A catalyst increases the rate of a chemical reaction by providing an alternative reaction pathway with a lower activation energy, without itself being consumed in the process. Enzymes are biological catalysts that regulate the vast majority of biochemical reactions within living cells.",
+   blanks:[["alternative","al_ _ _ _ _ _ _ _ _"],["activation","ac_ _ _ _ _ _ _ _"],["consumed","co_ _ _ _ _ _"],["biological","bi_ _ _ _ _ _ _ _"],["biochemical","bi_ _ _ _ _ _ _ _ _"]]},
+  {topic:"Chemistry",
+   sentence:"Acids donate protons to other substances, while bases accept them, according to the Brønsted-Lowry definition. The pH scale, which ranges from zero to fourteen, measures the concentration of hydrogen ions in a solution and indicates whether the substance is acidic, neutral, or alkaline.",
+   blanks:[["definition","de_ _ _ _ _ _ _ _"],["concentration","co_ _ _ _ _ _ _ _ _ _ _"],["hydrogen","hy_ _ _ _ _ _"],["indicates","in_ _ _ _ _ _ _"],["alkaline","al_ _ _ _ _ _"]]},
+
+  // ── ASTRONOMY ──────────────────────────────────────────────────────────────
+  {topic:"Astronomy",
+   sentence:"Black holes are regions of spacetime where gravity is so intense that nothing, not even light, can escape beyond the event horizon. They form when massive stars exhaust their nuclear fuel and undergo gravitational collapse.",
+   blanks:[["spacetime","sp_ _ _ _ _ _ _"],["intense","in_ _ _ _ _"],["horizon","ho_ _ _ _ _"],["exhaust","ex_ _ _ _ _"],["gravitational","gr_ _ _ _ _ _ _ _ _ _ _"]]},
+  {topic:"Astronomy",
+   sentence:"The life cycle of a star is determined largely by its initial mass, with more massive stars burning their fuel more rapidly and ending their lives in spectacular supernova explosions. The remnants of such explosions may form neutron stars or black holes.",
+   blanks:[["determined","de_ _ _ _ _ _ _ _"],["rapidly","ra_ _ _ _ _"],["spectacular","sp_ _ _ _ _ _ _ _ _"],["supernova","su_ _ _ _ _ _ _"],["remnants","re_ _ _ _ _ _"]]},
+  {topic:"Astronomy",
+   sentence:"The observable universe is approximately ninety-three billion light-years in diameter and contains an estimated two trillion galaxies. Current cosmological models suggest that the universe has been expanding continuously since the Big Bang, approximately thirteen point eight billion years ago.",
+   blanks:[["approximately","ap_ _ _ _ _ _ _ _ _ _"],["estimated","es_ _ _ _ _ _ _"],["cosmological","co_ _ _ _ _ _ _ _ _ _"],["expanding","ex_ _ _ _ _ _ _"],["continuously","co_ _ _ _ _ _ _ _ _ _"]]},
+
+  // ── MEDICINE ───────────────────────────────────────────────────────────────
+  {topic:"Medicine",
+   sentence:"Vaccines stimulate the immune system to produce antibodies against specific pathogens without causing the disease itself. This acquired immunity protects individuals from future infection and reduces the overall transmission of infectious diseases within communities.",
+   blanks:[["stimulate","st_ _ _ _ _ _ _"],["antibodies","an_ _ _ _ _ _ _"],["pathogens","pa_ _ _ _ _ _ _"],["acquired","ac_ _ _ _ _ _"],["transmission","tr_ _ _ _ _ _ _ _ _ _"]]},
+  {topic:"Medicine",
+   sentence:"Antibiotic resistance occurs when bacteria evolve mechanisms to survive exposure to drugs that would previously have killed them. The overuse and misuse of antibiotics in both human medicine and agriculture have accelerated the emergence of resistant strains, posing a serious global health threat.",
+   blanks:[["mechanisms","me_ _ _ _ _ _ _ _"],["previously","pr_ _ _ _ _ _ _ _"],["misuse","mi_ _ _ _"],["accelerated","ac_ _ _ _ _ _ _ _ _"],["emergence","em_ _ _ _ _ _ _"]]},
+  {topic:"Medicine",
+   sentence:"The human immune system comprises two main branches: the innate immune response, which provides immediate but non-specific defence, and the adaptive immune response, which generates targeted antibodies against particular antigens. Memory cells formed during an adaptive response enable the body to react more swiftly upon subsequent exposure.",
+   blanks:[["comprises","co_ _ _ _ _ _ _"],["innate","in_ _ _ _"],["adaptive","ad_ _ _ _ _ _"],["antigens","an_ _ _ _ _ _"],["subsequent","su_ _ _ _ _ _ _ _"]]},
+
+  // ── HISTORY ────────────────────────────────────────────────────────────────
+  {topic:"History",
+   sentence:"The Industrial Revolution, which originated in Britain during the late eighteenth century, transformed manufacturing through the widespread adoption of steam power and mechanisation. Rapid urbanisation followed as workers migrated from rural areas to newly established factory towns.",
+   blanks:[["originated","or_ _ _ _ _ _ _ _"],["widespread","wi_ _ _ _ _ _ _ _"],["mechanisation","me_ _ _ _ _ _ _ _ _ _ _"],["urbanisation","ur_ _ _ _ _ _ _ _ _"],["migrated","mi_ _ _ _ _ _"]]},
+  {topic:"History",
+   sentence:"The Silk Road was an ancient network of overland and maritime trade routes connecting East Asia with Central Asia, the Middle East, and the Mediterranean world. Along these routes, merchants exchanged not only commodities such as silk and spices but also religions, languages, and technologies.",
+   blanks:[["maritime","ma_ _ _ _ _ _"],["connecting","co_ _ _ _ _ _ _ _"],["commodities","co_ _ _ _ _ _ _ _ _"],["religions","re_ _ _ _ _ _ _"],["technologies","te_ _ _ _ _ _ _ _ _ _"]]},
+  {topic:"History",
+   sentence:"The Renaissance, which flourished across Europe between the fourteenth and seventeenth centuries, represented a profound renewal of interest in the art, literature, and philosophy of classical antiquity. Humanist scholars sought to revive and reinterpret ancient Greek and Roman thought within a Christian intellectual framework.",
+   blanks:[["flourished","fl_ _ _ _ _ _ _ _"],["profound","pr_ _ _ _ _ _"],["antiquity","an_ _ _ _ _ _ _"],["Humanist","Hu_ _ _ _ _ _"],["reinterpret","re_ _ _ _ _ _ _ _ _ _"]]},
+  {topic:"Ancient History",
+   sentence:"The Roman Empire reached its greatest territorial extent under Emperor Trajan in the early second century CE, encompassing diverse cultures and legal systems across three continents. The sophistication of Roman engineering is evident in its roads, aqueducts, and monumental architecture, many examples of which have survived to the present day.",
+   blanks:[["territorial","te_ _ _ _ _ _ _ _ _"],["encompassing","en_ _ _ _ _ _ _ _ _ _"],["sophistication","so_ _ _ _ _ _ _ _ _ _ _ _"],["aqueducts","aq_ _ _ _ _ _ _"],["monumental","mo_ _ _ _ _ _ _ _"]]},
+  {topic:"Archaeology",
+   sentence:"Archaeological excavations rely on systematic stratigraphic analysis to determine the relative age of artefacts based on the layer of soil in which they are found. Modern techniques such as radiocarbon dating and dendrochronology allow researchers to assign more precise absolute dates to organic materials.",
+   blanks:[["stratigraphic","st_ _ _ _ _ _ _ _ _ _ _"],["artefacts","ar_ _ _ _ _ _ _"],["radiocarbon","ra_ _ _ _ _ _ _ _ _"],["dendrochronology","de_ _ _ _ _ _ _ _ _ _ _ _ _ _ _"],["absolute","ab_ _ _ _ _ _"]]},
+
+  // ── ECONOMICS ──────────────────────────────────────────────────────────────
+  {topic:"Economics",
+   sentence:"Inflation refers to the sustained rise in the general price level of goods and services, which erodes the purchasing power of a currency over time. Central banks typically respond by adjusting interest rates to moderate consumer spending and stabilise the economy.",
+   blanks:[["sustained","su_ _ _ _ _ _ _"],["erodes","er_ _ _ _"],["purchasing","pu_ _ _ _ _ _ _ _"],["moderate","mo_ _ _ _ _ _"],["stabilise","st_ _ _ _ _ _ _"]]},
+  {topic:"Economics",
+   sentence:"In a free market economy, the interaction of supply and demand determines the equilibrium price of goods and services. When supply exceeds demand, prices tend to fall; conversely, when demand outstrips supply, producers are able to command higher prices.",
+   blanks:[["interaction","in_ _ _ _ _ _ _ _ _"],["equilibrium","eq_ _ _ _ _ _ _ _ _"],["conversely","co_ _ _ _ _ _ _ _"],["outstrips","ou_ _ _ _ _ _ _"],["command","co_ _ _ _ _"]]},
+  {topic:"Economics",
+   sentence:"Globalisation has accelerated the integration of national economies through the expansion of international trade, capital flows, and the movement of people. While it has lifted millions out of poverty in developing nations, critics argue that it has also widened inequality both within and between countries.",
+   blanks:[["integration","in_ _ _ _ _ _ _ _ _"],["expansion","ex_ _ _ _ _ _ _"],["inequality","in_ _ _ _ _ _ _ _ _"],["developing","de_ _ _ _ _ _ _ _"],["widened","wi_ _ _ _ _"]]},
+  {topic:"Macroeconomics",
+   sentence:"Fiscal policy refers to the use of government expenditure and taxation to influence economic activity. During periods of recession, governments may adopt expansionary fiscal measures such as increased public spending or tax cuts to stimulate aggregate demand.",
+   blanks:[["expenditure","ex_ _ _ _ _ _ _ _ _"],["influence","in_ _ _ _ _ _ _"],["expansionary","ex_ _ _ _ _ _ _ _ _ _"],["stimulate","st_ _ _ _ _ _ _"],["aggregate","ag_ _ _ _ _ _ _"]]},
+
+  // ── SOCIOLOGY ──────────────────────────────────────────────────────────────
+  {topic:"Sociology",
+   sentence:"Social stratification describes the hierarchical arrangement of individuals and groups within a society based on factors such as wealth, occupation, and social prestige. In many societies, stratification is reproduced across generations through unequal access to education and economic opportunities.",
+   blanks:[["hierarchical","hi_ _ _ _ _ _ _ _ _"],["arrangement","ar_ _ _ _ _ _ _ _ _"],["prestige","pr_ _ _ _ _ _"],["reproduced","re_ _ _ _ _ _ _ _ _"],["unequal","un_ _ _ _ _ _"]]},
+  {topic:"Sociology",
+   sentence:"Socialisation is the lifelong process through which individuals acquire the values, norms, and knowledge necessary to participate effectively in their society. Primary socialisation, which occurs within the family during early childhood, lays the foundation for subsequent social learning.",
+   blanks:[["lifelong","li_ _ _ _ _ _"],["acquire","ac_ _ _ _ _"],["participate","pa_ _ _ _ _ _ _ _ _"],["subsequent","su_ _ _ _ _ _ _ _"],["foundation","fo_ _ _ _ _ _ _ _"]]},
+
+  // ── PSYCHOLOGY ─────────────────────────────────────────────────────────────
+  {topic:"Psychology",
+   sentence:"Cognitive behavioural therapy is a structured, evidence-based psychological treatment that helps patients identify and challenge distorted thought patterns contributing to mental health disorders such as anxiety and depression. Research consistently demonstrates its effectiveness for a wide range of conditions.",
+   blanks:[["structured","st_ _ _ _ _ _ _ _"],["identify","id_ _ _ _ _ _"],["distorted","di_ _ _ _ _ _ _"],["contributing","co_ _ _ _ _ _ _ _ _ _"],["consistently","co_ _ _ _ _ _ _ _ _ _"]]},
+  {topic:"Psychology",
+   sentence:"Memory consolidation is the neurological process by which newly encoded information is stabilised and transferred from short-term to long-term memory. Sleep plays a critical role in this process, as the brain actively replays and reorganises experiences during slow-wave sleep.",
+   blanks:[["neurological","ne_ _ _ _ _ _ _ _ _"],["encoded","en_ _ _ _ _"],["stabilised","st_ _ _ _ _ _ _ _"],["transferred","tr_ _ _ _ _ _ _ _ _"],["reorganises","re_ _ _ _ _ _ _ _ _"]]},
+  {topic:"Psychology",
+   sentence:"The concept of cognitive dissonance, introduced by Leon Festinger in 1957, refers to the psychological discomfort experienced when a person holds two or more contradictory beliefs simultaneously. Individuals are motivated to reduce this discomfort by altering their beliefs, attitudes, or behaviours.",
+   blanks:[["dissonance","di_ _ _ _ _ _ _ _"],["discomfort","di_ _ _ _ _ _ _"],["contradictory","co_ _ _ _ _ _ _ _ _ _ _"],["simultaneously","si_ _ _ _ _ _ _ _ _ _ _ _"],["motivated","mo_ _ _ _ _ _ _"]]},
+
+  // ── LINGUISTICS ────────────────────────────────────────────────────────────
+  {topic:"Linguistics",
+   sentence:"Language acquisition in children proceeds through predictable stages, beginning with babbling and progressing to the production of single words, two-word combinations, and eventually complex grammatical structures. Research suggests that exposure to a rich linguistic environment during the critical period significantly enhances language development.",
+   blanks:[["predictable","pr_ _ _ _ _ _ _ _ _"],["progressing","pr_ _ _ _ _ _ _ _ _"],["grammatical","gr_ _ _ _ _ _ _ _ _"],["linguistic","li_ _ _ _ _ _ _ _"],["enhances","en_ _ _ _ _ _"]]},
+  {topic:"Linguistics",
+   sentence:"Sociolinguistics examines the relationship between language and society, exploring how factors such as social class, ethnicity, age, and gender influence the way people speak. Dialects and registers arise as speakers adapt their language to different social contexts and interlocutors.",
+   blanks:[["examines","ex_ _ _ _ _ _"],["ethnicity","et_ _ _ _ _ _ _"],["influence","in_ _ _ _ _ _ _"],["registers","re_ _ _ _ _ _ _ _"],["interlocutors","in_ _ _ _ _ _ _ _ _ _ _"]]},
+
+  // ── TECHNOLOGY ─────────────────────────────────────────────────────────────
+  {topic:"Technology",
+   sentence:"Machine learning algorithms enable computers to improve their performance on tasks through experience, without being explicitly programmed. By analysing large datasets, these systems can identify patterns and make predictions with a degree of accuracy that rivals, and in some cases surpasses, human performance.",
+   blanks:[["algorithms","al_ _ _ _ _ _ _ _"],["explicitly","ex_ _ _ _ _ _ _ _"],["analysing","an_ _ _ _ _ _ _"],["predictions","pr_ _ _ _ _ _ _ _ _"],["surpasses","su_ _ _ _ _ _ _"]]},
+  {topic:"Technology",
+   sentence:"Blockchain technology provides a decentralised and immutable ledger for recording transactions, making it extremely difficult for any single party to alter historical records without detection. Its applications extend beyond cryptocurrency to fields such as supply chain management, healthcare, and digital identity verification.",
+   blanks:[["decentralised","de_ _ _ _ _ _ _ _ _ _ _"],["immutable","im_ _ _ _ _ _"],["transactions","tr_ _ _ _ _ _ _ _ _ _"],["cryptocurrency","cr_ _ _ _ _ _ _ _ _ _ _"],["verification","ve_ _ _ _ _ _ _ _ _ _"]]},
+  {topic:"Cybersecurity",
+   sentence:"Encryption transforms readable data into an unreadable format using mathematical algorithms, ensuring that only authorised parties with the correct decryption key can access the original information. As computing power increases, cryptographers must develop ever more sophisticated algorithms to maintain secure communications.",
+   blanks:[["transforms","tr_ _ _ _ _ _ _ _"],["authorised","au_ _ _ _ _ _ _ _"],["decryption","de_ _ _ _ _ _ _ _"],["cryptographers","cr_ _ _ _ _ _ _ _ _ _ _"],["sophisticated","so_ _ _ _ _ _ _ _ _ _ _"]]},
+
+  // ── ENVIRONMENT ────────────────────────────────────────────────────────────
+  {topic:"Environment",
+   sentence:"Deforestation, driven largely by agricultural expansion and logging, destroys critical habitats and releases vast quantities of stored carbon dioxide into the atmosphere. Beyond its contribution to climate change, forest loss threatens countless plant and animal species with extinction.",
+   blanks:[["agricultural","ag_ _ _ _ _ _ _ _ _"],["destroys","de_ _ _ _ _ _"],["quantities","qu_ _ _ _ _ _ _ _"],["contribution","co_ _ _ _ _ _ _ _ _ _"],["extinction","ex_ _ _ _ _ _ _ _"]]},
+  {topic:"Environment",
+   sentence:"Renewable energy technologies such as photovoltaic solar panels and wind turbines generate electricity without producing greenhouse gas emissions during operation. Widespread adoption of these technologies is considered essential for achieving the deep decarbonisation of energy systems required to limit global warming.",
+   blanks:[["photovoltaic","ph_ _ _ _ _ _ _ _ _ _"],["generating","ge_ _ _ _ _ _ _ _"],["emissions","em_ _ _ _ _ _ _"],["decarbonisation","de_ _ _ _ _ _ _ _ _ _ _ _ _"],["achieving","ac_ _ _ _ _ _ _"]]},
+  {topic:"Environmental Science",
+   sentence:"The nitrogen cycle describes the continuous movement of nitrogen through the atmosphere, soil, water, and living organisms. Nitrogen-fixing bacteria play a crucial role in converting atmospheric nitrogen into ammonia, a form that plants can absorb and use to synthesise proteins.",
+   blanks:[["continuous","co_ _ _ _ _ _ _ _"],["organisms","or_ _ _ _ _ _ _"],["converting","co_ _ _ _ _ _ _ _"],["absorb","ab_ _ _ _"],["synthesise","sy_ _ _ _ _ _ _ _"]]},
+
+  // ── MATHEMATICS ────────────────────────────────────────────────────────────
+  {topic:"Mathematics",
+   sentence:"Differential calculus provides tools for calculating the instantaneous rate of change of a function with respect to one of its variables. This concept, known as the derivative, has wide-ranging applications in physics, engineering, economics, and the biological sciences.",
+   blanks:[["instantaneous","in_ _ _ _ _ _ _ _ _ _ _"],["calculating","ca_ _ _ _ _ _ _ _ _"],["derivative","de_ _ _ _ _ _ _ _"],["applications","ap_ _ _ _ _ _ _ _ _ _"],["biological","bi_ _ _ _ _ _ _ _"]]},
+  {topic:"Mathematics",
+   sentence:"Statistical inference allows researchers to draw conclusions about a population based on data collected from a representative sample. Key methods include hypothesis testing, in which researchers assess the likelihood that observed results occurred by chance, and confidence interval estimation.",
+   blanks:[["inference","in_ _ _ _ _ _ _"],["representative","re_ _ _ _ _ _ _ _ _ _ _ _"],["hypothesis","hy_ _ _ _ _ _ _ _"],["likelihood","li_ _ _ _ _ _ _ _"],["estimation","es_ _ _ _ _ _ _ _"]]},
+
+  // ── ARCHITECTURE ───────────────────────────────────────────────────────────
+  {topic:"Architecture",
+   sentence:"Gothic architecture, which emerged in twelfth-century France and spread throughout medieval Europe, is characterised by its pointed arches, ribbed vaults, and flying buttresses, which together allow for taller, lighter structures with expansive stained-glass windows.",
+   blanks:[["emerged","em_ _ _ _ _"],["characterised","ch_ _ _ _ _ _ _ _ _ _ _"],["buttresses","bu_ _ _ _ _ _ _ _"],["expansive","ex_ _ _ _ _ _ _"],["structures","st_ _ _ _ _ _ _ _"]]},
+  {topic:"Architecture",
+   sentence:"Modernist architecture, influenced by the Bauhaus movement, rejected historical ornamentation in favour of functional design, new industrial materials such as steel and reinforced concrete, and the principle that form should follow function. Pioneers such as Le Corbusier and Mies van der Rohe fundamentally transformed urban landscapes worldwide.",
+   blanks:[["ornamentation","or_ _ _ _ _ _ _ _ _ _ _"],["functional","fu_ _ _ _ _ _ _ _"],["reinforced","re_ _ _ _ _ _ _ _"],["Pioneers","Pi_ _ _ _ _ _"],["fundamentally","fu_ _ _ _ _ _ _ _ _ _ _"]]},
+
+  // ── LAW ────────────────────────────────────────────────────────────────────
+  {topic:"Law",
+   sentence:"The principle of judicial review empowers courts to examine the constitutionality of legislative and executive actions, ensuring that no branch of government exceeds the authority granted to it by the constitution. This doctrine is a cornerstone of democratic governance in many countries.",
+   blanks:[["empowers","em_ _ _ _ _ _"],["constitutionality","co_ _ _ _ _ _ _ _ _ _ _ _ _ _ _"],["legislative","le_ _ _ _ _ _ _ _ _"],["exceeds","ex_ _ _ _ _"],["cornerstone","co_ _ _ _ _ _ _ _ _"]]},
+  {topic:"Law",
+   sentence:"International humanitarian law, also known as the law of armed conflict, establishes rules that seek to limit the effects of warfare on civilians and combatants who are no longer participating in hostilities. Its foundational instruments include the Geneva Conventions of 1949 and their subsequent Additional Protocols.",
+   blanks:[["establishes","es_ _ _ _ _ _ _ _ _"],["civilians","ci_ _ _ _ _ _ _"],["combatants","co_ _ _ _ _ _ _ _"],["hostilities","ho_ _ _ _ _ _ _ _ _"],["subsequent","su_ _ _ _ _ _ _ _"]]},
+
+  // ── LITERATURE ─────────────────────────────────────────────────────────────
+  {topic:"Literature",
+   sentence:"Magical realism is a literary mode, associated particularly with Latin American fiction, in which fantastical elements are presented as a natural and unremarkable part of an otherwise realistic narrative. Writers such as Gabriel García Márquez use this technique to explore political and historical themes through allegory.",
+   blanks:[["associated","as_ _ _ _ _ _ _ _"],["fantastical","fa_ _ _ _ _ _ _ _ _"],["unremarkable","un_ _ _ _ _ _ _ _ _ _"],["narrative","na_ _ _ _ _ _ _"],["allegory","al_ _ _ _ _ _"]]},
+  {topic:"Literature",
+   sentence:"The Modernist literary movement, flourishing in the early twentieth century, broke decisively with traditional narrative conventions by introducing stream-of-consciousness technique, fragmented structure, and an intense focus on subjective psychological experience. Authors such as Virginia Woolf and James Joyce are considered its foremost practitioners.",
+   blanks:[["decisively","de_ _ _ _ _ _ _ _"],["conventions","co_ _ _ _ _ _ _ _ _"],["fragmented","fr_ _ _ _ _ _ _ _"],["subjective","su_ _ _ _ _ _ _ _"],["practitioners","pr_ _ _ _ _ _ _ _ _ _ _"]]},
+
+  // ── MUSIC ──────────────────────────────────────────────────────────────────
+  {topic:"Music",
+   sentence:"Western tonal music is organised around a system of keys, each defined by a specific set of pitches arranged in a hierarchical relationship centred on a tonic note. The tension between harmonic stability and dissonance drives the forward momentum of tonal compositions.",
+   blanks:[["organised","or_ _ _ _ _ _ _"],["hierarchical","hi_ _ _ _ _ _ _ _ _"],["dissonance","di_ _ _ _ _ _ _ _"],["momentum","mo_ _ _ _ _ _"],["compositions","co_ _ _ _ _ _ _ _ _ _"]]},
+
+  // ── PHILOSOPHY ─────────────────────────────────────────────────────────────
+  {topic:"Philosophy",
+   sentence:"Utilitarianism, most closely associated with Jeremy Bentham and John Stuart Mill, holds that the morally correct action is the one that produces the greatest happiness for the greatest number of people. Critics of this consequentialist framework argue that it can justify actions that violate individual rights in the pursuit of aggregate welfare.",
+   blanks:[["associated","as_ _ _ _ _ _ _ _"],["morally","mo_ _ _ _ _"],["consequentialist","co_ _ _ _ _ _ _ _ _ _ _ _ _ _"],["violate","vi_ _ _ _ _"],["aggregate","ag_ _ _ _ _ _ _"]]},
+  {topic:"Philosophy",
+   sentence:"Epistemology is the branch of philosophy concerned with the nature, scope, and limits of human knowledge. A central debate within epistemology is between rationalists, who argue that knowledge is derived primarily through reason, and empiricists, who maintain that it originates from sensory experience.",
+   blanks:[["concerned","co_ _ _ _ _ _ _"],["rationalists","ra_ _ _ _ _ _ _ _ _ _"],["primarily","pr_ _ _ _ _ _ _"],["empiricists","em_ _ _ _ _ _ _ _ _"],["originates","or_ _ _ _ _ _ _ _"]]},
+
+  // ── NUTRITION ──────────────────────────────────────────────────────────────
+  {topic:"Nutrition Science",
+   sentence:"Macronutrients — carbohydrates, proteins, and fats — provide the energy and structural components necessary for bodily functions, while micronutrients such as vitamins and minerals are required in smaller quantities to support metabolic processes. A deficiency in any essential nutrient can impair physiological function and lead to disease.",
+   blanks:[["carbohydrates","ca_ _ _ _ _ _ _ _ _ _ _"],["structural","st_ _ _ _ _ _ _ _"],["micronutrients","mi_ _ _ _ _ _ _ _ _ _ _"],["metabolic","me_ _ _ _ _ _ _"],["physiological","ph_ _ _ _ _ _ _ _ _ _ _"]]},
+
+  // ── POLITICAL SCIENCE ──────────────────────────────────────────────────────
+  {topic:"Political Science",
+   sentence:"Democracy is characterised by competitive elections, the protection of civil liberties, the rule of law, and mechanisms for holding governments accountable to their citizens. Scholars distinguish between liberal democracy, which emphasises individual rights, and electoral democracy, which focuses narrowly on the holding of elections.",
+   blanks:[["competitive","co_ _ _ _ _ _ _ _ _"],["mechanisms","me_ _ _ _ _ _ _ _"],["accountable","ac_ _ _ _ _ _ _ _ _"],["distinguish","di_ _ _ _ _ _ _ _ _"],["emphasises","em_ _ _ _ _ _ _ _"]]},
+
+  // ── NEUROSCIENCE ───────────────────────────────────────────────────────────
+  {topic:"Neuroscience",
+   sentence:"Neuroplasticity refers to the brain's remarkable capacity to reorganise its structure and function in response to experience, learning, and injury. This property allows the nervous system to form new synaptic connections, compensate for damage, and adapt to changing environmental demands throughout an individual's lifespan.",
+   blanks:[["remarkable","re_ _ _ _ _ _ _ _"],["reorganise","re_ _ _ _ _ _ _ _"],["synaptic","sy_ _ _ _ _ _"],["compensate","co_ _ _ _ _ _ _ _"],["lifespan","li_ _ _ _ _ _"]]},
+
+  // ── ANTHROPOLOGY ───────────────────────────────────────────────────────────
+  {topic:"Anthropology",
+   sentence:"Cultural anthropology investigates the diversity of human cultures, examining how societies organise themselves, transmit knowledge across generations, and assign meaning to their practices and beliefs. Ethnographic fieldwork, in which researchers immerse themselves within a community for an extended period, is the discipline's primary methodological tool.",
+   blanks:[["investigates","in_ _ _ _ _ _ _ _ _ _"],["transmit","tr_ _ _ _ _ _"],["ethnographic","et_ _ _ _ _ _ _ _ _ _"],["immerse","im_ _ _ _ _"],["methodological","me_ _ _ _ _ _ _ _ _ _ _ _"]]}
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let current = [];
+let answersVisible = false;
+
+// ── GENERATE ──────────────────────────────────────────────────────────────────
+function generateExercises() {
+  answersVisible = false;
+  choicesVisible = false;
+  const shuffled = [...POOL].sort(() => Math.random() - 0.5);
+  current = shuffled.slice(0, 10);
+
+  document.getElementById('placeholder').style.display = 'none';
+  document.getElementById('answersBar').classList.remove('visible');
+  document.getElementById('toggleAnswersBtn').style.display = '';
+  document.getElementById('toggleAnswersBtn').textContent = 'Show Answers';
+  document.getElementById('toggleChoicesBtn').style.display = '';
+  document.getElementById('toggleChoicesBtn').textContent = 'Show Choices (easier)';
+  document.getElementById('copyWithoutBtn').style.display = '';
+  document.getElementById('copyWithBtn').style.display = '';
+
+  const container = document.getElementById('exercises');
+  container.innerHTML = '';
+
+  current.forEach((ex, idx) => {
+    const div = document.createElement('div');
+    div.className = 'exercise';
+    div.innerHTML = `
+      <div class="exercise-num">Exercise ${idx + 1}</div>
+      <div class="exercise-topic">${esc(ex.topic)}</div>
+      <div class="exercise-text">${buildSentence(ex, idx)}</div>
+      <div class="answer-reveal" id="ans-${idx}"><strong>Answers:</strong> ${esc(ex.blanks.map(([w])=>w).join(' \u00b7 '))}</div>
+      <div class="word-bank" id="bank-${idx}"><strong>Word bank:</strong> ${esc(shuffleWords(ex.blanks.map(([w])=>w)).join('  \u2022  '))}</div>
+    `;
+    container.appendChild(div);
+  });
+
+  current.forEach((ex, idx) => {
+    ex.blanks.forEach(([word], bIdx) => {
+      const inp = document.getElementById(`inp-${idx}-${bIdx}`);
+      if (!inp) return;
+      inp.addEventListener('input', () => { checkInput(inp, word); autoSize(inp); });
+      autoSize(inp);
+    });
+  });
+}
+
+// ── BUILD SENTENCE HTML ───────────────────────────────────────────────────────
+function buildSentence(ex, idx) {
+  const sentence = ex.sentence;
+  let result = '';
+  let cursor = 0;
+
+  ex.blanks.forEach(([word, hint], bIdx) => {
+    const rx = new RegExp('\\b' + rxEsc(word) + '\\b');
+    const m  = rx.exec(sentence.substring(cursor));
+    if (!m) return;
+    const absPos = cursor + m.index;
+    result += esc(sentence.substring(cursor, absPos));
+    const display = hint || fallbackHint(word);
+    const w = Math.max(display.length + 1, 7);
+    result += `<span class="blank-wrap"><input class="blank-input" id="inp-${idx}-${bIdx}" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="width:${(w*0.6).toFixed(1)}em" placeholder="${esc(display)}" data-answer="${esc(word.toLowerCase())}"></span>`;
+    cursor = absPos + word.length;
+  });
+
+  result += esc(sentence.substring(cursor));
+  return result;
+}
+
+function fallbackHint(word) {
+  if (word.length <= 2) return word[0] + '_';
+  return word.slice(0, 2) + word.slice(2).split('').map(() => '_').join(' ');
+}
+
+// ── INPUTS ────────────────────────────────────────────────────────────────────
+function autoSize(inp) {
+  const len = Math.max(inp.value.length, inp.placeholder.length, 6);
+  inp.style.width = (len * 0.6).toFixed(1) + 'em';
+}
+
+function checkInput(inp, word) {
+  const val = inp.value.trim().toLowerCase();
+  if (!val) { inp.classList.remove('correct','incorrect'); return; }
+  if (val === word.toLowerCase()) { inp.classList.add('correct'); inp.classList.remove('incorrect'); }
+  else { inp.classList.add('incorrect'); inp.classList.remove('correct'); }
+}
+
+// ── TOGGLE CHOICES ────────────────────────────────────────────────────────────
+let choicesVisible = false;
+function toggleChoices() {
+  choicesVisible = !choicesVisible;
+  current.forEach((_, idx) => {
+    document.getElementById(`bank-${idx}`)?.classList.toggle('visible', choicesVisible);
+  });
+  document.getElementById('toggleChoicesBtn').textContent = choicesVisible ? 'Hide Choices' : 'Show Choices (easier)';
+}
+
+function shuffleWords(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ── TOGGLE ANSWERS ────────────────────────────────────────────────────────────
+function toggleAnswers() {
+  answersVisible = !answersVisible;
+  current.forEach((_, idx) => {
+    document.getElementById(`ans-${idx}`)?.classList.toggle('visible', answersVisible);
+  });
+  document.getElementById('toggleAnswersBtn').textContent = answersVisible ? 'Hide Answers' : 'Show Answers';
+  document.getElementById('answersBar').classList.toggle('visible', answersVisible);
+}
+
+// ── COPY ──────────────────────────────────────────────────────────────────────
+function copyExercises(withAnswers) {
+  if (!current.length) return;
+  let text = '';
+  current.forEach((ex, idx) => {
+    text += `Exercise ${idx + 1}  [${ex.topic}]\n`;
+    let s = ex.sentence;
+    ex.blanks.forEach(([word, hint]) => {
+      s = s.replace(new RegExp('\\b' + rxEsc(word) + '\\b'), hint || fallbackHint(word));
+    });
+    text += s + '\n';
+    if (withAnswers) text += `Answers: ${ex.blanks.map(([w]) => w).join(', ')}\n`;
+    text += '\n';
+  });
+  navigator.clipboard.writeText(text)
+    .then(() => showToast(withAnswers ? '\u2713 Teacher copy (with answers) copied!' : '\u2713 Student copy copied!'))
+    .catch(() => showToast('Copy failed \u2014 try Ctrl+C'));
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function rxEsc(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+}
+</script>
+</body>
+</html>
