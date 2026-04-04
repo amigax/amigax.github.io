@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stephie's Gap Fill Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #f7f3ec;
+    --cream-dark: #ede8df;
+    --ink: #1a1510;
+    --ink-mid: #3d3628;
+    --ink-light: #7a6e5f;
+    --sepia: #8b6914;
+    --sepia-light: #c4a44a;
+    --sepia-pale: #f0e6c8;
+    --red-pen: #c0392b;
+    --green-pen: #27ae60;
+    --blue-pen: #2471a3;
+    --border: #ccc0a8;
+    --shadow: rgba(26,21,16,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Lora', Georgia, serif;
+    min-height: 100vh;
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(139,105,20,0.06) 27px, rgba(139,105,20,0.06) 28px);
+  }
+
+  header {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 28px 40px 22px;
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    border-bottom: 4px solid var(--sepia-light);
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(196,164,74,0.04) 10px, rgba(196,164,74,0.04) 11px);
+  }
+
+  .header-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1;
+  }
+
+  .header-sub {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    color: var(--sepia-light);
+    font-size: 0.95rem;
+    margin-bottom: 2px;
+  }
+
+  .header-badge {
+    margin-left: auto;
+    background: var(--sepia);
+    color: var(--cream);
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border-radius: 2px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    align-self: flex-start;
+    margin-top: 4px;
+  }
+
+  .controls {
+    display: flex;
+    gap: 12px;
+    padding: 20px 40px;
+    background: var(--cream-dark);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .btn {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 10px 20px;
+    border: 2px solid var(--ink);
+    background: var(--ink);
+    color: var(--cream);
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: all 0.15s ease;
+    border-radius: 2px;
+  }
+
+  .btn:hover:not(:disabled) {
+    background: var(--ink-mid);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--shadow);
+  }
+  .btn:active:not(:disabled) { transform: translateY(0); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--ink);
+  }
+  .btn-outline:hover:not(:disabled) {
+    background: var(--ink);
+    color: var(--cream);
+  }
+
+  .btn-sepia {
+    background: var(--sepia);
+    border-color: var(--sepia);
+    color: #fff;
+  }
+  .btn-sepia:hover:not(:disabled) { background: #7a5c10; border-color: #7a5c10; }
+
+  .btn-generate {
+    font-size: 0.95rem;
+    padding: 12px 28px;
+  }
+
+  .copy-group {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .copy-label {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    color: var(--ink-light);
+  }
+
+  .main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 36px 40px 60px;
+  }
+
+  .placeholder {
+    text-align: center;
+    padding: 80px 0;
+    color: var(--ink-light);
+    font-style: italic;
+    font-size: 1.05rem;
+  }
+  .placeholder-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.35; }
+
+  .loading-wrap {
+    display: none;
+    text-align: center;
+    padding: 70px 0;
+  }
+  .loading-wrap.visible { display: block; }
+
+  .spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--sepia);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 20px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text { font-style: italic; color: var(--ink-light); font-size: 1rem; }
+  .loading-sub {
+    font-size: 0.78rem;
+    color: var(--ink-light);
+    margin-top: 6px;
+    font-family: 'Source Code Pro', monospace;
+    opacity: 0.65;
+  }
+
+  .error-box {
+    display: none;
+    background: #fdf2f2;
+    border: 1px solid #e8c8c8;
+    border-left: 4px solid var(--red-pen);
+    padding: 14px 18px;
+    border-radius: 2px;
+    color: var(--red-pen);
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+  }
+  .error-box.visible { display: block; }
+
+  .exercises {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .exercise {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--sepia);
+    padding: 24px 28px;
+    border-radius: 2px;
+    box-shadow: 0 2px 8px var(--shadow);
+    animation: slideIn 0.3s ease both;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .exercise:nth-child(1)  { animation-delay: 0.02s; }
+  .exercise:nth-child(2)  { animation-delay: 0.05s; }
+  .exercise:nth-child(3)  { animation-delay: 0.08s; }
+  .exercise:nth-child(4)  { animation-delay: 0.11s; }
+  .exercise:nth-child(5)  { animation-delay: 0.14s; }
+  .exercise:nth-child(6)  { animation-delay: 0.17s; }
+  .exercise:nth-child(7)  { animation-delay: 0.20s; }
+  .exercise:nth-child(8)  { animation-delay: 0.23s; }
+  .exercise:nth-child(9)  { animation-delay: 0.26s; }
+  .exercise:nth-child(10) { animation-delay: 0.29s; }
+
+  .exercise-num {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.68rem;
+    color: var(--sepia);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .exercise-topic {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--ink-light);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .exercise-text {
+    font-size: 1rem;
+    line-height: 1.95;
+    color: var(--ink);
+  }
+
+  .blank-wrap {
+    display: inline-block;
+    position: relative;
+    vertical-align: bottom;
+    margin: 0 2px;
+  }
+
+  .blank-input {
+    font-family: 'Lora', serif;
+    font-size: 0.92rem;
+    border: none;
+    border-bottom: 2px solid var(--ink-mid);
+    background: transparent;
+    outline: none;
+    padding: 0 2px 1px;
+    color: var(--blue-pen);
+    min-width: 40px;
+    text-align: center;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .blank-input:focus   { border-bottom-color: var(--sepia); }
+  .blank-input.correct   { color: var(--green-pen); border-bottom-color: var(--green-pen); }
+  .blank-input.incorrect { color: var(--red-pen);   border-bottom-color: var(--red-pen); }
+
+  .answer-reveal {
+    display: none;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.8rem;
+    color: var(--sepia);
+    background: var(--sepia-pale);
+    padding: 6px 10px;
+    border-radius: 2px;
+    margin-top: 14px;
+    line-height: 1.6;
+  }
+  .answer-reveal.visible { display: block; }
+
+  .answers-bar {
+    padding: 16px 40px;
+    background: var(--sepia-pale);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    display: none;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Lora', serif;
+    font-size: 0.85rem;
+    color: var(--ink-mid);
+    font-style: italic;
+  }
+  .answers-bar.visible { display: flex; }
+  .answers-bar .dot { color: var(--sepia); font-style: normal; font-size: 1.2rem; }
+
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: var(--cream);
+    font-family: 'Lora', serif;
+    font-size: 0.9rem;
+    padding: 12px 24px;
+    border-radius: 2px;
+    opacity: 0;
+    transition: all 0.25s ease;
+    pointer-events: none;
+    z-index: 1000;
+    border-left: 3px solid var(--sepia-light);
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 640px) {
+    header { padding: 20px; flex-wrap: wrap; }
+    .controls { padding: 14px 16px; }
+    .main { padding: 20px 16px 50px; }
+    .copy-group { margin-left: 0; width: 100%; }
+    .header-title { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="header-sub">Stephie's Academic English Practice</div>
+    <div class="header-title">Gap Fill Exercises</div>
+  </div>
+  <div class="header-badge">TOEFL Prep</div>
+</header>
+
+<div class="controls">
+  <button class="btn btn-generate" id="generateBtn" onclick="generateExercises()">⟳ Generate 10 Exercises</button>
+  <button class="btn btn-outline" id="toggleAnswersBtn" onclick="toggleAnswers()" style="display:none">Show Answers</button>
+
+  <div class="copy-group">
+    <span class="copy-label">Copy:</span>
+    <button class="btn btn-sepia"   id="copyWithoutBtn" onclick="copyExercises(false)" style="display:none">Student Copy</button>
+    <button class="btn btn-outline" id="copyWithBtn"    onclick="copyExercises(true)"  style="display:none">Teacher Copy</button>
+  </div>
+</div>
+
+<div class="answers-bar" id="answersBar">
+  <span class="dot">✦</span>
+  Answer key is now visible — scroll through each exercise to review.
+</div>
+
+<main class="main">
+  <div class="error-box" id="errorBox"></div>
+
+  <div class="placeholder" id="placeholder">
+    <div class="placeholder-icon">✎</div>
+    Click <em>Generate 10 Exercises</em> to begin.<br>
+    <span style="font-size:0.85rem;margin-top:8px;display:block;">Fresh AI-generated passages every time — science, history, economics &amp; more.</span>
+  </div>
+
+  <div class="loading-wrap" id="loadingWrap">
+    <div class="spinner"></div>
+    <div class="loading-text">Generating fresh exercises…</div>
+    <div class="loading-sub" id="loadingProgress">Consulting the textbooks…</div>
+  </div>
+
+  <div class="exercises" id="exercises"></div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let currentExercises = [];
+let answersVisible   = false;
+let isGenerating     = false;
+
+// ─── PROMPT ──────────────────────────────────────────────────────────────────
+const SYSTEM = `You are an expert TOEFL academic English exercise creator.
+Generate gap-fill (cloze) exercises suitable for upper-intermediate to advanced TOEFL candidates.
+
+Return ONLY a valid JSON array of exactly 10 objects. No markdown fences, no preamble, no explanation.
+
+Each object:
+  "topic"    : string  — academic subject label (e.g. "Earth Science", "Economics")
+  "sentence" : string  — 2–3 factually accurate, formal academic sentences on that topic
+  "blanks"   : array of [word, hint] pairs
+
+Blank rules:
+- 4–6 blanks per exercise
+- Choose challenging academic vocabulary appropriate for TOEFL
+- Each "word" must appear verbatim in "sentence" (case-sensitive match)
+- "hint" format: first 2 characters of the word, then one underscore per remaining letter separated by spaces
+  Examples: "accumulates" → "ac_ _ _ _ _ _ _ _ _"  |  "photosynthesis" → "ph_ _ _ _ _ _ _ _ _ _ _ _"  |  "the" → "th_"
+- Blanks array must be ordered by position of first occurrence in the sentence
+- Topics must vary widely across the 10 exercises (geology, biology, history, economics, physics, chemistry, medicine, psychology, technology, linguistics, astronomy, environment, sociology, mathematics, archaeology — never repeat the same topic twice)`;
+
+// ─── API ─────────────────────────────────────────────────────────────────────
+async function callAPI() {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 4000,
+      system: SYSTEM,
+      messages: [{ role: "user", content: "Generate 10 varied TOEFL gap-fill exercises. Return only the JSON array." }]
+    })
+  });
+
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}));
+    throw new Error(e.error?.message || `HTTP ${res.status}`);
+  }
+
+  const data = await res.json();
+  const raw  = data.content?.find(b => b.type === "text")?.text || "";
+  // Strip accidental fences
+  const clean = raw.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
+  const parsed = JSON.parse(clean);
+  if (!Array.isArray(parsed) || !parsed.length) throw new Error("Unexpected response format from API.");
+  return parsed;
+}
+
+// ─── GENERATE ────────────────────────────────────────────────────────────────
+async function generateExercises() {
+  if (isGenerating) return;
+  isGenerating = true;
+
+  const genBtn = document.getElementById("generateBtn");
+  genBtn.disabled = true;
+  genBtn.textContent = "Generating…";
+
+  document.getElementById("placeholder").style.display    = "none";
+  document.getElementById("exercises").innerHTML          = "";
+  document.getElementById("errorBox").classList.remove("visible");
+  document.getElementById("loadingWrap").classList.add("visible");
+  document.getElementById("answersBar").classList.remove("visible");
+  document.getElementById("toggleAnswersBtn").style.display = "none";
+  document.getElementById("copyWithoutBtn").style.display   = "none";
+  document.getElementById("copyWithBtn").style.display      = "none";
+  answersVisible = false;
+
+  const flavours = [
+    "Consulting the textbooks…",
+    "Choosing academic vocabulary…",
+    "Crafting TOEFL-level passages…",
+    "Almost ready…"
+  ];
+  let fi = 0;
+  const prog = document.getElementById("loadingProgress");
+  prog.textContent = flavours[0];
+  const timer = setInterval(() => {
+    fi = Math.min(fi + 1, flavours.length - 1);
+    prog.textContent = flavours[fi];
+  }, 2000);
+
+  try {
+    currentExercises = await callAPI();
+    renderExercises(currentExercises);
+    document.getElementById("toggleAnswersBtn").style.display = "";
+    document.getElementById("copyWithoutBtn").style.display   = "";
+    document.getElementById("copyWithBtn").style.display      = "";
+    document.getElementById("toggleAnswersBtn").textContent   = "Show Answers";
+  } catch (err) {
+    const box = document.getElementById("errorBox");
+    box.textContent = "⚠ " + err.message + "  — check your connection and try again.";
+    box.classList.add("visible");
+    document.getElementById("placeholder").style.display = "";
+  } finally {
+    clearInterval(timer);
+    document.getElementById("loadingWrap").classList.remove("visible");
+    genBtn.disabled = false;
+    genBtn.textContent = "⟳ Generate 10 Exercises";
+    isGenerating = false;
+  }
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function renderExercises(exercises) {
+  const container = document.getElementById("exercises");
+  container.innerHTML = "";
+
+  exercises.forEach((ex, idx) => {
+    const div = document.createElement("div");
+    div.className = "exercise";
+    const answerList = ex.blanks.map(([w]) => w).join(" · ");
+
+    div.innerHTML = `
+      <div class="exercise-num">Exercise ${idx + 1}</div>
+      <div class="exercise-topic">${esc(ex.topic)}</div>
+      <div class="exercise-text">${buildSentence(ex, idx)}</div>
+      <div class="answer-reveal" id="ans-${idx}"><strong>Answers:</strong> ${esc(answerList)}</div>
+    `;
+    container.appendChild(div);
+  });
+
+  exercises.forEach((ex, idx) => {
+    ex.blanks.forEach(([word], bIdx) => {
+      const inp = document.getElementById(`inp-${idx}-${bIdx}`);
+      if (!inp) return;
+      inp.addEventListener("input", () => { checkInput(inp, word); autoSize(inp); });
+      autoSize(inp);
+    });
+  });
+}
+
+function buildSentence(ex, idx) {
+  const sentence = ex.sentence;
+  let result = "";
+  let cursor = 0;
+
+  ex.blanks.forEach(([word, hint], bIdx) => {
+    const rx    = new RegExp("\\b" + rxEsc(word) + "\\b");
+    const slice = sentence.substring(cursor);
+    const m     = rx.exec(slice);
+    if (!m) return;
+
+    const absPos = cursor + m.index;
+    result += esc(sentence.substring(cursor, absPos));
+
+    const display = hint || fallbackHint(word);
+    const w = Math.max(display.length + 1, 8);
+    result += `<span class="blank-wrap"><input class="blank-input" id="inp-${idx}-${bIdx}" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="width:${(w * 0.6).toFixed(1)}em" placeholder="${esc(display)}" data-answer="${esc(word.toLowerCase())}"></span>`;
+    cursor = absPos + word.length;
+  });
+
+  result += esc(sentence.substring(cursor));
+  return result;
+}
+
+function fallbackHint(word) {
+  if (word.length <= 2) return word[0] + "_";
+  return word.slice(0, 2) + word.slice(2).split("").map(() => "_").join(" ");
+}
+
+// ─── INPUTS ──────────────────────────────────────────────────────────────────
+function autoSize(inp) {
+  const len = Math.max(inp.value.length, inp.placeholder.length, 6);
+  inp.style.width = (len * 0.6).toFixed(1) + "em";
+}
+
+function checkInput(inp, word) {
+  const val = inp.value.trim().toLowerCase();
+  if (!val) {
+    inp.classList.remove("correct", "incorrect");
+  } else if (val === word.toLowerCase()) {
+    inp.classList.add("correct");
+    inp.classList.remove("incorrect");
+  } else {
+    inp.classList.add("incorrect");
+    inp.classList.remove("correct");
+  }
+}
+
+// ─── TOGGLE ANSWERS ──────────────────────────────────────────────────────────
+function toggleAnswers() {
+  answersVisible = !answersVisible;
+  currentExercises.forEach((_, idx) => {
+    document.getElementById(`ans-${idx}`)?.classList.toggle("visible", answersVisible);
+  });
+  document.getElementById("toggleAnswersBtn").textContent = answersVisible ? "Hide Answers" : "Show Answers";
+  document.getElementById("answersBar").classList.toggle("visible", answersVisible);
+}
+
+// ─── COPY ────────────────────────────────────────────────────────────────────
+function copyExercises(withAnswers) {
+  if (!currentExercises.length) return;
+  let text = "";
+
+  currentExercises.forEach((ex, idx) => {
+    text += `Exercise ${idx + 1}  [${ex.topic}]\n`;
+    let s = ex.sentence;
+    ex.blanks.forEach(([word, hint]) => {
+      s = s.replace(new RegExp("\\b" + rxEsc(word) + "\\b"), hint || fallbackHint(word));
+    });
+    text += s + "\n";
+    if (withAnswers) text += `Answers: ${ex.blanks.map(([w]) => w).join(", ")}\n`;
+    text += "\n";
+  });
+
+  navigator.clipboard.writeText(text)
+    .then(() => toast(withAnswers ? "✓ Teacher copy (with answers) copied!" : "✓ Student copy copied!"))
+    .catch(() => toast("Copy failed — please use Ctrl+C"));
+}
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function rxEsc(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+}
+</script>
+</body>
+</html>
