@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stephie's Academic Discussion Practice</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream:#f7f3ec; --cream-dark:#ede8df; --ink:#1a1510; --ink-mid:#3d3628; --ink-light:#7a6e5f;
+    --sepia:#8b6914; --sepia-light:#c4a44a; --sepia-pale:#f0e6c8; --border:#ccc0a8; --shadow:rgba(26,21,16,0.12);
+    --prof-bg:#eef4fb; --prof-border:#2471a3; --s1-bg:#f0f7ee; --s1-border:#27ae60;
+    --s2-bg:#fdf3f3; --s2-border:#c0392b; --reply-bg:#fffdf7; --green:#27ae60; --red:#c0392b; --blue:#2471a3;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--cream);color:var(--ink);font-family:'Lora',Georgia,serif;min-height:100vh;
+    background-image:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(139,105,20,0.06) 27px,rgba(139,105,20,0.06) 28px);}
+  header{background:var(--ink);color:var(--cream);padding:28px 40px 22px;display:flex;align-items:flex-end;gap:20px;
+    border-bottom:4px solid var(--sepia-light);position:relative;overflow:hidden;}
+  header::before{content:'';position:absolute;inset:0;
+    background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(196,164,74,0.04) 10px,rgba(196,164,74,0.04) 11px);}
+  .header-title{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;letter-spacing:-0.5px;line-height:1;}
+  .header-sub{font-family:'Lora',serif;font-style:italic;color:var(--sepia-light);font-size:0.95rem;margin-bottom:2px;}
+  .header-badge{margin-left:auto;background:var(--sepia);color:var(--cream);font-family:'Source Code Pro',monospace;
+    font-size:0.7rem;padding:4px 10px;border-radius:2px;letter-spacing:1px;text-transform:uppercase;align-self:flex-start;margin-top:4px;}
+  .nav-link{display:inline-block;margin:0 40px;padding:10px 0;font-family:'Lora',serif;font-style:italic;
+    font-size:0.85rem;color:var(--sepia);text-decoration:none;border-bottom:1px solid transparent;transition:border-color 0.15s;}
+  .nav-link:hover{border-bottom-color:var(--sepia);}
+  .controls{display:flex;gap:12px;padding:20px 40px;background:var(--cream-dark);border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center;}
+  .btn{font-family:'Playfair Display',serif;font-weight:600;font-size:0.85rem;padding:10px 20px;border:2px solid var(--ink);
+    background:var(--ink);color:var(--cream);cursor:pointer;letter-spacing:0.3px;transition:all 0.15s ease;border-radius:2px;}
+  .btn:hover{background:var(--ink-mid);transform:translateY(-1px);box-shadow:0 4px 12px var(--shadow);}
+  .btn:active{transform:translateY(0);}
+  .btn-outline{background:transparent;color:var(--ink);}
+  .btn-outline:hover{background:var(--ink);color:var(--cream);}
+  .btn-sepia{background:var(--sepia);border-color:var(--sepia);color:#fff;}
+  .btn-sepia:hover{background:#7a5c10;border-color:#7a5c10;}
+  .btn-generate{font-size:0.95rem;padding:12px 28px;}
+  .copy-group{margin-left:auto;display:flex;gap:8px;align-items:center;}
+  .copy-label{font-family:'Lora',serif;font-style:italic;font-size:0.8rem;color:var(--ink-light);}
+  .task-banner{background:var(--sepia-pale);border-bottom:1px solid var(--border);padding:14px 40px;
+    font-size:0.85rem;color:var(--ink-mid);line-height:1.6;}
+  .task-banner strong{color:var(--ink);}
+  .main{max-width:900px;margin:0 auto;padding:36px 40px 60px;}
+  .placeholder{text-align:center;padding:80px 0;color:var(--ink-light);font-style:italic;font-size:1.05rem;}
+  .placeholder-icon{font-size:3rem;margin-bottom:16px;opacity:0.35;}
+  .exercises{display:flex;flex-direction:column;gap:48px;}
+  .exercise{background:#fff;border:1px solid var(--border);border-radius:3px;box-shadow:0 2px 10px var(--shadow);overflow:hidden;animation:slideIn 0.3s ease both;}
+  @keyframes slideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .exercise:nth-child(1){animation-delay:0.02s}.exercise:nth-child(2){animation-delay:0.07s}
+  .exercise:nth-child(3){animation-delay:0.12s}.exercise:nth-child(4){animation-delay:0.17s}
+  .exercise:nth-child(5){animation-delay:0.22s}
+  .exercise-header{background:var(--ink);color:var(--cream);padding:14px 22px;display:flex;align-items:baseline;gap:14px;}
+  .exercise-num{font-family:'Source Code Pro',monospace;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--sepia-light);}
+  .exercise-subject{font-family:'Playfair Display',serif;font-size:1rem;font-weight:600;}
+  .exercise-body{padding:24px 24px 0;}
+  .task-instruction{font-size:0.88rem;color:var(--ink-mid);background:var(--cream-dark);border-left:3px solid var(--sepia-light);
+    padding:10px 14px;margin-bottom:20px;line-height:1.6;border-radius:1px;}
+  .task-instruction strong{color:var(--ink);}
+  .forum{display:flex;flex-direction:column;gap:14px;margin-bottom:22px;}
+  .post{border-radius:3px;padding:14px 16px;}
+  .post-professor{background:var(--prof-bg);border-left:4px solid var(--prof-border);}
+  .post-s1{background:var(--s1-bg);border-left:4px solid var(--s1-border);}
+  .post-s2{background:var(--s2-bg);border-left:4px solid var(--s2-border);}
+  .post-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-family:'Playfair Display',serif;font-size:0.75rem;font-weight:700;flex-shrink:0;}
+  .avatar-prof{background:#2471a3;color:#fff;} .avatar-s1{background:#27ae60;color:#fff;} .avatar-s2{background:#c0392b;color:#fff;}
+  .post-name{font-family:'Playfair Display',serif;font-size:0.88rem;font-weight:600;color:var(--ink);}
+  .post-role{font-family:'Lora',serif;font-style:italic;font-size:0.75rem;color:var(--ink-light);}
+  .post-text{font-size:0.93rem;line-height:1.75;color:var(--ink);}
+  .reply-area{padding:0 24px 6px;}
+  .reply-label{font-family:'Playfair Display',serif;font-size:0.82rem;font-weight:600;color:var(--ink-light);
+    text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+  .reply-label::after{content:'';flex:1;height:1px;background:var(--border);}
+  textarea.reply{width:100%;min-height:130px;font-family:'Lora',serif;font-size:0.95rem;line-height:1.75;color:var(--ink);
+    background:var(--reply-bg);border:1px solid var(--border);border-left:3px solid var(--sepia);border-radius:2px;
+    padding:12px 14px;resize:vertical;outline:none;transition:border-color 0.2s;}
+  textarea.reply:focus{border-color:var(--sepia-light);}
+  .reply-meta{display:flex;align-items:center;justify-content:space-between;margin-top:8px;
+    font-family:'Source Code Pro',monospace;font-size:0.75rem;color:var(--ink-light);flex-wrap:wrap;gap:8px;}
+  .word-count{display:flex;align-items:center;gap:6px;}
+  .wc-num{font-size:0.88rem;font-weight:500;color:var(--ink);transition:color 0.2s;}
+  .wc-num.ok{color:var(--green);} .wc-num.warn{color:var(--red);}
+  .wc-bar-wrap{width:120px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+  .wc-bar{height:100%;background:var(--sepia);border-radius:3px;transition:width 0.2s,background 0.2s;}
+  .wc-bar.ok{background:var(--green);}
+  .clear-btn{font-family:'Lora',serif;font-style:italic;font-size:0.75rem;color:var(--ink-light);
+    background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;}
+  .clear-btn:hover{color:var(--red);}
+
+  /* ── Example response ── */
+  .example-area{padding:0 24px 24px;}
+  .example-toggle{display:inline-flex;align-items:center;gap:7px;font-family:'Playfair Display',serif;
+    font-size:0.8rem;font-weight:600;color:var(--sepia);background:none;border:1.5px solid var(--sepia);
+    border-radius:2px;padding:6px 14px;cursor:pointer;transition:all 0.15s;margin-top:4px;}
+  .example-toggle:hover{background:var(--sepia);color:#fff;}
+  .example-box{display:none;margin-top:14px;border:1.5px solid var(--sepia-light);border-radius:3px;overflow:hidden;}
+  .example-box.visible{display:block;}
+  .example-header{background:var(--sepia);color:#fff;padding:10px 16px;display:flex;align-items:center;
+    justify-content:space-between;flex-wrap:wrap;gap:8px;}
+  .example-label{font-family:'Playfair Display',serif;font-size:0.85rem;font-weight:700;letter-spacing:0.2px;}
+  .example-badge{font-family:'Source Code Pro',monospace;font-size:0.68rem;background:rgba(255,255,255,0.2);
+    padding:2px 9px;border-radius:2px;letter-spacing:1px;}
+  .example-text{background:var(--sepia-pale);padding:18px 20px;font-size:0.93rem;line-height:1.85;
+    color:var(--ink);font-family:'Lora',serif;border-bottom:1px solid var(--border);}
+  .example-notes{background:#fff;padding:14px 20px;}
+  .example-notes-title{font-family:'Playfair Display',serif;font-size:0.72rem;font-weight:700;
+    text-transform:uppercase;letter-spacing:0.6px;color:var(--sepia);margin-bottom:8px;}
+  .example-notes ul{list-style:none;padding:0;display:flex;flex-direction:column;gap:5px;}
+  .example-notes ul li{font-family:'Lora',serif;font-size:0.82rem;color:var(--ink-mid);line-height:1.55;
+    padding-left:18px;position:relative;}
+  .example-notes ul li::before{content:'✓';position:absolute;left:0;color:var(--green);font-size:0.75rem;top:1px;}
+
+  .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);
+    color:var(--cream);font-family:'Lora',serif;font-size:0.9rem;padding:12px 24px;border-radius:2px;opacity:0;
+    transition:all 0.25s ease;pointer-events:none;z-index:1000;border-left:3px solid var(--sepia-light);white-space:nowrap;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  @media(max-width:640px){
+    header{padding:20px;flex-wrap:wrap;} .controls{padding:14px 16px;} .main{padding:20px 16px 50px;}
+    .copy-group{margin-left:0;width:100%;} .header-title{font-size:1.4rem;} .nav-link{margin:0 16px;}
+    .task-banner{padding:12px 16px;}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="header-sub">Stephie's Academic English Practice</div>
+    <div class="header-title">Academic Discussion</div>
+  </div>
+  <div class="header-badge">TOEFL Prep</div>
+</header>
+<a class="nav-link" href="toefl-blanks.html">&#8592; Gap Fill</a>
+<a class="nav-link" href="toefl-ctest.html">C-Test</a>
+<div class="controls">
+  <button class="btn btn-generate" onclick="generate()">&#8635; Generate 5 Exercises</button>
+  <div class="copy-group">
+    <span class="copy-label">Copy all:</span>
+    <button class="btn btn-sepia"   id="copyWithoutBtn" onclick="copyAll(false)" style="display:none">Student Copy</button>
+    <button class="btn btn-outline" id="copyWithBtn"    onclick="copyAll(true)"  style="display:none">With Responses</button>
+  </div>
+</div>
+<div class="task-banner">
+  <strong>Task:</strong> Write a post responding to the professor's question.
+  Express and support your personal opinion, and make a meaningful contribution in your own words.
+  <strong>Minimum 100 words.</strong>
+</div>
+<main class="main">
+  <div class="placeholder" id="placeholder">
+    <div class="placeholder-icon">&#128172;</div>
+    Click <em>Generate 5 Exercises</em> to begin.<br>
+    <span style="font-size:0.85rem;margin-top:8px;display:block;">Each exercise includes a model high-scoring example response.</span>
+  </div>
+  <div class="exercises" id="exercises"></div>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const POOL = [
+  {
+    subject:"Marketing",
+    professor:{name:"Dr. Chen",question:"Next week we will be discussing the impact of social media influencers on consumer behaviour. With the rise of platforms like Instagram and YouTube, a new type of celebrity has emerged whose endorsements can sway purchasing decisions. What are your thoughts on whether influencer marketing is a positive or negative development for consumers?"},
+    students:[
+      {name:"Jack",text:"I think social media influencers have a significant and largely positive impact. When young people admire these influencers and trust their recommendations, they can discover products they genuinely benefit from. Of course, there are concerns about authenticity when influencers promote things they do not actually use, but I believe most followers are becoming more aware of this."},
+      {name:"Emily",text:"I am not convinced that influencers have a truly significant impact on consumer behaviour. Most people are intelligent enough to make purchasing decisions based on their own needs rather than someone else's recommendation. There are so many influencers promoting competing products that consumers have naturally become more sceptical and selective."}
+    ],
+    example:{
+      text:"I believe influencer marketing presents both opportunities and serious risks, and on balance I think the risks outweigh the benefits. Jack is right that influencers can introduce consumers to genuinely useful products, but Emily's point about scepticism is equally important — and I would go further. The fundamental problem with influencer marketing is the blurring of the line between authentic recommendation and paid advertisement. When a person with three million followers promotes a skincare product, their followers often do not realise they are watching an advertisement, not a personal opinion. This lack of transparency is damaging to consumer trust and can lead people to spend money on products that do not deliver what was promised. I have personally seen friends purchase supplements and clothing items based on influencer promotions, only to be disappointed. In my view, stricter regulation requiring clear labelling of paid partnerships — which some countries are beginning to implement — is essential. Influencer marketing is not inherently negative, but without transparency, it exploits the parasocial trust that audiences place in creators.",
+      notes:["States a clear position immediately and maintains it throughout","Engages directly with both student posts by name, building on them rather than ignoring them","Supports the argument with a personal example, adding authenticity","Introduces a new idea (regulation) that extends the discussion beyond what others said","Uses varied, sophisticated vocabulary: parasocial, transparency, blurring, exploit","Well over 100 words with coherent paragraph structure"]
+    }
+  },
+  {
+    subject:"Environmental Studies",
+    professor:{name:"Professor Nakamura",question:"This week we are examining the concept of individual versus collective responsibility in addressing climate change. Some argue that personal choices such as diet and travel habits are the most powerful lever for change, while others believe that systemic policy reform is what truly matters. What is your position?"},
+    students:[
+      {name:"Sofia",text:"I believe individual actions are meaningful because they reflect our values and send market signals to producers. When enough people choose plant-based diets or avoid unnecessary flights, companies and governments are forced to respond. Small choices, multiplied across millions of people, can drive enormous change."},
+      {name:"Marcus",text:"While individual choices matter symbolically, I think systemic change through government policy and corporate regulation is far more impactful. A single coal power plant produces more emissions than millions of individuals could offset through lifestyle changes. We need bold structural solutions, not just personal virtue."}
+    ],
+    example:{
+      text:"I find myself largely persuaded by Marcus's argument, though I think it is important not to dismiss individual action entirely. The statistical reality he describes is compelling: the carbon footprint of major industrial operations dwarfs what any individual could realistically offset by changing their diet or buying an electric vehicle. When corporations successfully shift the narrative toward individual responsibility — as the oil industry famously did when it popularised the concept of the personal carbon footprint — they deflect attention from the structural changes that are actually required. That said, I do not think Sofia's point is without merit. Individual choices do influence markets, and more importantly, they shape the cultural and political environment in which policy change becomes possible. A society of people who take climate change seriously in their personal lives is more likely to elect governments willing to implement ambitious climate policy. So while systemic action must come first, I see individual behaviour as a vital reinforcement rather than an alternative. The two are not in competition — they are mutually reinforcing.",
+      notes:["Takes a nuanced position that synthesises both students' views rather than simply agreeing with one","Opens with a clear thesis rather than a vague introduction","Uses precise, sophisticated language: dwarfs, deflect, compelling, mutually reinforcing","Demonstrates knowledge of a real-world example (the carbon footprint concept and its origins)","Addresses the question directly while adding original insight","Strong concluding sentence that summarises the argument memorably"]
+    }
+  },
+  {
+    subject:"Education",
+    professor:{name:"Dr. Okafor",question:"We have been exploring how technology is reshaping the classroom. Some educators believe that digital tools such as tablets, AI tutors, and online platforms dramatically improve learning outcomes, while others worry they are a distraction and deepen inequality. What do you think — does technology improve education?"},
+    students:[
+      {name:"Aisha",text:"Technology has genuinely transformed learning for me personally. Being able to access video lectures, interactive simulations, and instant feedback from AI tools has made difficult subjects far more approachable. I think the key is proper teacher training so technology is used purposefully rather than just as a novelty."},
+      {name:"David",text:"I am more cautious. Research shows that students who use laptops in class often multitask and retain less information. Technology can also widen the gap between students who have reliable internet and devices at home and those who do not. We should not assume that adding screens automatically improves education."}
+    ],
+    example:{
+      text:"My view is that technology has transformative potential in education, but that potential is almost entirely dependent on how it is implemented — which means David's caution and Aisha's optimism are both justified, just directed at different situations. In well-resourced schools where teachers are properly trained and technology is used with clear pedagogical intent, the evidence for improved outcomes is strong. Adaptive learning platforms, for example, can provide genuinely personalised instruction that no single teacher could replicate across a class of thirty students. However, David raises a critical point about inequality that I think deserves more attention. If we introduce technology without addressing the digital divide, we risk creating a two-tier system where students from wealthier backgrounds gain additional advantages while those from lower-income households fall further behind. I have seen this in my own community, where some students completed online learning during the pandemic effectively and others barely participated at all. For technology to be a genuine equaliser rather than a new source of disadvantage, governments must ensure universal access to devices and reliable internet — not as a luxury, but as educational infrastructure.",
+      notes:["Begins by framing both students' positions fairly before stating an original thesis","Argues that context determines effectiveness — a sophisticated, nuanced claim","Uses a specific, concrete example (adaptive learning platforms) to support the argument","Introduces the concept of the digital divide with a personal example","Concluding sentence is forward-looking and proposes a concrete solution","Sophisticated connective language: however, that said, rather than, not as … but as"]
+    }
+  },
+  {
+    subject:"Psychology",
+    professor:{name:"Professor Reyes",question:"Today we are discussing the concept of intrinsic versus extrinsic motivation. Intrinsic motivation comes from internal satisfaction, while extrinsic motivation involves external rewards such as money, grades, or praise. The question I would like you to consider is: which type of motivation do you believe is more effective in the long term, and why?"},
+    students:[
+      {name:"Lena",text:"I strongly believe intrinsic motivation is more powerful in the long run. When people genuinely enjoy what they are doing or find it meaningful, they persist through difficulty and continue improving even without external rewards. I have noticed this in my own studies — subjects I find fascinating always produce my best work."},
+      {name:"Tom",text:"I think extrinsic motivators are actually underrated. In the real world, people need to complete tasks they may not naturally enjoy, and external rewards make this possible. Grades motivate students to engage with material they might otherwise ignore, and financial incentives drive productivity in workplaces across every industry."}
+    ],
+    example:{
+      text:"Both Lena and Tom make valid points, but I think the research on motivation suggests a more nuanced picture than either position captures on its own. Psychologists have found that extrinsic rewards can actually undermine intrinsic motivation in certain conditions — a phenomenon known as the overjustification effect. When people who already enjoy an activity begin receiving external rewards for it, they can start to perceive the activity as something they do for the reward rather than for its own sake, and their enjoyment diminishes. This suggests that Tom's defence of extrinsic motivation may be most applicable to tasks that people do not naturally enjoy, while Lena's argument holds for activities that are already intrinsically rewarding. For educators, this has a practical implication: using grades and rewards indiscriminately, even for subjects students find engaging, may actually erode their natural curiosity over time. Long-term learning outcomes are likely to be best when intrinsic motivation is cultivated as the foundation, with extrinsic incentives used selectively and thoughtfully rather than as the default tool.",
+      notes:["Introduces a specific psychological concept (overjustification effect) that elevates the response","Synthesises both positions and identifies the conditions under which each applies","Moves from theoretical knowledge to practical educational implications","Avoids simply agreeing with one student — adds genuinely new information","Uses hedging language appropriately: suggests, may, likely — showing academic maturity","Strong final sentence that captures the argument concisely"]
+    }
+  },
+  {
+    subject:"Urban Planning",
+    professor:{name:"Dr. Petrov",question:"As cities grow, urban planners face a critical choice: should city development prioritise expanding public transport networks, or should resources be directed toward improving road infrastructure for private vehicles? Both approaches have significant economic, social, and environmental implications. What is your view?"},
+    students:[
+      {name:"Yuki",text:"Investing in public transport is clearly the better choice for modern cities. It reduces traffic congestion, lowers carbon emissions, and provides mobility for people who cannot afford or are unable to drive. Cities with excellent metro and bus systems, like Tokyo and Amsterdam, consistently rank among the most liveable in the world."},
+      {name:"Carlos",text:"In many regions, especially suburban and rural areas, public transport simply is not a practical solution because population density is too low to sustain it. Road infrastructure improvements serve a broader population and support economic activity more directly. We should not ignore the needs of the majority who rely on personal vehicles."}
+    ],
+    example:{
+      text:"I strongly support prioritising public transport investment, particularly in growing urban areas, though I think Carlos raises a legitimate point about context that needs to be taken seriously. Yuki is right that cities with excellent public transit consistently outperform car-dependent ones on measures of liveability, sustainability, and economic productivity. The reason is straightforward: a single metro line can move tens of thousands of people per hour, while the same corridor given over to private vehicles can move only a fraction of that number. Building more roads in cities has repeatedly been shown to induce additional traffic rather than reduce congestion — a phenomenon known as induced demand — meaning road expansion often makes traffic worse, not better. Carlos's concern about rural and suburban areas is fair, but in the context of growing cities specifically, it is less relevant. Dense urban environments are precisely where public transport is most efficient and most needed. The more productive question for urban planners is not whether to build transport or roads, but how to design cities in a way that makes public transport the most attractive choice for the greatest number of people.",
+      notes:["States a clear position while acknowledging the merit of the opposing view","Introduces a specific urban planning concept (induced demand) to strengthen the argument","Uses a concrete comparison (metro capacity vs road capacity) to make the point vivid","Distinguishes between urban and non-urban contexts, showing analytical precision","Reframes the question at the end — a sophisticated rhetorical move","Fluent use of academic vocabulary: productivity, phenomenon, induce, liveability"]
+    }
+  },
+  {
+    subject:"Economics",
+    professor:{name:"Professor Williams",question:"This week we turn to the debate over the universal basic income, or UBI — a policy in which every citizen receives a regular unconditional payment from the government. Proponents argue it eliminates poverty and empowers workers; critics worry about cost and reduced work incentives. What is your opinion on UBI?"},
+    students:[
+      {name:"Nina",text:"I support universal basic income because it would provide genuine financial security and eliminate the poverty trap created by means-tested welfare systems. If people's basic needs are met, they are free to take risks, start businesses, pursue education, or care for family members — all of which benefit society broadly."},
+      {name:"Ryan",text:"The cost of UBI is a serious problem that its supporters often underestimate. Funding unconditional payments for every citizen would require either massive tax increases or cuts to other vital public services. There is also evidence from trials that it slightly reduces labour force participation, which could slow economic growth."}
+    ],
+    example:{
+      text:"I find UBI intellectually compelling but practically complicated, and I think the debate between Nina and Ryan reflects a genuine tension that cannot be resolved simply by asserting one side is correct. Nina's point about the poverty trap is well made — means-tested welfare systems do create perverse incentives where earning more money can leave people worse off once benefits are withdrawn, and UBI would eliminate this problem elegantly. However, Ryan's concern about cost is not just a conservative talking point; it is a real fiscal challenge. The question is whether UBI replaces or supplements existing welfare programmes, and at what level the payment is set. Small-scale trials in Finland and Stockton, California, showed encouraging results: recipients reported lower stress, better health outcomes, and in most cases continued working. But these trials involved small populations and were funded externally, making it difficult to extrapolate to a national scale. My view is that a partial UBI — set below the poverty line and combined with targeted services — is a more realistic and politically viable starting point than a full replacement of the welfare state. The principle is sound; the implementation requires careful design.",
+      notes:["Acknowledges complexity rather than forcing a simple yes or no — appropriate for a contested policy question","Engages specifically with both students' arguments and explains why each has merit","Cites real-world evidence (Finland, Stockton trials) that adds credibility","Proposes a concrete, specific policy position (partial UBI) rather than vague support","Sophisticated economic vocabulary: perverse incentives, means-tested, extrapolate, fiscal","The final two-sentence conclusion is concise and memorable"]
+    }
+  },
+  {
+    subject:"Media Studies",
+    professor:{name:"Dr. Hassan",question:"We are examining the impact of 24-hour news cycles and social media on public discourse. Critics argue that the constant demand for content has prioritised speed over accuracy, contributing to the spread of misinformation. Others believe expanded media access has empowered citizens and increased accountability. What do you think?"},
+    students:[
+      {name:"Priya",text:"I believe the proliferation of news sources and social media has been broadly positive. Citizens can now access diverse perspectives, hold powerful institutions accountable, and organise around shared causes in ways that were impossible before the internet. The problem of misinformation is real but manageable through media literacy education."},
+      {name:"James",text:"The speed of social media is genuinely dangerous for public discourse. False stories spread far faster than corrections, and the algorithm-driven nature of platforms rewards emotionally provocative content regardless of its accuracy. This has contributed to political polarisation and made it harder for people to agree on basic facts."}
+    ],
+    example:{
+      text:"I think James's analysis of the structural incentives built into social media platforms is the most important insight in this discussion, and it is one that Priya's optimism does not fully address. The problem is not simply that people share misinformation — it is that the algorithms powering these platforms are specifically designed to maximise engagement, and emotionally arousing content, including outrage and fear, consistently generates more engagement than accurate but less dramatic information. This is not a failure of user behaviour that media literacy can fix; it is a deliberate design choice by platforms whose business model depends on keeping users scrolling. That said, Priya is right that expanded media access has produced genuine accountability benefits — the Arab Spring, the exposure of corporate wrongdoing, and the amplification of marginalised voices are real achievements enabled by social media. The problem is that these benefits and harms coexist in the same system, and we should resist the temptation to evaluate platforms solely by their best moments or their worst. What is needed is structural reform — algorithmic transparency, liability for the amplification of verified misinformation, and democratic oversight of platform design — rather than simply hoping that better-educated users will save public discourse.",
+      notes:["Identifies the most important argument and explains why it matters more than the alternative","Introduces the concept of algorithmic design and business model incentives — original and sophisticated","Concedes Priya's point fairly before maintaining its own position","Uses vivid, specific examples to ground an abstract argument","Proposes concrete policy solutions rather than ending with a vague call for change","Impressive range of vocabulary: amplification, accountability, arousing, liability, coexist"]
+    }
+  },
+  {
+    subject:"Public Health",
+    professor:{name:"Professor Kim",question:"Our topic this week is the ethics of mandatory vaccination policies. Several countries require certain vaccinations as a condition of attending school or working in healthcare settings. Some argue this is essential for public health and herd immunity; others feel it violates individual autonomy. What is your view?"},
+    students:[
+      {name:"Ana",text:"I support mandatory vaccination in high-risk settings such as schools and hospitals. The science is clear that vaccines are safe and that herd immunity protects those who cannot be vaccinated due to medical conditions. Individual freedom has limits when personal choices put vulnerable people at serious risk."},
+      {name:"Ben",text:"Mandatory vaccination raises real concerns about bodily autonomy and government overreach. A better approach is to invest heavily in public education and make vaccines free and accessible, which has proven effective in many countries. Compulsion tends to generate distrust and resentment that can actually reduce vaccination rates."}
+    ],
+    example:{
+      text:"I support mandatory vaccination in specific high-risk settings, though I think the strongest argument for this position is not the one Ana leads with. Ana emphasises the safety of vaccines, which is correct, but Ben is also correct that trust is crucial — and mandates that are perceived as overreach can backfire by fuelling the anti-vaccine movement. The more persuasive case for mandatory vaccination in settings like hospitals and schools is not simply that it protects the individual being vaccinated, but that it protects third parties who have no choice in the matter. A healthcare worker who refuses vaccination and then transmits a preventable disease to a vulnerable patient is not exercising freedom in any morally defensible sense — they are imposing risk on someone else without consent. Similarly, unvaccinated children in a classroom pose a specific risk to classmates who cannot be vaccinated for medical reasons. In these contexts, the autonomy argument loses much of its force because the freedom being claimed is the freedom to put others at risk. Ben's preferred approach of education and access is the right starting point, but in settings where the risk to third parties is high and immediate, I believe a mandate is ethically justified.",
+      notes:["Takes a position but immediately improves on the argument of the student they agree with — sophisticated","Steelmans the opposing position fairly before explaining why it does not apply in this specific context","Introduces the third-party harm principle — a philosophical concept that strengthens the argument","Uses concrete scenarios (healthcare worker, unvaccinated child) to make abstract ethics vivid","Agrees with one student on conclusion but one on process — nuanced engagement with both","Clear, well-organised structure: position → complication → core argument → concession → conclusion"]
+    }
+  },
+  {
+    subject:"Technology Ethics",
+    professor:{name:"Dr. Moreau",question:"Artificial intelligence is increasingly being used to make decisions that affect people's lives — including hiring, loan approval, and criminal sentencing. Some welcome AI decision-making as more objective and efficient than human judgement; others warn it encodes bias and removes human accountability. What is your position?"},
+    students:[
+      {name:"Sara",text:"I am deeply concerned about using AI for high-stakes decisions about people's lives. These systems are trained on historical data that reflects existing discrimination, and they can perpetuate or even amplify those biases invisibly. At minimum, there should always be a human in the decision-making loop who can be held accountable."},
+      {name:"Alex",text:"Human decision-making is itself riddled with bias, inconsistency, and fatigue. A well-designed AI system can be more consistent and transparent than a human reviewer, particularly in routine decisions. The answer is rigorous auditing and regulation of AI systems, not blanket rejection of a technology that could make many processes fairer."}
+    ],
+    example:{
+      text:"I agree with Sara that AI decision-making in high-stakes contexts poses serious risks, but I think Alex identifies something equally important: the comparison should be between AI and imperfect human decision-making, not between AI and some ideal of perfectly fair human judgement. Judges, hiring managers, and loan officers all bring unconscious biases to their decisions, and they are rarely held accountable for individual choices in the way we might hope. Where I part from Alex's optimism is on the question of auditability and accountability. When a human makes a biased decision, we can at least challenge that person, require them to justify their reasoning, and hold them legally responsible. When a black-box algorithm makes a biased decision, the person it harms often cannot even find out why. This opacity is not a technical inevitability — it is a design choice, and it should be prohibited by law in any context where the decision materially affects a person's life. I believe AI can and should play a role in these decisions, but only where its reasoning is fully explainable, independently audited, and subject to meaningful human override. Efficiency gains that come at the cost of explainability and accountability are not worth making.",
+      notes:["Reframes the debate by insisting on the right comparison (AI vs imperfect humans, not AI vs ideal humans)","Agrees with both students partially and explains precisely where each argument succeeds or fails","Introduces the concept of opacity/explainability as a key distinguishing factor — adds new dimension","Makes a concrete policy recommendation (explainability required by law) that is specific and actionable","Uses sophisticated vocabulary: opacity, auditability, materially, inevitability, override","The final sentence is punchy and quotable — a strong conclusion"]
+    }
+  },
+  {
+    subject:"Sociology",
+    professor:{name:"Professor Dubois",question:"This week we are discussing whether social media has made people more or less connected to one another. While digital platforms allow us to maintain relationships across vast distances, some researchers argue that online interaction is a poor substitute for face-to-face connection and may increase loneliness. What do you think?"},
+    students:[
+      {name:"Mei",text:"Social media has undeniably made it easier to stay connected with friends and family who live far away, and it has helped many people find communities around shared interests they could not access locally. For introverts and people with social anxiety, online communication can be a genuine lifeline rather than an inferior substitute."},
+      {name:"Oliver",text:"Research consistently shows that heavy social media use is associated with increased loneliness, anxiety, and depression, particularly among young people. The curated, performative nature of online profiles creates unrealistic social comparisons, and the passive scrolling that platforms encourage is a very poor substitute for the depth of real human connection."}
+    ],
+    example:{
+      text:"I think the key to resolving this debate is a distinction that both Mei and Oliver's responses gesture toward but do not make fully explicit: the difference between using social media to maintain existing relationships and using it as a substitute for the effort of building real ones. Mei is right that for people who are geographically separated from friends and family, or who face social barriers in their physical environment, digital communication provides genuine connection. The research on this is reasonably clear — video calls with close friends have real wellbeing benefits. Oliver's concern, however, is directed at a different behaviour: the passive, voyeuristic consumption of curated highlight reels that makes up the majority of social media use for most people. This kind of use does not connect us to people we know — it exposes us to an unrealistic portrait of other people's lives and leaves us feeling inadequate by comparison. The platform design encourages this passive consumption because it maximises time-on-site, regardless of its effect on users' wellbeing. My conclusion is therefore conditional: social media enhances connection when it facilitates genuine communication, and undermines it when it replaces genuine communication with consumption. The problem is that most people do far more of the latter than the former.",
+      notes:["Identifies a distinction missed by both students — this is the hallmark of a high-scoring response","Engages fairly and specifically with both Mei and Oliver's positions","Explains the mechanism (platform design incentives) behind the negative effects","Uses conditionals and qualifications expertly: when, however, regardless of, far more than","Personal voice is present without being overly anecdotal — balanced academic register","The final sentence is a crisp, memorable summary of a nuanced argument"]
+    }
+  },
+  {
+    subject:"Business",
+    professor:{name:"Dr. Tanaka",question:"We will be discussing the growing trend of remote and hybrid work arrangements. The pandemic forced many organisations to adopt remote working, and some have made this permanent. Advocates say it improves productivity and work-life balance; critics argue it weakens company culture and makes collaboration harder. What is your view?"},
+    students:[
+      {name:"Laura",text:"Remote work has been genuinely transformative for me and many people I know. Eliminating the commute alone saves hours each week and significantly reduces stress. Studies also suggest that many workers are actually more productive at home because they face fewer interruptions and can design their own working environment."},
+      {name:"Chris",text:"I think the enthusiasm for remote work overlooks its serious costs. Junior employees lose the mentorship and incidental learning that comes from being physically present with more experienced colleagues. Company culture and team cohesion are also genuinely harder to build when people rarely meet in person, which matters for long-term organisational health."}
+    ],
+    example:{
+      text:"I believe hybrid working — rather than fully remote or fully in-office — is the arrangement most likely to capture the genuine benefits that both Laura and Chris describe while mitigating the real costs. Laura's point about productivity is well supported by the evidence, and the time and stress saved by eliminating a long commute is a meaningful quality-of-life improvement that employers should not dismiss. However, Chris raises a concern that I think is particularly serious for people early in their careers, and it is one that the enthusiasm for remote work sometimes glosses over. Informal learning — absorbing how experienced colleagues handle difficult conversations, navigate office politics, or present ideas under pressure — happens largely through proximity and observation, not through scheduled video calls. A junior employee working from home may complete their tasks efficiently while missing an entire dimension of professional development that is much harder to replicate remotely. This is why I think a hybrid model, requiring meaningful in-person time while preserving the flexibility that makes remote work valuable, is the right answer for most knowledge-work organisations. The exact balance should depend on the nature of the work and the career stage of the employees involved — it is not a one-size-fits-all question.",
+      notes:["Proposes a specific third option (hybrid) rather than simply taking sides — analytical and mature","Acknowledges the evidence for both positions before explaining the rationale for synthesis","Identifies informal learning as a specific mechanism — more precise than just saying 'collaboration'","Qualifies the recommendation appropriately (nature of work, career stage) — shows sophisticated thinking","Uses effective signalling phrases: however, this is why, it is not a one-size-fits-all question","Academic and fluent throughout without feeling stilted or formulaic"]
+    }
+  },
+  {
+    subject:"Philosophy",
+    professor:{name:"Professor Adeyemi",question:"A classic question in moral philosophy asks whether the ends justify the means — that is, whether a morally questionable action can be justified if it produces a sufficiently good outcome. This is the central tension between consequentialist and deontological ethical frameworks. What is your view on how we should evaluate the morality of actions?"},
+    students:[
+      {name:"Hana",text:"I lean toward consequentialism because I believe the real-world impact of our actions is what matters most morally. If lying in a specific situation prevents serious harm, then lying is justified. Rules and principles are useful guides, but they should never override our responsibility to consider the actual consequences for real people."},
+      {name:"Leo",text:"I think consequentialism is dangerous because it can justify almost any atrocity if the expected benefits are framed as large enough. History is full of terrible acts committed in the name of the greater good. We need firm moral rules that protect individual dignity and cannot simply be overridden by utilitarian calculation."}
+    ],
+    example:{
+      text:"Leo's historical argument against consequentialism is powerful, and I think it identifies a genuine danger: when we allow outcomes to justify any means, we give decision-makers enormous latitude to rationalise cruelty on the grounds of some projected future benefit. The twentieth century is full of catastrophic examples. However, I do not think the solution is an absolute deontological framework that ignores consequences entirely. Consider Leo's own position: if a rule genuinely produces terrible outcomes in every case it is applied, should we not revise the rule? A moral framework that rigidly upholds principles even as people suffer seems to make means more important than the human beings those rules are supposed to protect. My own view is that moral reasoning requires both dimensions. We need firm principles — particularly those that protect individual rights — that act as presumptions against easy consequentialist override. But those principles should themselves be grounded in and tested against real-world outcomes over time. The question is not whether consequences matter at all, but whether we should allow any individual or group to override rights based on their personal calculation of benefit. Strong procedural rules help prevent that abuse while still allowing us to care about the outcomes those procedures produce.",
+      notes:["Engages with both philosophical frameworks by name and shows genuine understanding of each","Does not simply choose a side — develops a nuanced synthesis that is philosophically defensible","Uses a historical argument and a counter-thought-experiment to challenge each position","Proposes a concrete resolution: rules as presumptions grounded in outcomes","Philosophical vocabulary used naturally: deontological, consequentialist, rationalise, procedural","Avoids vagueness — each claim is supported with a reason or example"]
+    }
+  },
+  {
+    subject:"Law",
+    professor:{name:"Dr. Osei",question:"We are discussing the purpose of criminal punishment. There are four main theories: retribution (punishment as justice), deterrence (preventing future crime), rehabilitation (reforming offenders), and incapacitation (protecting society). Which of these do you believe should be the primary goal of a criminal justice system, and why?"},
+    students:[
+      {name:"Rachel",text:"I believe rehabilitation should be the primary goal of the criminal justice system. Most people who commit crimes will eventually be released back into society, and a system focused on rehabilitation produces better long-term outcomes for everyone. Countries like Norway that prioritise rehabilitation have dramatically lower reoffending rates than those that emphasise punishment."},
+      {name:"Sam",text:"Rehabilitation is a worthy goal, but I think deterrence and incapacitation must take priority. The primary duty of the justice system is to protect law-abiding citizens from harm. If serious offenders are not effectively removed from society, communities suffer. Rehabilitation should be offered within a framework that still holds offenders accountable for their actions."}
+    ],
+    example:{
+      text:"I agree with Rachel that rehabilitation should be the primary long-term goal of the criminal justice system, but I think the most persuasive argument for this position is not purely humanitarian — it is pragmatic. If the purpose of punishment is to reduce crime and make society safer, then a system that successfully rehabilitates offenders is objectively more effective than one focused on retribution or deterrence. Norway's reoffending rate of around twenty percent compares strikingly with rates of sixty percent or higher in countries that rely primarily on punitive incarceration. Punishment that simply warehouses offenders and returns them to society more damaged and less employable than before is not protecting anyone — it is deferring harm. Sam is right that incapacitation serves an immediate protective function for dangerous offenders, and I would not argue against it in those cases. But incapacitation is not a long-term solution for the vast majority of offenders who will eventually be released. The question is what kind of person we want them to be when they leave. A justice system serious about public safety should treat rehabilitation not as a soft alternative to punishment, but as its most effective tool. Retribution may satisfy an emotional need for justice, but it should not be confused with a strategy for actually reducing crime.",
+      notes:["Reframes the argument from moral to pragmatic grounds — a sophisticated rhetorical move","Cites specific statistics (Norway's 20% reoffending rate) that give the argument credibility","Acknowledges the valid role of incapacitation without abandoning the main thesis","Distinguishes between what feels like justice and what actually reduces crime — insightful","The penultimate sentence redefines rehabilitation as a tool for safety, not softness — reframes the debate","Sophisticated vocabulary: punitive, incapacitation, pragmatic, retribution, defer"]
+    }
+  },
+  {
+    subject:"History",
+    professor:{name:"Professor Singh",question:"We are discussing whether wealthy nations have a moral obligation to pay reparations to countries and communities that were harmed by colonialism. Supporters argue that present-day inequalities are a direct legacy of colonial extraction; opponents question the practicality and fairness of holding present generations responsible for historical actions. What do you think?"},
+    students:[
+      {name:"Fatima",text:"I believe wealthy nations do have a moral obligation to address the economic consequences of colonialism, which systematically extracted resources and wealth from colonised nations and created inequalities that persist today. Reparations need not mean direct cash payments — they could take the form of debt cancellation, technology transfer, or preferential trade agreements."},
+      {name:"Nathan",text:"While I acknowledge the genuine harms of colonialism, I am sceptical about reparations in practice. It is extremely difficult to agree on who owes what to whom across multiple generations, and there is a risk that payments benefit corrupt governments rather than affected communities. I believe forward-looking development aid and trade reform are more effective and practical solutions."}
+    ],
+    example:{
+      text:"I think Fatima is right that there is a genuine moral obligation, but Nathan raises practical concerns that cannot simply be dismissed as evasions of responsibility. The core moral argument is straightforward: present-day wealth in many former colonial powers was built in part through the systematic extraction of resources and labour from colonised peoples, and the economic underdevelopment of many former colonies today is at least partly a consequence of that process. The fact that the people alive today did not personally commit those acts does not dissolve the obligation, because they continue to benefit from the structures those acts created — just as an heir who inherits stolen property has an obligation to address that theft even if they did not commit it themselves. However, Nathan is right that the mechanism matters enormously. Cash payments to governments with poor accountability records may well fail to reach the communities most affected. Fatima's suggestions — debt cancellation, preferential trade terms, technology transfer — are more promising precisely because they target structural disadvantages rather than transferring resources that can be captured by elites. My view is that reparations in some form are morally required, but that the debate should shift from whether to how, with the design of any programme guided by the priorities of affected communities rather than the preferences of donor nations.",
+      notes:["Uses an analogy (inheriting stolen property) to make the moral argument vivid and concrete","Acknowledges the practical concerns without letting them become an excuse for inaction","Engages with Fatima's specific policy suggestions and explains why they are well-designed","Proposes a reframing of the debate (from whether to how) — a sophisticated move","Introduces the concept of accountability and elite capture — shows policy awareness","Measured, balanced academic tone throughout — persuasive without being polemical"]
+    }
+  },
+  {
+    subject:"Political Science",
+    professor:{name:"Dr. Ibrahim",question:"Voter turnout in many democratic countries has declined significantly in recent decades, particularly among young people. Some propose making voting compulsory, as Australia does, to ensure governments are truly representative. Others argue that the freedom not to vote is itself a democratic right. What do you think about compulsory voting?"},
+    students:[
+      {name:"Jade",text:"I support compulsory voting because low turnout produces governments that represent only a motivated minority rather than the full population. When voting is required, politicians must appeal to a broader range of citizens rather than just mobilising their existing base. Australia's experience shows that compulsory voting is compatible with a free and democratic society."},
+      {name:"Connor",text:"Forcing citizens to vote is a contradiction in a free society. The right to abstain — to send a message that no candidate deserves your support — is a legitimate democratic choice. Compulsory voting would likely increase the number of uninformed or random votes, which does not obviously improve democratic outcomes. Better civic education is a more appropriate solution."}
+    ],
+    example:{
+      text:"I find myself persuaded by Jade's argument, though I think the most powerful case for compulsory voting is slightly different from the one she makes. The strongest justification is not simply about representativeness — it is about the incentive structure it creates for politicians. In systems with voluntary voting, campaigns are designed to mobilise existing supporters rather than persuade undecided citizens, because turnout operations are more reliable than persuasion. This produces governments that cater to the preferences of reliable voters — typically older, wealthier, and more ideologically extreme — rather than the median citizen. Compulsory voting, by requiring the whole electorate to participate, forces politicians to design platforms with genuine broad appeal. Connor's concern about uninformed votes is worth taking seriously, but I think it underestimates voters. Research from Australia suggests that compulsory voting does not significantly reduce the quality of electoral decisions — it simply brings in people whose views were previously ignored. His preferred solution of civic education is admirable but has been tried for decades without reversing the turnout decline, which suggests it is insufficient on its own. A fine-based compulsory system with a formal option to cast a blank ballot — preserving Connor's right to abstain while still requiring engagement with the system — seems to me the most defensible approach.",
+      notes:["Agrees with Jade but improves on her argument by focusing on political incentives — more sophisticated","Uses specific knowledge of electoral behaviour (mobilisation vs persuasion) to support the claim","Addresses Connor's concern directly and explains why the evidence does not support it","Proposes a specific design feature (blank ballot option) that addresses the autonomy objection","References Australian evidence specifically, matching what both students mention","Confident, clear academic voice throughout with well-organised paragraph structure"]
+    }
+  }
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let current = [];
+
+// ── GENERATE ──────────────────────────────────────────────────────────────────
+function generate() {
+  const shuffled = [...POOL].sort(() => Math.random() - 0.5);
+  current = shuffled.slice(0, 5);
+  document.getElementById('placeholder').style.display = 'none';
+  document.getElementById('copyWithoutBtn').style.display = '';
+  document.getElementById('copyWithBtn').style.display = '';
+  const container = document.getElementById('exercises');
+  container.innerHTML = '';
+  current.forEach((ex, idx) => {
+    const div = document.createElement('div');
+    div.className = 'exercise';
+    const s1I = ex.students[0].name.slice(0,2).toUpperCase();
+    const s2I = ex.students[1].name.slice(0,2).toUpperCase();
+    const prI = ex.professor.name.split(' ').pop().slice(0,2).toUpperCase();
+    const notesHTML = ex.example.notes.map(n => `<li>${esc(n)}</li>`).join('');
+    div.innerHTML = `
+      <div class="exercise-header">
+        <span class="exercise-num">Exercise ${idx+1}</span>
+        <span class="exercise-subject">${esc(ex.subject)}</span>
+      </div>
+      <div class="exercise-body">
+        <div class="task-instruction">
+          <strong>Your professor is teaching a class on ${esc(ex.subject)}.</strong>
+          Write a post responding to the professor's question. Express and support your personal opinion and make a contribution in your own words. An effective response will contain at least 100 words.
+        </div>
+        <div class="forum">
+          <div class="post post-professor">
+            <div class="post-header">
+              <div class="avatar avatar-prof">${esc(prI)}</div>
+              <div><div class="post-name">${esc(ex.professor.name)}</div><div class="post-role">Professor</div></div>
+            </div>
+            <div class="post-text">${esc(ex.professor.question)}</div>
+          </div>
+          <div class="post post-s1">
+            <div class="post-header">
+              <div class="avatar avatar-s1">${esc(s1I)}</div>
+              <div><div class="post-name">${esc(ex.students[0].name)}</div><div class="post-role">Student</div></div>
+            </div>
+            <div class="post-text">${esc(ex.students[0].text)}</div>
+          </div>
+          <div class="post post-s2">
+            <div class="post-header">
+              <div class="avatar avatar-s2">${esc(s2I)}</div>
+              <div><div class="post-name">${esc(ex.students[1].name)}</div><div class="post-role">Student</div></div>
+            </div>
+            <div class="post-text">${esc(ex.students[1].text)}</div>
+          </div>
+        </div>
+      </div>
+      <div class="reply-area">
+        <div class="reply-label">Your response</div>
+        <textarea class="reply" id="reply-${idx}" placeholder="Write your response here…" oninput="onType(${idx})"></textarea>
+        <div class="reply-meta">
+          <div class="word-count">
+            <span class="wc-num" id="wc-${idx}">0</span>
+            <span>/ 100 words</span>
+            <div class="wc-bar-wrap"><div class="wc-bar" id="wcbar-${idx}" style="width:0%"></div></div>
+          </div>
+          <button class="clear-btn" onclick="clearReply(${idx})">clear</button>
+        </div>
+      </div>
+      <div class="example-area">
+        <button class="example-toggle" id="extoggle-${idx}" onclick="toggleExample(${idx})">&#9733; Show Example High-Scoring Response</button>
+        <div class="example-box" id="exbox-${idx}">
+          <div class="example-header">
+            <span class="example-label">&#9733; Example High-Scoring Response</span>
+            <span class="example-badge">MODEL ANSWER</span>
+          </div>
+          <div class="example-text">${esc(ex.example.text)}</div>
+          <div class="example-notes">
+            <div class="example-notes-title">Why this scores well</div>
+            <ul>${notesHTML}</ul>
+          </div>
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// ── EXAMPLE TOGGLE ────────────────────────────────────────────────────────────
+function toggleExample(idx) {
+  const box = document.getElementById(`exbox-${idx}`);
+  const btn = document.getElementById(`extoggle-${idx}`);
+  const visible = box.classList.toggle('visible');
+  btn.textContent = visible ? '✕ Hide Example Response' : '★ Show Example High-Scoring Response';
+}
+
+// ── WORD COUNT ────────────────────────────────────────────────────────────────
+function onType(idx) {
+  const ta = document.getElementById(`reply-${idx}`);
+  const words = ta.value.trim() === '' ? 0 : ta.value.trim().split(/\s+/).length;
+  const wcNum = document.getElementById(`wc-${idx}`);
+  const wcBar = document.getElementById(`wcbar-${idx}`);
+  wcNum.textContent = words;
+  wcBar.style.width = Math.min(words/100*100,100)+'%';
+  const ok = words >= 100;
+  wcNum.className = 'wc-num'+(ok?' ok':(words>0?' warn':''));
+  wcBar.className  = 'wc-bar'+(ok?' ok':'');
+}
+
+function clearReply(idx) {
+  document.getElementById(`reply-${idx}`).value='';
+  onType(idx);
+}
+
+// ── COPY ──────────────────────────────────────────────────────────────────────
+function copyAll(withResponses) {
+  if (!current.length) return;
+  let text = '';
+  current.forEach((ex, idx) => {
+    text += `${'='.repeat(60)}\nEXERCISE ${idx+1} — ${ex.subject.toUpperCase()}\n${'='.repeat(60)}\n\n`;
+    text += `Your professor is teaching a class on ${ex.subject}.\nWrite a post responding to the professor's question.\nExpress and support your personal opinion. Minimum 100 words.\n\n`;
+    text += `${ex.professor.name} (Professor):\n${ex.professor.question}\n\n`;
+    text += `${ex.students[0].name} (Student):\n${ex.students[0].text}\n\n`;
+    text += `${ex.students[1].name} (Student):\n${ex.students[1].text}\n\n`;
+    if (withResponses) {
+      const reply = (document.getElementById(`reply-${idx}`)?.value||'').trim();
+      text += `YOUR RESPONSE:\n${reply||'[No response written]'}\n\n`;
+    } else {
+      text += `YOUR RESPONSE:\n${'_'.repeat(60)}\n\n`;
+    }
+    text += '\n';
+  });
+  navigator.clipboard.writeText(text)
+    .then(()=>showToast(withResponses?'\u2713 Copied with your responses!':'\u2713 Student copy copied!'))
+    .catch(()=>showToast('Copy failed \u2014 try Ctrl+C'));
+}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+</script>
+</body>
+</html>
