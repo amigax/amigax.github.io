@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stephie's Write an Email Practice</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream:#f7f3ec; --cream-dark:#ede8df; --ink:#1a1510; --ink-mid:#3d3628; --ink-light:#7a6e5f;
+    --sepia:#8b6914; --sepia-light:#c4a44a; --sepia-pale:#f0e6c8; --border:#ccc0a8; --shadow:rgba(26,21,16,0.12);
+    --green:#27ae60; --red:#c0392b; --blue:#2471a3;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--cream);color:var(--ink);font-family:'Lora',Georgia,serif;min-height:100vh;
+    background-image:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(139,105,20,0.06) 27px,rgba(139,105,20,0.06) 28px);}
+  header{background:var(--ink);color:var(--cream);padding:28px 40px 22px;display:flex;align-items:flex-end;gap:20px;
+    border-bottom:4px solid var(--sepia-light);position:relative;overflow:hidden;}
+  header::before{content:'';position:absolute;inset:0;
+    background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(196,164,74,0.04) 10px,rgba(196,164,74,0.04) 11px);}
+  .header-title{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;letter-spacing:-0.5px;line-height:1;}
+  .header-sub{font-family:'Lora',serif;font-style:italic;color:var(--sepia-light);font-size:0.95rem;margin-bottom:2px;}
+  .header-badge{margin-left:auto;background:var(--sepia);color:var(--cream);font-family:'Source Code Pro',monospace;
+    font-size:0.7rem;padding:4px 10px;border-radius:2px;letter-spacing:1px;text-transform:uppercase;align-self:flex-start;margin-top:4px;}
+  .nav-bar{background:var(--cream-dark);border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+  .nav-link{display:inline-block;padding:10px 12px;font-family:'Lora',serif;font-style:italic;
+    font-size:0.85rem;color:var(--sepia);text-decoration:none;border-bottom:2px solid transparent;transition:border-color 0.15s;}
+  .nav-link:hover{border-bottom-color:var(--sepia);}
+  .nav-link.active{border-bottom-color:var(--sepia);font-weight:600;font-style:normal;}
+  .controls{display:flex;gap:12px;padding:18px 40px;background:var(--cream);border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center;}
+  .btn{font-family:'Playfair Display',serif;font-weight:600;font-size:0.85rem;padding:10px 20px;border:2px solid var(--ink);
+    background:var(--ink);color:var(--cream);cursor:pointer;letter-spacing:0.3px;transition:all 0.15s ease;border-radius:2px;}
+  .btn:hover{background:var(--ink-mid);transform:translateY(-1px);box-shadow:0 4px 12px var(--shadow);}
+  .btn:active{transform:translateY(0);}
+  .btn-outline{background:transparent;color:var(--ink);}
+  .btn-outline:hover{background:var(--ink);color:var(--cream);}
+  .btn-sepia{background:var(--sepia);border-color:var(--sepia);color:#fff;}
+  .btn-sepia:hover{background:#7a5c10;border-color:#7a5c10;}
+  .btn-generate{font-size:0.95rem;padding:12px 28px;}
+  .copy-group{margin-left:auto;display:flex;gap:8px;align-items:center;}
+  .copy-label{font-family:'Lora',serif;font-style:italic;font-size:0.8rem;color:var(--ink-light);}
+  .task-banner{background:var(--sepia-pale);border-bottom:1px solid var(--border);padding:13px 40px;
+    font-size:0.85rem;color:var(--ink-mid);line-height:1.6;}
+  .task-banner strong{color:var(--ink);}
+  .main{max-width:920px;margin:0 auto;padding:36px 40px 60px;}
+  .placeholder{text-align:center;padding:80px 0;color:var(--ink-light);font-style:italic;font-size:1.05rem;}
+  .placeholder-icon{font-size:3rem;margin-bottom:16px;opacity:0.35;}
+  .exercises{display:flex;flex-direction:column;gap:48px;}
+  .exercise{background:#fff;border:1px solid var(--border);border-radius:3px;box-shadow:0 2px 10px var(--shadow);overflow:hidden;animation:slideIn 0.3s ease both;}
+  @keyframes slideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .exercise:nth-child(1){animation-delay:0.02s}.exercise:nth-child(2){animation-delay:0.07s}
+  .exercise:nth-child(3){animation-delay:0.12s}.exercise:nth-child(4){animation-delay:0.17s}
+  .exercise:nth-child(5){animation-delay:0.22s}
+
+  /* Header bar */
+  .ex-header{background:var(--ink);color:var(--cream);padding:14px 22px;display:flex;align-items:baseline;gap:14px;}
+  .ex-num{font-family:'Source Code Pro',monospace;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--sepia-light);}
+  .ex-subject{font-family:'Playfair Display',serif;font-size:1rem;font-weight:600;}
+  .ex-setting{font-family:'Lora',serif;font-style:italic;font-size:0.8rem;color:var(--sepia-light);margin-left:auto;}
+
+  /* Two-column layout like the TOEFL screenshot */
+  .ex-body{display:grid;grid-template-columns:1fr 1fr;gap:0;min-height:320px;}
+  @media(max-width:700px){.ex-body{grid-template-columns:1fr;}}
+
+  /* Left — scenario */
+  .scenario-col{padding:22px 22px;border-right:1px solid var(--border);background:var(--cream);}
+  .scenario-text{font-size:0.9rem;line-height:1.75;color:var(--ink);margin-bottom:16px;}
+  .task-heading{font-family:'Playfair Display',serif;font-size:0.88rem;font-weight:700;color:var(--ink);margin-bottom:8px;}
+  .task-bullets{list-style:none;padding:0;display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+  .task-bullets li{font-size:0.87rem;line-height:1.6;color:var(--ink-mid);padding-left:16px;position:relative;}
+  .task-bullets li::before{content:'●';position:absolute;left:0;font-size:0.5rem;color:var(--ink);top:5px;}
+  .task-foot{font-size:0.8rem;color:var(--ink-light);font-style:italic;margin-top:6px;}
+
+  /* Right — response */
+  .response-col{padding:18px 20px;display:flex;flex-direction:column;background:#fafaf8;}
+  .email-header-fields{margin-bottom:12px;}
+  .email-field{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);}
+  .email-field:last-child{border-bottom:none;margin-bottom:4px;}
+  .field-label{font-family:'Source Code Pro',monospace;font-size:0.72rem;color:var(--ink-light);min-width:52px;text-transform:uppercase;letter-spacing:0.5px;}
+  .field-val{font-family:'Lora',serif;font-size:0.85rem;color:var(--ink-mid);}
+  .response-label{font-family:'Playfair Display',serif;font-size:0.78rem;font-weight:600;color:var(--ink-light);
+    text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+  .response-label::after{content:'';flex:1;height:1px;background:var(--border);}
+  textarea.reply{width:100%;flex:1;min-height:180px;font-family:'Lora',serif;font-size:0.92rem;line-height:1.75;
+    color:var(--ink);background:#fff;border:1px solid var(--border);border-left:3px solid var(--sepia);
+    border-radius:2px;padding:10px 12px;resize:vertical;outline:none;transition:border-color 0.2s;}
+  textarea.reply:focus{border-color:var(--sepia-light);}
+  .reply-meta{display:flex;align-items:center;justify-content:space-between;margin-top:7px;
+    font-family:'Source Code Pro',monospace;font-size:0.72rem;color:var(--ink-light);flex-wrap:wrap;gap:6px;}
+  .word-count{display:flex;align-items:center;gap:6px;}
+  .wc-num{font-size:0.85rem;font-weight:500;color:var(--ink);transition:color 0.2s;}
+  .wc-num.ok{color:var(--green);} .wc-num.warn{color:var(--red);}
+  .wc-bar-wrap{width:100px;height:4px;background:var(--border);border-radius:3px;overflow:hidden;}
+  .wc-bar{height:100%;background:var(--sepia);border-radius:3px;transition:width 0.2s,background 0.2s;}
+  .wc-bar.ok{background:var(--green);}
+  .clear-btn{font-family:'Lora',serif;font-style:italic;font-size:0.72rem;color:var(--ink-light);
+    background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;}
+  .clear-btn:hover{color:var(--red);}
+
+  /* Example answer */
+  .example-area{padding:0 22px 22px;border-top:1px solid var(--border);}
+  .example-toggle{display:inline-flex;align-items:center;gap:7px;font-family:'Playfair Display',serif;
+    font-size:0.8rem;font-weight:600;color:var(--sepia);background:none;border:1.5px solid var(--sepia);
+    border-radius:2px;padding:6px 14px;cursor:pointer;transition:all 0.15s;margin-top:14px;}
+  .example-toggle:hover{background:var(--sepia);color:#fff;}
+  .example-box{display:none;margin-top:14px;border:1.5px solid var(--sepia-light);border-radius:3px;overflow:hidden;}
+  .example-box.visible{display:block;}
+  .example-header{background:var(--sepia);color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .example-label{font-family:'Playfair Display',serif;font-size:0.85rem;font-weight:700;}
+  .example-badge{font-family:'Source Code Pro',monospace;font-size:0.68rem;background:rgba(255,255,255,0.2);padding:2px 9px;border-radius:2px;letter-spacing:1px;}
+  .example-email{background:var(--sepia-pale);padding:18px 20px;font-family:'Lora',serif;}
+  .example-email-fields{margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .example-email-field{font-size:0.82rem;color:var(--ink-mid);margin-bottom:3px;}
+  .example-email-field strong{font-family:'Source Code Pro',monospace;font-size:0.72rem;text-transform:uppercase;color:var(--ink-light);margin-right:6px;}
+  .example-email-body{font-size:0.92rem;line-height:1.85;color:var(--ink);white-space:pre-wrap;}
+  .example-notes{background:#fff;border-top:1px solid var(--border);padding:14px 20px;}
+  .example-notes-title{font-family:'Playfair Display',serif;font-size:0.72rem;font-weight:700;
+    text-transform:uppercase;letter-spacing:0.6px;color:var(--sepia);margin-bottom:8px;}
+  .example-notes ul{list-style:none;padding:0;display:flex;flex-direction:column;gap:5px;}
+  .example-notes ul li{font-family:'Lora',serif;font-size:0.82rem;color:var(--ink-mid);line-height:1.55;
+    padding-left:18px;position:relative;}
+  .example-notes ul li::before{content:'✓';position:absolute;left:0;color:var(--green);font-size:0.75rem;top:1px;}
+
+  .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);
+    color:var(--cream);font-family:'Lora',serif;font-size:0.9rem;padding:12px 24px;border-radius:2px;opacity:0;
+    transition:all 0.25s ease;pointer-events:none;z-index:1000;border-left:3px solid var(--sepia-light);white-space:nowrap;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  @media(max-width:640px){
+    header{padding:20px;flex-wrap:wrap;} .controls{padding:14px 16px;} .main{padding:20px 16px 50px;}
+    .copy-group{margin-left:0;width:100%;} .header-title{font-size:1.4rem;} .nav-bar{padding:0 16px;}
+    .task-banner{padding:12px 16px;}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="header-sub">Stephie's Academic English Practice</div>
+    <div class="header-title">Write an Email</div>
+  </div>
+  <div class="header-badge">TOEFL Prep</div>
+</header>
+
+<nav class="nav-bar">
+  <a class="nav-link" href="toefl-blanks.html">Gap Fill</a>
+  <a class="nav-link" href="toefl-ctest.html">C-Test</a>
+  <a class="nav-link" href="toefl-discussion.html">Academic Discussion</a>
+  <a class="nav-link active" href="#">Write an Email</a>
+</nav>
+
+<div class="controls">
+  <button class="btn btn-generate" onclick="generate()">&#8635; Generate 5 Exercises</button>
+  <div class="copy-group">
+    <span class="copy-label">Copy all:</span>
+    <button class="btn btn-sepia"   id="copyStudentBtn" onclick="copyAll(false)" style="display:none">Student Copy</button>
+    <button class="btn btn-outline" id="copyTeacherBtn" onclick="copyAll(true)"  style="display:none">Teacher Copy</button>
+  </div>
+</div>
+
+<div class="task-banner">
+  <strong>Task:</strong> Read the scenario, then write an email that achieves the communication goal.
+  Address all bullet points. Write in complete sentences. <strong>No minimum word count specified — write as much as you can.</strong>
+</div>
+
+<main class="main">
+  <div class="placeholder" id="placeholder">
+    <div class="placeholder-icon">&#9993;</div>
+    Click <em>Generate 5 Exercises</em> to begin.<br>
+    <span style="font-size:0.85rem;margin-top:8px;display:block;">Academic and social email scenarios — authentic TOEFL Write an Email format.</span>
+  </div>
+  <div class="exercises" id="exercises"></div>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const POOL = [
+  {
+    subject: "Academic — Library Fine",
+    setting: "Academic",
+    to: "librarian@cityuniversity.edu",
+    subject_line: "Overdue Fine — Request for Reconsideration",
+    scenario: "You borrowed a book from your university library. You returned it one week late because you were hospitalised with a sudden illness. You have now received a fine of $25. You feel the fine is unfair given the circumstances.",
+    heading: "Write an email to the university librarian. In your email, do the following.",
+    bullets: ["Explain why you returned the book late","Describe the circumstances that prevented you from returning it on time","Ask the librarian to waive or reduce the fine"],
+    footer: "Write as much as you can and in complete sentences.",
+    example: {
+      body: `Dear University Librarian,
+
+I am writing regarding a fine of $25 I recently received for the late return of a library book (Title: Introduction to Cognitive Science, borrowed on 14 March). I would like to respectfully request that the fine be reconsidered.
+
+The reason for the late return was entirely beyond my control. On 16 March, two days after borrowing the book, I was admitted to City General Hospital with acute appendicitis and required emergency surgery. I remained in hospital for five days and was unable to leave my room, let alone visit the library. Upon my discharge, I returned the book as quickly as my recovery allowed.
+
+I understand that the library's overdue policy exists for good reason, and I have always made every effort to return materials on time. Given that this delay was caused by a genuine medical emergency, I would be very grateful if you could waive or reduce the fine. I am happy to provide a copy of my hospital discharge letter as supporting documentation.
+
+Thank you very much for your understanding. I look forward to hearing from you.
+
+Yours sincerely,
+[Your name]`,
+      notes: ["Opens with a clear reference to the specific fine — immediately orients the reader","Provides specific, credible detail (dates, hospital name, medical condition) without oversharing","Uses polite, formal register throughout — 'respectfully request', 'I would be very grateful'","Offers evidence (discharge letter) — shows good faith and strengthens the request","Addresses all three bullet points in logical order","Closes professionally with a forward-looking statement"]
+    }
+  },
+  {
+    subject: "Social — Neighbour Noise",
+    setting: "Social",
+    to: "neighbour (no address given)",
+    subject_line: "Noise from Your Apartment",
+    scenario: "Your upstairs neighbour plays loud music late at night, which has been disturbing your sleep and affecting your work. You have not spoken to them before about this issue. You want to resolve the situation politely.",
+    heading: "Write an email to your neighbour. In your email, do the following.",
+    bullets: ["Introduce yourself and explain how you know them","Describe the problem and how it is affecting you","Suggest a solution that would work for both of you"],
+    footer: "Write as much as you can and in complete sentences.",
+    example: {
+      body: `Dear Neighbour,
+
+My name is [Your name] and I live in the apartment directly below yours — Apartment 4B. We have not had the chance to meet formally, though I have seen you occasionally in the building corridor.
+
+I am writing because I have been experiencing some difficulty sleeping over the past few weeks due to loud music coming from what I believe is your apartment, usually between midnight and 2 a.m. I work early shifts and need to be up by 5:30 a.m., so the disrupted sleep has been affecting my concentration and energy at work quite significantly. I want to be clear that I completely understand wanting to enjoy music at home — I simply find the late-night timing difficult to manage.
+
+I was hoping we might find a solution that works for both of us. Would it be possible for you to use headphones after 11 p.m., or perhaps keep the volume at a lower level during those late hours? I would truly appreciate it. If you would like to discuss this in person, I am happy to do so — please feel free to knock on my door at any time.
+
+Thank you so much for taking the time to read this. I hope we can sort this out easily.
+
+Best wishes,
+[Your name], Apartment 4B`,
+      notes: ["Introduces themselves clearly and specifically — 'Apartment 4B' makes context immediate","Describes the problem with concrete detail (time, frequency, impact on work) without exaggerating","Maintains a warm, non-confrontational tone throughout — never accusatory","Proposes two specific, reasonable solutions rather than making a vague request","Invites face-to-face conversation — shows willingness to resolve things cooperatively","Closing is warm and optimistic — preserves the neighbourly relationship"]
+    }
+  },
+  {
+    subject: "Academic — Professor Extension Request",
+    setting: "Academic",
+    to: "professor.chang@stateuniversity.edu",
+    subject_line: "Request for Assignment Extension — ENG 301",
+    scenario: "You are a student in Professor Chang's English Literature class. You have a major essay due in three days. Your laptop broke and you lost some of your work. You are asking for a short extension.",
+    heading: "Write an email to Professor Chang. In your email, do the following.",
+    bullets: ["Explain the situation that has caused the problem","Say how much extra time you are requesting and why that is sufficient","Assure the professor that you take the assignment seriously"],
+    footer: "Write as much as you can and in complete sentences.",
+    example: {
+      body: `Dear Professor Chang,
+
+I am writing to ask whether it might be possible to grant me a short extension on the ENG 301 essay that is due this Friday, 11 April. I apologise for the inconvenience this request may cause.
+
+My laptop suffered a hardware failure on Tuesday evening, and despite taking it to a repair shop immediately, the technician informed me that the hard drive is unrecoverable. I had saved a draft of approximately 1,200 words locally rather than backing it up to the cloud, which I now deeply regret. I have had to restart the essay almost entirely from my notes and highlighted readings.
+
+I would like to request an extension of three additional days, which would make my new deadline Monday, 14 April. I believe this is sufficient time for me to produce work of the standard I know you expect, and I am committed to working through the weekend to complete it. I have already re-read the primary texts and reconstructed my argument outline.
+
+I want to assure you that I take this assignment very seriously. I have attended every class this semester and have genuinely engaged with the material. This is not a situation I could have anticipated, and I would not ask for an extension unless it were truly necessary.
+
+Thank you very much for your consideration. I completely understand if the extension is not possible and will do my best regardless.
+
+Yours sincerely,
+[Your name]
+Student ID: [Your ID]`,
+      notes: ["States the request clearly in the opening sentence — no burying the lead","Explains the technical problem specifically and honestly, including their own regret","Gives a precise time extension (3 days) with a specific new date — shows planning","Demonstrates initiative by mentioning work already done (re-reading texts, outline)","The reassurance paragraph addresses the professor's likely concern proactively","The final sentence shows maturity — accepts the professor may say no"]
+    }
+  },
+  {
+    subject: "Social — Lost Item at Restaurant",
+    setting: "Social",
+    to: "manager@riverviewrestaurant.com",
+    subject_line: "Lost Property — Dinner on 3 April",
+    scenario: "You had dinner at a restaurant last night and left your glasses case (containing prescription glasses) behind. You need the glasses for work. You are writing to ask if the item has been found.",
+    heading: "Write an email to the restaurant manager. In your email, do the following.",
+    bullets: ["Describe when you visited and where you were sitting","Describe the lost item in detail so it can be identified","Ask what you should do to retrieve it, and explain why it is urgent"],
+    footer: "Write as much as you can and in complete sentences.",
+    example: {
+      body: `Dear Restaurant Manager,
+
+I am writing to enquire about a lost item that I believe I left at your restaurant last night, Thursday 3 April. My party of three was seated at a window table on the ground floor — I believe our table number was 7, near the right side of the restaurant as you enter.
+
+The item I am missing is a glasses case — it is a hard, rectangular case made of dark navy blue fabric with a silver magnetic clip fastening. Inside the case are my prescription reading glasses, which have thin gold wire frames and small oval lenses. There may also be a lens-cleaning cloth inside the case. It would most likely have been left on or underneath the table, or possibly on the window ledge beside it.
+
+I would be extremely grateful if your staff could check whether the item has been handed in to lost property. These glasses are prescribed and I need them for reading at work — without them I am genuinely struggling to manage my daily tasks. I am happy to come in to collect them in person at any time that is convenient for you, or if you are able to let me know by email whether they have been found, I can arrange collection as quickly as possible.
+
+Thank you very much for your help. I hope to hear from you soon.
+
+Kind regards,
+[Your name]
+Tel: [Your number]`,
+      notes: ["Provides precise location details (date, table number, position in restaurant) that genuinely help staff search","Describes the lost item with exceptional specificity — colour, material, fastening, contents","Explains why the item is urgent without being dramatic or demanding","Offers maximum flexibility for collection — considerate of the restaurant's time","Gives contact details, which is practical and appropriate for this type of email","Warm and grateful tone throughout — likely to generate a helpful response"]
+    }
+  },
+  {
+    subject: "Academic — Study Group Request",
+    setting: "Academic",
+    to: "j.okafor@email.com",
+    subject_line: "Study Group for Final Exams",
+    scenario: "You are preparing for final exams and have heard that a classmate named James has already formed a study group. You would like to join the group. You do not know James very well but have spoken to him a few times in class.",
+    heading: "Write an email to James. In your email, do the following.",
+    bullets: ["Introduce yourself and explain how you know James","Say why you would like to join the study group","Explain what you could contribute to the group"],
+    footer: "Write as much as you can and in complete sentences.",
+    example: {
+      body: `Hi James,
+
+My name is [Your name] — I sit a few rows behind you in Professor Reyes's Psychology of Learning class, and I think we also briefly discussed the mid-term format after class a few weeks ago. I hope you do not mind me getting in touch.
+
+I heard from a mutual classmate that you have put together a study group for the final exams, and I was wondering whether there might be room for one more person. With finals coming up in just over two weeks, I am finding that studying alone is not working as well as I had hoped, particularly for the more complex theoretical content in Chapters 8 through 11. I think working through difficult material with others would help me consolidate my understanding considerably.
+
+In terms of what I could bring to the group, I feel fairly confident about the research methods and statistics sections — I have a background in data analysis and found those topics relatively straightforward. I would be very happy to help explain any of that material if others find it challenging, and I could also put together a summary sheet for those chapters. I am flexible on timing and location and would fit in with whatever schedule the group has already agreed on.
+
+Please let me know if this would work. I really appreciate you considering it.
+
+Best,
+[Your name]`,
+      notes: ["Establishes the connection to James naturally and specifically — not generic","States the request clearly and explains the motivation honestly","Demonstrates self-awareness (identifying specific chapters as difficult) — sounds credible","The contribution paragraph is specific and generous — offers concrete value, not just enthusiasm","Explicitly says 'I'll fit in with your schedule' — shows respect for existing group dynamics","Friendly, peer-appropriate tone — less formal than a professor email but still polite"]
+    }
+  },
+  {
+    subject: "Academic — Seminar Absence",
+    setting: "Academic",
+    to: "dr.patel@university.ac.uk",
+    subject_line: "Absence from Seminar — 9 April",
+    scenario: "You had to miss an important seminar last week because you had to travel home suddenly due to a family emergency. You are writing to your lecturer to explain, apologise, and find out what you missed.",
+    heading: "Write an email to Dr. Patel. In your email, do the following.",
+    bullets: ["Apologise for missing the seminar and explain why","Ask what was covered in the session you missed","Ask whether any additional reading or tasks were assigned"],
+    footer: "Write as much as you can and in complete sentences.",
+    example: {
+      body: `Dear Dr. Patel,
+
+I am writing to apologise for my absence from your seminar on Wednesday 9 April. I am very sorry for missing the session, particularly at this stage of the semester.
+
+The reason for my absence was a sudden family emergency — my mother was taken to hospital unexpectedly on the morning of the 9th and I had to travel back to my home city immediately. I returned to campus yesterday and am catching up on everything as quickly as I can. I recognise that missing a seminar is not ideal and I want to assure you that this was not a decision I took lightly.
+
+I would be very grateful if you could let me know what topics were covered during the session I missed, and whether there were any key points from the discussion that I should be aware of. I also wanted to ask whether any additional readings, tasks, or preparation were assigned for the following week, so that I do not fall behind. If any handouts or slides were distributed, I would appreciate being sent a copy, or I can collect them from you in person if that is more convenient.
+
+I am committed to keeping up with the course and will make sure I am fully prepared for next week's seminar.
+
+Thank you very much for your understanding.
+
+Yours sincerely,
+[Your name]`,
+      notes: ["Apologises immediately and sincerely — the right tone for missing academic contact time","Explains the emergency without oversharing personal detail — respectful of boundaries","Asks three specific, practical questions about what was missed — shows genuine desire to catch up","Mentions slides and handouts specifically — demonstrates awareness of how seminars work","The reassurance at the end is appropriate — shows academic commitment","Formal, respectful register appropriate for a university lecturer"]
+    }
+  },
+  {
+    subject: "Social — Returning a Favour",
+    setting: "Social",
+    to: "friend (informal)",
+    subject_line: "Thank you + a favour to return!",
+    scenario: "Your friend Sarah helped you move apartments three weeks ago. You want to thank her properly and offer to help her with something in return. You also want to suggest meeting up soon.",
+    heading: "Write an email to Sarah. In your email, do the following.",
+    bullets: ["Thank her genuinely and mention something specific she did that helped","Offer to help her with something specific in return","Suggest a plan to meet up soon"],
+    footer: "Write as much as you can and in complete sentences.",
+    example: {
+      body: `Hi Sarah!
+
+I have been meaning to write this email for weeks and I am embarrassed it has taken me this long — so first of all, a huge and overdue thank you for helping me move on the 15th. Honestly, without you I would still be surrounded by boxes in my old hallway. I especially appreciated that you stayed until nearly 9 p.m. to help me unpack the kitchen — that was genuinely above and beyond, and it made such a difference to be able to actually cook a proper meal that first evening instead of ordering takeaway again!
+
+The new place is starting to feel like home now, which is largely thanks to you. I would really love to return the favour properly. I know you mentioned a few weeks ago that you wanted to repaint your living room but kept putting it off — if you are still planning to do that, I am completely free most weekends in April and would love to help. I am actually a reasonably competent painter, I promise. Just say the word and I will show up with coffee and a roller.
+
+Speaking of which, we are long overdue a proper catch-up. Are you free any evening next week for dinner? I would love to show you the new apartment and cook for you — consider it a belated thank-you meal. Let me know what days work for you.
+
+Can't wait to see you!
+[Your name]`,
+      notes: ["The apology for lateness in thanking is natural and endearing — very human tone","Mentions a specific detail (unpacking the kitchen, staying until 9 p.m.) that shows genuine gratitude","The return offer is specific and well-chosen — references something Sarah actually mentioned","The 'I am a reasonably competent painter, I promise' line shows warmth and personality","Suggests a concrete, specific plan (dinner at the new apartment) rather than vague 'let's meet soon'","Register is perfectly calibrated — informal, warm, slightly humorous — exactly right for a close friend"]
+    }
+  },
+  {
+    subject: "Academic — Complaint About Marking",
+    setting: "Academic",
+    to: "module.coordinator@university.edu",
+    subject_line: "Query Regarding Essay Mark — Module HIST 204",
+    scenario: "You received a lower grade than expected on a history essay. You believe the marking did not reflect the feedback criteria given at the start of the module. You want to raise this formally but politely.",
+    heading: "Write an email to the module coordinator. In your email, do the following.",
+    bullets: ["Explain which assignment you are writing about and what grade you received","Describe your concern about how the marking was applied","Ask how you can formally request a review of your mark"],
+    footer: "Write as much as you can and in complete sentences.",
+    example: {
+      body: `Dear Module Coordinator,
+
+I am writing to raise a query about the mark I received for the HIST 204 essay submitted on 20 March (essay title: "The Role of Propaganda in Shaping Public Opinion During the First World War"). I received a grade of 54%, which I was surprised by given the feedback I have received on previous work in this module.
+
+My concern relates to the consistency between the marking and the assessment criteria distributed at the start of the module. The criteria document stated that critical engagement with primary sources would account for approximately 35% of the mark, and I devoted a significant portion of my essay to close analysis of three original propaganda posters and two contemporary newspaper editorials. The written feedback I received on my script, however, does not appear to address this section of the criteria and focuses primarily on the structure of my argument. I am therefore uncertain whether the primary source analysis was assessed according to the published criteria, and I would appreciate some clarification on this point.
+
+I am not writing to challenge the marker's professional judgement, and I fully accept that the grade may be correct upon review. I would simply like to understand more clearly how my work was assessed against the published criteria. Could you advise me on the process for requesting a formal mark review, and whether I would need to submit any supporting documentation?
+
+I would be grateful for your guidance. Thank you for your time.
+
+Yours sincerely,
+[Your name]
+Student ID: [ID]`,
+      notes: ["Identifies the specific assignment with full details — module code, title, date, grade","Makes a precise and evidence-based complaint — cites the criteria document specifically","The language is carefully calibrated: query, concern, clarification — never aggressive or accusatory","Explicitly acknowledges the marker's authority and shows openness to the grade being correct — very mature","Asks a specific procedural question rather than just venting — shows knowledge of how to navigate the system","Appropriate formal academic register throughout — exactly right for a complaint to a module coordinator"]
+    }
+  },
+  {
+    subject: "Social — Declining an Invitation",
+    setting: "Social",
+    to: "friend (semi-formal)",
+    subject_line: "Re: Birthday Party on 19 April",
+    scenario: "Your colleague and friend Marco has invited you to his birthday party on 19 April. Unfortunately you have already committed to attending your cousin's wedding abroad that same weekend and cannot change your plans.",
+    heading: "Write an email to Marco. In your email, do the following.",
+    bullets: ["Decline the invitation and explain why you cannot attend","Express how much you would have liked to go","Suggest an alternative way to celebrate with him"],
+    footer: "Write as much as you can and in complete sentences.",
+    example: {
+      body: `Hi Marco,
+
+Thank you so much for inviting me to your birthday party on the 19th — it sounds like it is going to be a brilliant evening and I am genuinely gutted that I cannot be there.
+
+The reason is that I am travelling to Portugal that weekend for my cousin's wedding. The ceremony is on the Saturday, and I have had the flights and accommodation booked for several months — it is really not something I can rearrange. I would have loved to have been at both events, but I am afraid my cousin's big day has to take priority! I hope you understand.
+
+I do not want your birthday to pass without marking it properly with you, though. Would you be up for having dinner or drinks the following week? I was thinking maybe Tuesday or Wednesday evening — wherever you fancy, my treat. I would also love to hear all about the party when I am back, so please make sure you take plenty of photos!
+
+I hope you have the most wonderful birthday and that the party is everything you want it to be. I will be thinking of you from Lisbon!
+
+With love,
+[Your name]`,
+      notes: ["Responds to the specific event and date immediately — grounded and genuine","'I am genuinely gutted' — natural, warm, idiomatic expression of disappointment","Explains the conflict clearly with enough detail to show it is a genuine reason, not an excuse","Uses light humour ('thinking of you from Lisbon') that maintains the friendship warmth","The alternative suggestion is specific (Tuesday or Wednesday, my treat) — not vague","Ends on a celebratory note that keeps the focus on Marco — generous and thoughtful"]
+    }
+  },
+  {
+    subject: "Academic — Requesting a Reference Letter",
+    setting: "Academic",
+    to: "professor.osei@university.edu",
+    subject_line: "Request for Academic Reference — Graduate School Application",
+    scenario: "You are applying to a graduate programme in Environmental Science. You took Professor Osei's Research Methods course last year and received an A. You want to ask her to write you a reference letter. The application deadline is 30 April.",
+    heading: "Write an email to Professor Osei. In your email, do the following.",
+    bullets: ["Remind her who you are and which course you took with her","Explain what you are applying for and why you chose her as a referee","Give her the information she needs to write the letter"],
+    footer: "Write as much as you can and in complete sentences.",
+    example: {
+      body: `Dear Professor Osei,
+
+I hope this email finds you well. My name is [Your name] and I was a student in your ENVS 301 Research Methods course during the spring semester of last year. I sat in the third row and submitted the group research project on microplastic contamination in urban waterways — I received an A for the module overall.
+
+I am writing to ask whether you would be willing to write an academic reference letter for me. I am applying to the MSc in Environmental Science at Green Valley University, with a focus on water resource management, and the application deadline is 30 April. I have chosen to ask you specifically because your Research Methods course was one of the most formative academic experiences I had as an undergraduate, and I believe you are well placed to speak to my ability to design and execute independent research, which is central to what the programme requires.
+
+To help you write the letter, I am attaching my personal statement and a copy of the project I submitted for your module. The letter should be addressed to the Graduate Admissions Committee and submitted via an online portal — I will send you the link and any specific instructions as soon as I receive them from the programme. The deadline for the reference is the same as the application deadline: 30 April.
+
+I completely understand if you are not able to do this, and I would be grateful if you could let me know either way so that I have time to make alternative arrangements if necessary. Thank you very much for considering my request.
+
+Yours sincerely,
+[Your name]`,
+      notes: ["Reminds the professor who they are with specific, memorable details — essential when professors teach hundreds","Explains the programme, institution, and deadline clearly upfront — professional and organised","Gives a specific and flattering reason for choosing this professor — not generic flattery but genuine","Attaches relevant materials and promises the portal link — shows the student has done the work","The 'please let me know either way' sentence is crucial — gives the professor a graceful exit","Appropriate formal academic register with a warm but not casual tone"]
+    }
+  },
+  {
+    subject: "Social — Recommending a Service",
+    setting: "Social",
+    to: "friend (informal)",
+    subject_line: "That language school you asked about!",
+    scenario: "Your friend Nina asked you a few weeks ago about the language school you attended to improve your English. She is thinking of enrolling. You want to tell her about your experience and give her your recommendation.",
+    heading: "Write an email to Nina. In your email, do the following.",
+    bullets: ["Apologise for taking so long to reply and explain why","Describe your experience at the language school honestly","Give a specific recommendation and any advice for enrolling"],
+    footer: "Write as much as you can and in complete sentences.",
+    example: {
+      body: `Hi Nina!
+
+I am so sorry it has taken me this long to get back to you about the language school — the past few weeks have been absolutely hectic with work deadlines and I kept putting this email off until I had more time to write it properly. Better late than never, I hope!
+
+So — the school is called the Meridian Language Centre, and honestly, I think it was one of the best decisions I made. I attended the Upper-Intermediate course for twelve weeks last autumn, going three evenings a week. The teaching was excellent — the classes were small (no more than ten students) which meant the teacher could actually give you individual feedback rather than just lecturing at the group. My speaking confidence improved enormously, and I really appreciated that the programme focused on real-life communication situations rather than just drilling grammar rules. The facilities are modern and the staff are friendly and responsive if you have any admin questions.
+
+If I were to give you one piece of advice, it would be to sit the placement test honestly and not try to place yourself in a higher level than you belong in — I was tempted to do this and I am glad I did not, because being in the right level made the learning so much more effective. Also, I would recommend booking early as the evening classes fill up quickly, especially the Upper-Intermediate and Advanced levels.
+
+Let me know if you have any other questions — I am happy to chat about it more!
+
+Big hug,
+[Your name]`,
+      notes: ["The apology is genuine and specific — explains why rather than just saying 'sorry for the delay'","Gives concrete, useful detail about the school — class size, schedule, teaching style","The recommendation is honest and balanced rather than just promotional","The specific advice (placement test) is practical and comes from genuine personal experience","The booking tip is genuinely helpful and shows knowledge of how the school operates","Register is warm and conversational throughout — perfectly calibrated for a close friend"]
+    }
+  },
+  {
+    subject: "Academic — Course Change Request",
+    setting: "Academic",
+    to: "registrar@northwestcollege.edu",
+    subject_line: "Request to Switch Course Sections — PSYC 201",
+    scenario: "You are enrolled in the Tuesday morning section of Psychology 201 but have recently taken on a part-time job that starts at 9 a.m. on Tuesdays. The same course has a Thursday afternoon section with available spaces. You want to transfer.",
+    heading: "Write an email to the college registrar. In your email, do the following.",
+    bullets: ["Explain your current enrolment and the change you want to make","Give the reason for the requested change","Ask what the process is and whether the change is possible before the deadline"],
+    footer: "Write as much as you can and in complete sentences.",
+    example: {
+      body: `Dear Registrar,
+
+I am writing to request a section transfer for PSYC 201 (Introduction to Psychology). I am currently enrolled in Section A, which meets on Tuesday mornings from 9:00 to 10:30 a.m. (Course Reference Number: 48271). I would like to transfer to Section C, which meets on Thursday afternoons from 2:00 to 3:30 p.m., and which I understand currently has available places.
+
+The reason for this request is that I have recently accepted a part-time position that requires me to start work at 9:00 a.m. on Tuesdays. This was not planned when I enrolled, and I am concerned that if I remain in the Tuesday section, I will not be able to attend consistently, which would not be fair to my instructor or to my performance in the course. The Thursday afternoon section would fit my schedule without any conflict.
+
+I have checked the academic calendar and I believe the course change deadline is 18 April, so I am writing now to ensure there is enough time to process the transfer. Could you please let me know whether this change is possible and, if so, what steps I need to take? I am happy to complete any necessary forms or visit the office in person if that is required.
+
+Thank you very much for your help. I want to make sure I handle this correctly and in good time.
+
+Yours sincerely,
+[Your name]
+Student ID: [ID]`,
+      notes: ["Identifies both sections with precise detail (CRN, meeting times) — makes the request easy to process","The reason is stated clearly and framed around academic performance — not just personal convenience","Shows awareness of the deadline and flags it proactively — demonstrates organisational competence","Offers to complete forms or visit in person — cooperative and practical","The closing sentence frames the request as about doing things correctly — good impression","Formal, efficient register appropriate for an administrative office"]
+    }
+  },
+  {
+    subject: "Social — Apologising for a Mistake",
+    setting: "Social",
+    to: "colleague (semi-formal)",
+    subject_line: "Apology — Meeting on Thursday",
+    scenario: "You accidentally shared a confidential work document with the wrong person during a meeting last Thursday. The document contained sensitive information about a colleague, Diana. You need to apologise to Diana directly.",
+    heading: "Write an email to Diana. In your email, do the following.",
+    bullets: ["Apologise clearly and take full responsibility for what happened","Explain how the mistake occurred","Tell her what steps you have taken to limit any damage"],
+    footer: "Write as much as you can and in complete sentences.",
+    example: {
+      body: `Dear Diana,
+
+I am writing to apologise sincerely for what happened during Thursday's meeting. I shared a document containing confidential information relating to your performance review with the full meeting group, when it should have been sent only to the team manager. This was entirely my error and I take full responsibility for it.
+
+The mistake occurred because I was sharing my screen to present a different document and accidentally opened the wrong file from a folder of similarly named attachments. I realise that this explanation does not make what happened acceptable — it simply describes how it came about. The error was careless, and I am genuinely sorry that you were affected by it.
+
+As soon as I realised what had happened, I immediately asked the manager to end the screen sharing and requested that everyone delete the document from their email if it had been automatically sent. I have also spoken to the IT team about recalling the message from those who received it electronically, and I have notified our line manager of the incident so that it is formally documented and handled appropriately.
+
+I understand if you are upset, and I want you to know that I take this seriously. If there is anything else I can do to address the situation, please do not hesitate to let me know.
+
+Sincerely,
+[Your name]`,
+      notes: ["Opens with a direct, unequivocal apology — no hedging, no passive voice","Explains the mechanism of the mistake clearly and honestly without making excuses","The sentence 'this does not make what happened acceptable' shows moral clarity — crucial in an apology","Lists three specific remedial actions taken — shows responsibility and initiative","The acknowledgement of her potential upset is empathetic and genuine","Professional tone — appropriately serious without being overly formal for a colleague"]
+    }
+  },
+  {
+    subject: "Academic — Internship Enquiry",
+    setting: "Academic",
+    to: "hr@greentech-solutions.com",
+    subject_line: "Summer Internship Enquiry — Environmental Engineering",
+    scenario: "You are a second-year Environmental Engineering student. You have seen that GreenTech Solutions runs summer internships but their website says applications are now closed. You want to enquire whether any late places are available.",
+    heading: "Write an email to the HR department. In your email, do the following.",
+    bullets: ["Introduce yourself and explain your interest in the company specifically","Enquire about whether late applications might be considered","Briefly explain what you could bring to the internship"],
+    footer: "Write as much as you can and in complete sentences.",
+    example: {
+      body: `Dear HR Team,
+
+My name is [Your name] and I am a second-year Environmental Engineering student at Northside University. I am writing to enquire whether GreenTech Solutions might be able to consider a late application for your summer internship programme.
+
+I am aware that your website states that applications for this year's programme have now closed, and I completely understand if all places have been filled. However, I wanted to reach out directly in case any last-minute availability exists, as I have been following GreenTech's work in renewable water treatment infrastructure for some time and your company is genuinely my first choice for a summer placement. Your recent project on constructed wetland systems for industrial wastewater treatment particularly caught my attention, as it aligns closely with the focus of my current dissertation research.
+
+I believe I could contribute meaningfully to your team. My coursework has given me a strong foundation in environmental impact assessment and water systems modelling, and I have practical laboratory experience in water quality analysis from a research assistant role I held last semester. I am a quick learner, adaptable, and highly motivated to gain experience in an applied industrial setting.
+
+I would be very happy to send a full CV and covering letter immediately if there is any possibility of a late placement. Thank you very much for taking the time to read my email, and I apologise for missing the official deadline.
+
+Yours sincerely,
+[Your name]`,
+      notes: ["Acknowledges the closed deadline immediately — honest and respectful of the company's process","States a genuine, specific reason for choosing this company — not generic flattery","References a real project (constructed wetland systems) that shows research and genuine interest","Lists specific, relevant skills (impact assessment, water systems modelling, lab experience) concisely","The offer to send CV immediately shows readiness and seriousness","Strikes the right balance between confident and humble — doesn't grovel but doesn't presume"]
+    }
+  },
+  {
+    subject: "Social — Asking for Advice",
+    setting: "Social",
+    to: "mentor/older friend (semi-formal)",
+    subject_line: "Advice on a Career Decision",
+    scenario: "You have been offered two jobs. One is a stable, well-paid position at a large company. The other is a lower-paid role at a small exciting start-up with more responsibility. You respect your former teacher Mr. Harrison and want his advice.",
+    heading: "Write an email to Mr. Harrison. In your email, do the following.",
+    bullets: ["Remind him who you are and update him on what you have been doing","Describe both job offers briefly and the dilemma you face","Ask for his specific advice or perspective on how to decide"],
+    footer: "Write as much as you can and in complete sentences.",
+    example: {
+      body: `Dear Mr. Harrison,
+
+I hope you are well. This is [Your name] — I was in your Business Studies class in my final year at Westgate College, around five years ago now. You may remember me as the student who did the rather ambitious presentation on ethical supply chains! I have thought of you often since graduating and always hoped to stay in touch.
+
+The reason I am reaching out is that I find myself facing a career decision I am genuinely unsure about, and you are someone whose judgement I have always respected enormously. I have recently been offered two quite different positions. The first is a Marketing Manager role at a large multinational consumer goods company — it is well-paid, comes with strong job security, and has a clear promotional structure. The second is a Content Strategist position at a small but fast-growing technology start-up: the salary is about 20% lower, but the role is broader, more creative, and would give me significantly more responsibility at an earlier stage of my career.
+
+I am genuinely torn. My instinct is that the start-up excites me more, but I am cautious about whether that excitement is clouding my practical judgement. I would be very grateful for your perspective — particularly on how you might weigh the value of early responsibility against financial security, or whether there are factors I might not be considering at this stage of my career.
+
+I realise it has been a long time since we were in touch and I am sorry for reaching out only when I need help! I would love to catch up more generally if you have time.
+
+With warm regards,
+[Your name]`,
+      notes: ["Re-introduces with a specific, memorable detail — 'ethical supply chains presentation' — charming and effective","Gives a clear, balanced description of both options with concrete details (salary difference, responsibility level)","Frames the dilemma honestly — acknowledges their own bias ('excitement clouding judgement') — shows self-awareness","Asks a specific question rather than just 'what should I do?' — respectful of the mentor's time","The apology for only reaching out when needing help shows social awareness and genuine warmth","Tone is warm and respectful without being sycophantic — exactly right for a former teacher relationship"]
+    }
+  }
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let current = [];
+
+// ── GENERATE ──────────────────────────────────────────────────────────────────
+function generate() {
+  const shuffled = [...POOL].sort(() => Math.random() - 0.5);
+  current = shuffled.slice(0, 5);
+  document.getElementById('placeholder').style.display = 'none';
+  document.getElementById('copyStudentBtn').style.display = '';
+  document.getElementById('copyTeacherBtn').style.display = '';
+  const container = document.getElementById('exercises');
+  container.innerHTML = '';
+
+  current.forEach((ex, idx) => {
+    const div = document.createElement('div');
+    div.className = 'exercise';
+    const notesHTML = ex.example.notes.map(n => `<li>${esc(n)}</li>`).join('');
+    const bulletsHTML = ex.bullets.map(b => `<li>${esc(b)}</li>`).join('');
+
+    div.innerHTML = `
+      <div class="ex-header">
+        <span class="ex-num">Exercise ${idx+1}</span>
+        <span class="ex-subject">${esc(ex.subject)}</span>
+        <span class="ex-setting">${esc(ex.setting)} context</span>
+      </div>
+      <div class="ex-body">
+        <div class="scenario-col">
+          <p class="scenario-text">${esc(ex.scenario)}</p>
+          <p class="task-heading">${esc(ex.heading)}</p>
+          <ul class="task-bullets">${bulletsHTML}</ul>
+          <p class="task-foot">${esc(ex.footer)}</p>
+        </div>
+        <div class="response-col">
+          <div class="email-header-fields">
+            <div class="email-field">
+              <span class="field-label">To</span>
+              <span class="field-val">${esc(ex.to)}</span>
+            </div>
+            <div class="email-field">
+              <span class="field-label">Subject</span>
+              <span class="field-val">${esc(ex.subject_line)}</span>
+            </div>
+          </div>
+          <div class="response-label">Your response</div>
+          <textarea class="reply" id="reply-${idx}" placeholder="Write your email here…" oninput="onType(${idx})"></textarea>
+          <div class="reply-meta">
+            <div class="word-count">
+              <span class="wc-num" id="wc-${idx}">0</span>
+              <span>words</span>
+              <div class="wc-bar-wrap"><div class="wc-bar" id="wcbar-${idx}" style="width:0%"></div></div>
+            </div>
+            <button class="clear-btn" onclick="clearReply(${idx})">clear</button>
+          </div>
+        </div>
+      </div>
+      <div class="example-area">
+        <button class="example-toggle" id="extoggle-${idx}" onclick="toggleExample(${idx})">&#9733; Show Example High-Scoring Response</button>
+        <div class="example-box" id="exbox-${idx}">
+          <div class="example-header">
+            <span class="example-label">&#9733; Example High-Scoring Response</span>
+            <span class="example-badge">MODEL ANSWER</span>
+          </div>
+          <div class="example-email">
+            <div class="example-email-fields">
+              <div class="example-email-field"><strong>To</strong>${esc(ex.to)}</div>
+              <div class="example-email-field"><strong>Subject</strong>${esc(ex.subject_line)}</div>
+            </div>
+            <div class="example-email-body">${esc(ex.example.body)}</div>
+          </div>
+          <div class="example-notes">
+            <div class="example-notes-title">Why this scores well</div>
+            <ul>${notesHTML}</ul>
+          </div>
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// ── EXAMPLE TOGGLE ────────────────────────────────────────────────────────────
+function toggleExample(idx) {
+  const box = document.getElementById(`exbox-${idx}`);
+  const btn = document.getElementById(`extoggle-${idx}`);
+  const visible = box.classList.toggle('visible');
+  btn.textContent = visible ? '✕ Hide Example Response' : '★ Show Example High-Scoring Response';
+}
+
+// ── WORD COUNT ────────────────────────────────────────────────────────────────
+function onType(idx) {
+  const ta = document.getElementById(`reply-${idx}`);
+  const words = ta.value.trim() === '' ? 0 : ta.value.trim().split(/\s+/).length;
+  const wcNum = document.getElementById(`wc-${idx}`);
+  const wcBar = document.getElementById(`wcbar-${idx}`);
+  wcNum.textContent = words;
+  const pct = Math.min(words / 150 * 100, 100);
+  wcBar.style.width = pct + '%';
+  const ok = words >= 100;
+  wcNum.className = 'wc-num' + (ok ? ' ok' : (words > 0 ? ' warn' : ''));
+  wcBar.className  = 'wc-bar' + (ok ? ' ok' : '');
+}
+
+function clearReply(idx) {
+  document.getElementById(`reply-${idx}`).value = '';
+  onType(idx);
+}
+
+// ── COPY ──────────────────────────────────────────────────────────────────────
+function copyAll(withResponses) {
+  if (!current.length) return;
+  let text = '';
+  current.forEach((ex, idx) => {
+    text += `${'='.repeat(60)}\nEXERCISE ${idx+1} — ${ex.subject.toUpperCase()}\n${'='.repeat(60)}\n\n`;
+    text += `${ex.scenario}\n\n`;
+    text += `${ex.heading}\n`;
+    ex.bullets.forEach(b => { text += `  • ${b}\n`; });
+    text += `\n${ex.footer}\n\n`;
+    text += `To: ${ex.to}\nSubject: ${ex.subject_line}\n\n`;
+    if (withResponses) {
+      const reply = (document.getElementById(`reply-${idx}`)?.value || '').trim();
+      text += `YOUR RESPONSE:\n${reply || '[No response written]'}\n\n`;
+      text += `--- MODEL ANSWER ---\n${ex.example.body}\n\nWhy this scores well:\n`;
+      ex.example.notes.forEach(n => { text += `  ✓ ${n}\n`; });
+    } else {
+      text += `YOUR RESPONSE:\n${'_'.repeat(60)}\n\n`;
+    }
+    text += '\n';
+  });
+  navigator.clipboard.writeText(text)
+    .then(() => showToast(withResponses ? '✓ Teacher copy (with answers) copied!' : '✓ Student copy copied!'))
+    .catch(() => showToast('Copy failed — try Ctrl+C'));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
