@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stephie's Reading Practice</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream:#f7f3ec; --cream-dark:#ede8df; --ink:#1a1510; --ink-mid:#3d3628; --ink-light:#7a6e5f;
+    --sepia:#8b6914; --sepia-light:#c4a44a; --sepia-pale:#f0e6c8; --border:#ccc0a8; --shadow:rgba(26,21,16,0.12);
+    --green:#27ae60; --red:#c0392b; --blue:#2471a3; --green-pale:#eaf7ee; --red-pale:#fdf2f2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--cream);color:var(--ink);font-family:'Lora',Georgia,serif;min-height:100vh;
+    background-image:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(139,105,20,0.06) 27px,rgba(139,105,20,0.06) 28px);}
+  header{background:var(--ink);color:var(--cream);padding:28px 40px 22px;display:flex;align-items:flex-end;gap:20px;
+    border-bottom:4px solid var(--sepia-light);position:relative;overflow:hidden;}
+  header::before{content:'';position:absolute;inset:0;
+    background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(196,164,74,0.04) 10px,rgba(196,164,74,0.04) 11px);}
+  .header-title{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;letter-spacing:-0.5px;line-height:1;}
+  .header-sub{font-family:'Lora',serif;font-style:italic;color:var(--sepia-light);font-size:0.95rem;margin-bottom:2px;}
+  .header-badge{margin-left:auto;background:var(--sepia);color:var(--cream);font-family:'Source Code Pro',monospace;
+    font-size:0.7rem;padding:4px 10px;border-radius:2px;letter-spacing:1px;text-transform:uppercase;align-self:flex-start;margin-top:4px;}
+  .site-nav{background:var(--cream-dark);border-bottom:1px solid var(--border);padding:0 40px;display:flex;flex-wrap:wrap;}
+  .site-nav a{display:inline-block;padding:10px 12px;font-family:'Lora',serif;font-style:italic;font-size:0.85rem;
+    color:var(--sepia);text-decoration:none;border-bottom:2px solid transparent;transition:border-color 0.15s;}
+  .site-nav a:hover{border-bottom-color:var(--sepia);}
+  .site-nav a.active{border-bottom-color:var(--sepia);font-weight:600;font-style:normal;}
+
+  /* ── Tab bar ── */
+  .tab-bar{display:flex;background:var(--ink);border-bottom:3px solid var(--sepia);}
+  .tab-btn{font-family:'Playfair Display',serif;font-size:0.9rem;font-weight:600;padding:14px 28px;
+    background:none;border:none;color:rgba(247,243,236,0.5);cursor:pointer;border-bottom:3px solid transparent;
+    margin-bottom:-3px;transition:all 0.15s;letter-spacing:0.2px;}
+  .tab-btn:hover{color:var(--cream);}
+  .tab-btn.active{color:var(--sepia-light);border-bottom-color:var(--sepia-light);}
+
+  .controls{display:flex;gap:12px;padding:18px 40px;background:var(--cream);border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center;}
+  .btn{font-family:'Playfair Display',serif;font-weight:600;font-size:0.85rem;padding:10px 20px;border:2px solid var(--ink);
+    background:var(--ink);color:var(--cream);cursor:pointer;letter-spacing:0.3px;transition:all 0.15s;border-radius:2px;}
+  .btn:hover{background:var(--ink-mid);transform:translateY(-1px);box-shadow:0 4px 12px var(--shadow);}
+  .btn:active{transform:translateY(0);}
+  .btn-outline{background:transparent;color:var(--ink);}
+  .btn-outline:hover{background:var(--ink);color:var(--cream);}
+  .btn-generate{font-size:0.95rem;padding:12px 28px;}
+  .score-summary{margin-left:auto;font-family:'Source Code Pro',monospace;font-size:0.8rem;color:var(--ink-light);
+    display:none;align-items:center;gap:8px;}
+  .score-summary.visible{display:flex;}
+  .score-big{font-size:1.1rem;font-weight:700;color:var(--ink);}
+
+  .tab-panel{display:none;} .tab-panel.active{display:block;}
+
+  .task-banner{background:var(--sepia-pale);border-bottom:1px solid var(--border);padding:13px 40px;
+    font-size:0.85rem;color:var(--ink-mid);line-height:1.6;}
+  .task-banner strong{color:var(--ink);}
+
+  .main{max-width:960px;margin:0 auto;padding:36px 40px 60px;}
+  .placeholder{text-align:center;padding:80px 0;color:var(--ink-light);font-style:italic;font-size:1.05rem;}
+  .placeholder-icon{font-size:3rem;margin-bottom:16px;opacity:0.35;}
+  .exercises{display:flex;flex-direction:column;gap:44px;}
+
+  /* ── Exercise card ── */
+  .exercise{background:#fff;border:1px solid var(--border);border-radius:3px;box-shadow:0 2px 10px var(--shadow);
+    overflow:hidden;animation:slideIn 0.3s ease both;}
+  @keyframes slideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .exercise:nth-child(1){animation-delay:0.02s}.exercise:nth-child(2){animation-delay:0.07s}
+  .exercise:nth-child(3){animation-delay:0.12s}.exercise:nth-child(4){animation-delay:0.17s}
+  .exercise:nth-child(5){animation-delay:0.22s}
+  .ex-header{background:var(--ink);color:var(--cream);padding:13px 22px;display:flex;align-items:center;gap:14px;}
+  .ex-num{font-family:'Source Code Pro',monospace;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--sepia-light);}
+  .ex-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:600;}
+  .ex-type{font-family:'Lora',serif;font-style:italic;font-size:0.78rem;color:var(--sepia-light);margin-left:auto;}
+  .ex-score{font-family:'Source Code Pro',monospace;font-size:0.75rem;color:var(--sepia-light);margin-left:12px;}
+
+  /* ── Daily Life layout: text left, questions right ── */
+  .dl-body{display:grid;grid-template-columns:1fr 1fr;min-height:260px;}
+  @media(max-width:700px){.dl-body{grid-template-columns:1fr;}}
+  .text-col{padding:22px;border-right:1px solid var(--border);background:var(--cream);}
+  .text-type-label{font-family:'Source Code Pro',monospace;font-size:0.65rem;letter-spacing:2px;
+    text-transform:uppercase;color:var(--sepia);margin-bottom:10px;}
+
+  /* Styled text types */
+  .styled-email{background:#fff;border:1px solid #ccc;border-radius:2px;font-family:'Source Code Pro',monospace;font-size:0.78rem;}
+  .styled-email .email-fields{border-bottom:1px solid #ccc;padding:8px 10px;}
+  .styled-email .email-field{display:flex;gap:6px;margin-bottom:3px;font-size:0.75rem;}
+  .styled-email .ef-label{color:#666;min-width:52px;}
+  .styled-email .email-body{padding:10px;font-family:'Lora',serif;font-size:0.85rem;line-height:1.7;color:var(--ink);}
+  .styled-poster{background:linear-gradient(135deg,#1a5276,#2471a3);color:#fff;border-radius:3px;padding:14px;text-align:center;}
+  .styled-poster .poster-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;margin-bottom:4px;}
+  .styled-poster .poster-sub{font-size:0.78rem;opacity:0.85;margin-bottom:10px;}
+  .styled-poster .poster-body{background:rgba(255,255,255,0.12);border-radius:2px;padding:10px;font-size:0.8rem;line-height:1.65;text-align:left;}
+  .styled-menu{background:#fff;border:2px solid var(--ink);border-radius:2px;padding:12px 14px;}
+  .styled-menu .menu-title{font-family:'Playfair Display',serif;font-size:0.95rem;font-weight:700;text-align:center;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:8px;}
+  .styled-menu .menu-section{font-family:'Playfair Display',serif;font-size:0.75rem;font-weight:700;text-transform:uppercase;color:var(--sepia);margin:8px 0 4px;}
+  .styled-menu .menu-item{display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:3px;}
+  .styled-menu .menu-note{font-style:italic;font-size:0.75rem;color:var(--ink-light);margin-top:4px;}
+  .styled-sign{background:#e8f0e0;border:3px solid #2d6a2d;border-radius:4px;padding:14px;text-align:center;}
+  .styled-sign .sign-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:#2d6a2d;margin-bottom:6px;}
+  .styled-sign .sign-body{font-size:0.85rem;line-height:1.65;color:#1a3a1a;}
+  .styled-receipt{background:#fff;font-family:'Source Code Pro',monospace;font-size:0.75rem;border:1px dashed #aaa;padding:12px;}
+  .styled-receipt .receipt-header{text-align:center;border-bottom:1px dashed #aaa;padding-bottom:8px;margin-bottom:8px;}
+  .styled-receipt .receipt-row{display:flex;justify-content:space-between;margin-bottom:2px;}
+  .styled-receipt .receipt-total{border-top:1px dashed #aaa;padding-top:6px;margin-top:6px;font-weight:700;}
+  .styled-receipt .receipt-note{text-align:center;margin-top:8px;font-size:0.7rem;color:#666;}
+  .styled-notice{background:#fffbe6;border-left:4px solid #f0a500;padding:12px 14px;font-size:0.85rem;line-height:1.7;}
+  .styled-notice .notice-title{font-family:'Playfair Display',serif;font-weight:700;margin-bottom:6px;color:#7a4f00;}
+  .styled-schedule{background:#fff;border:1px solid var(--border);}
+  .styled-schedule .sched-title{background:var(--blue);color:#fff;padding:8px 12px;font-family:'Playfair Display',serif;font-size:0.88rem;font-weight:600;}
+  .styled-schedule .sched-row{display:flex;border-bottom:1px solid var(--border);font-size:0.82rem;}
+  .styled-schedule .sched-row:last-child{border-bottom:none;}
+  .styled-schedule .sched-time{padding:7px 10px;border-right:1px solid var(--border);min-width:80px;color:var(--ink-light);font-family:'Source Code Pro',monospace;font-size:0.75rem;}
+  .styled-schedule .sched-event{padding:7px 10px;flex:1;}
+  .plain-text{font-size:0.88rem;line-height:1.8;color:var(--ink);}
+
+  /* ── Academic passage layout ── */
+  .ac-body{display:grid;grid-template-columns:55% 45%;min-height:340px;}
+  @media(max-width:700px){.ac-body{grid-template-columns:1fr;}}
+  .passage-col{padding:22px;border-right:1px solid var(--border);background:var(--cream);}
+  .passage-title{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;text-align:center;
+    margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .passage-text{font-size:0.92rem;line-height:1.85;color:var(--ink);}
+  .passage-text p{margin-bottom:10px;}
+
+  /* ── Questions col ── */
+  .questions-col{padding:18px 20px;background:#fafaf8;display:flex;flex-direction:column;gap:18px;}
+  .question-block{}
+  .q-text{font-size:0.88rem;line-height:1.6;color:var(--ink);margin-bottom:10px;font-weight:500;}
+  .q-options{display:flex;flex-direction:column;gap:6px;}
+  .q-option{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border:1.5px solid var(--border);
+    border-radius:3px;cursor:pointer;transition:all 0.12s;background:#fff;font-size:0.85rem;line-height:1.5;}
+  .q-option:hover{border-color:var(--sepia);background:var(--sepia-pale);}
+  .q-option input[type=radio]{margin-top:2px;accent-color:var(--sepia);flex-shrink:0;}
+  .q-option.correct{background:var(--green-pale);border-color:var(--green);color:#155724;}
+  .q-option.wrong{background:var(--red-pale);border-color:var(--red);color:#721c24;}
+  .q-option.reveal-correct{background:var(--green-pale);border-color:var(--green);}
+  .q-option input{pointer-events:none;}
+  .q-explanation{display:none;margin-top:8px;padding:8px 12px;background:#fff;border-left:3px solid var(--sepia);
+    border-radius:0 2px 2px 0;font-size:0.8rem;line-height:1.6;color:var(--ink-mid);font-style:italic;}
+  .q-explanation.visible{display:block;}
+  .check-btn{align-self:flex-start;font-family:'Playfair Display',serif;font-weight:600;font-size:0.78rem;
+    padding:7px 16px;border:1.5px solid var(--sepia);background:var(--sepia);color:#fff;border-radius:2px;
+    cursor:pointer;transition:all 0.15s;margin-top:4px;}
+  .check-btn:hover{background:#7a5c10;}
+  .check-btn:disabled{opacity:0.4;cursor:not-allowed;}
+  .q-score-row{font-family:'Source Code Pro',monospace;font-size:0.72rem;color:var(--ink-light);padding-top:6px;border-top:1px solid var(--border);}
+
+  .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);
+    color:var(--cream);font-family:'Lora',serif;font-size:0.9rem;padding:12px 24px;border-radius:2px;opacity:0;
+    transition:all 0.25s ease;pointer-events:none;z-index:1000;border-left:3px solid var(--sepia-light);white-space:nowrap;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  @media(max-width:640px){
+    header{padding:20px;flex-wrap:wrap;}.controls{padding:14px 16px;}.main{padding:20px 16px 50px;}
+    .header-title{font-size:1.4rem;}.site-nav{padding:0 16px;}.task-banner{padding:12px 16px;}
+    .tab-btn{padding:12px 16px;font-size:0.82rem;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="header-sub">Stephie's Academic English Practice</div>
+    <div class="header-title">Reading Exercises</div>
+  </div>
+  <div class="header-badge">TOEFL Prep</div>
+</header>
+
+<nav class="site-nav">
+  <a href="toefl-blanks.html">Gap Fill</a>
+  <a href="toefl-ctest.html">C-Test</a>
+  <a href="toefl-discussion.html">Academic Discussion</a>
+  <a href="toefl-email.html">Write an Email</a>
+  <a href="#" class="active">Reading</a>
+</nav>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('daily')">&#128240; Read in Daily Life</button>
+  <button class="tab-btn" onclick="switchTab('academic')">&#128218; Read an Academic Passage</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ DAILY LIFE TAB -->
+<div class="tab-panel active" id="panel-daily">
+  <div class="controls">
+    <button class="btn btn-generate" onclick="generateDaily()">&#8635; Generate 5 Exercises</button>
+    <div class="score-summary" id="dl-score-summary">
+      Total score: <span class="score-big" id="dl-score-val">—</span>
+    </div>
+  </div>
+  <div class="task-banner">
+    <strong>Read in Daily Life:</strong> Short everyday texts (emails, posters, menus, signs, schedules, receipts).
+    Read carefully, then answer the multiple-choice questions.
+  </div>
+  <main class="main">
+    <div class="placeholder" id="dl-placeholder">
+      <div class="placeholder-icon">&#128240;</div>
+      Click <em>Generate 5 Exercises</em> to begin.<br>
+      <span style="font-size:0.85rem;margin-top:8px;display:block;">Everyday texts with 2–3 comprehension questions each.</span>
+    </div>
+    <div class="exercises" id="dl-exercises"></div>
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ ACADEMIC PASSAGE TAB -->
+<div class="tab-panel" id="panel-academic">
+  <div class="controls">
+    <button class="btn btn-generate" onclick="generateAcademic()">&#8635; Generate 5 Passages</button>
+    <div class="score-summary" id="ac-score-summary">
+      Total score: <span class="score-big" id="ac-score-val">—</span>
+    </div>
+  </div>
+  <div class="task-banner">
+    <strong>Read an Academic Passage:</strong> ~200-word expository texts from history, science, business, arts and social science.
+    Answer all five questions — one correct answer each.
+  </div>
+  <main class="main">
+    <div class="placeholder" id="ac-placeholder">
+      <div class="placeholder-icon">&#128218;</div>
+      Click <em>Generate 5 Passages</em> to begin.<br>
+      <span style="font-size:0.85rem;margin-top:8px;display:block;">Academic passages with 5 comprehension and vocabulary questions each.</span>
+    </div>
+    <div class="exercises" id="ac-exercises"></div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════════
+// DAILY LIFE POOL
+// ═══════════════════════════════════════════════════════════════════════════════
+const DAILY_POOL = [
+  {
+    title:"Registration Confirmation Email",
+    type:"email",
+    renderType:"email",
+    emailFields:{to:"jhsigh36@dmail.com",from:"emmaj.onlinecourses@dmail.com",date:"08/17/2025",subject:"You're in!"},
+    emailBody:`Dear Mr. Singh,
+
+Your registration for the online coding course, which begins on October 5th at 9:00 AM, is complete. Login details will be sent a day before the course begins. If you would like to cancel your registration, let us know by October 3rd.
+
+Best regards,
+Emma Johnson`,
+    questions:[
+      {q:"What is the main purpose of the email?",
+       options:["To cancel registration for a course","To confirm registration for a course","To provide information about a course","To request payment for a course"],
+       correct:1,
+       explanation:"The email tells Mr. Singh his registration is complete — its main purpose is to confirm enrolment, not to provide general course information or request payment."},
+      {q:"By what date must Mr. Singh contact the sender if he wants to cancel?",
+       options:["October 3rd","October 5th","August 17th","A day before the course"],
+       correct:0,
+       explanation:"The email explicitly states: 'If you would like to cancel your registration, let us know by October 3rd.'"},
+      {q:"What will Mr. Singh receive on October 4th?",
+       options:["A refund confirmation","His course certificate","His login details","A reminder to register"],
+       correct:2,
+       explanation:"The email says login details 'will be sent a day before the course begins'. The course begins October 5th, so login details arrive October 4th."}
+    ]
+  },
+  {
+    title:"Community Volunteer Day Poster",
+    type:"poster",
+    renderType:"poster",
+    posterTitle:"Join the Annual Community Volunteer Day!",
+    posterSub:"Date: April 22 | Time: 9:00 a.m. – 2:00 p.m. | Location: Central Park, Melbourne",
+    posterBody:`Make a positive impact in your community by participating in our Annual Community Volunteer Day. Activities you can join:
+
+• Park Cleanup: Help us keep our park beautiful by picking up litter and maintaining green spaces.
+• Tree Planting: Contribute to the environment by planting trees and shrubs in designated areas.
+• Community Garden: Assist in preparing and planting the community garden, where residents can grow their own fruits and vegetables.
+• Educational Workshops: Attend workshops on sustainability, recycling, and conservation taught by local experts.
+
+We encourage everyone, regardless of age or experience, to join in these activities.
+All participants will receive a free T-shirt and refreshments. Please wear comfortable clothing and bring gloves if you have them.`,
+    questions:[
+      {q:"What is the main purpose of the poster?",
+       options:["To recruit new members for a club","To promote a community volunteer event","To announce a new park initiative","To advertise a gardening workshop"],
+       correct:1,
+       explanation:"The poster promotes the Annual Community Volunteer Day — a community event open to all. It is not advertising a club, a single park project, or just a gardening workshop."},
+      {q:"Which of the following will participants receive?",
+       options:["A gardening toolkit","A certificate of participation","A free T-shirt and refreshments","A cash payment for their work"],
+       correct:2,
+       explanation:"The poster states: 'All participants will receive a free T-shirt and refreshments.'"},
+      {q:"According to the poster, who can participate?",
+       options:["Only experienced volunteers","Only people under 18","Only Melbourne residents","People of any age or experience"],
+       correct:3,
+       explanation:"The poster says: 'We encourage everyone, regardless of age or experience, to join in these activities.'"}
+    ]
+  },
+  {
+    title:"Café Daily Menu",
+    type:"menu",
+    renderType:"menu",
+    menuTitle:"The Morning Perch — Daily Menu",
+    menuSections:[
+      {heading:"Hot Drinks",items:[["Flat white","$4.50"],["Chai latte","$5.00"],["Filter coffee","$3.50"]]},
+      {heading:"Breakfast",items:[["Avocado toast (GF option available)","$13.00"],["Eggs Benedict","$15.50"],["Granola & yoghurt bowl","$10.00"]]},
+      {heading:"Lunch (from 11:30 a.m.)",items:[["Chicken & pesto panini","$12.00"],["Soup of the day + bread","$9.50"],["Caesar salad (add chicken +$3)","$13.00"]]}
+    ],
+    menuNote:"* GF = gluten-free. Please inform staff of allergies before ordering. Kitchen closes at 3:00 p.m.",
+    questions:[
+      {q:"What is the earliest you can order lunch at this café?",
+       options:["9:00 a.m.","10:00 a.m.","11:30 a.m.","3:00 p.m."],
+       correct:2,
+       explanation:"The menu states 'Lunch (from 11:30 a.m.)' — lunch service begins at 11:30."},
+      {q:"A customer wants a gluten-free breakfast. Which item might suit them?",
+       options:["Eggs Benedict","Avocado toast","Granola & yoghurt bowl","Chicken & pesto panini"],
+       correct:1,
+       explanation:"Only the avocado toast notes 'GF option available', making it the suitable choice for a gluten-free breakfast order."},
+      {q:"What does a customer need to do if they have a food allergy?",
+       options:["Call ahead to reserve a table","Check the menu online first","Inform staff before ordering","Bring their own food"],
+       correct:2,
+       explanation:"The menu note says: 'Please inform staff of allergies before ordering.'"}
+    ]
+  },
+  {
+    title:"Library Notice",
+    type:"notice",
+    renderType:"notice",
+    noticeTitle:"Important Notice: Library System Upgrade",
+    noticeBody:`The City Library will be temporarily closed from Monday 14 July to Wednesday 16 July while we upgrade our catalogue and borrowing system.
+
+During this period:
+• Book returns can still be made using the external drop box at the main entrance.
+• Online renewals will be unavailable. Any items due for return between 14–16 July will automatically have their due date extended to Thursday 17 July.
+• Reservations placed before 14 July will be held until Friday 18 July.
+
+We apologise for any inconvenience and look forward to offering you an improved service from 17 July onwards.`,
+    questions:[
+      {q:"Why is the library closing temporarily?",
+       options:["To carry out building repairs","To upgrade its catalogue and borrowing system","To move to a new location","To allow staff training"],
+       correct:1,
+       explanation:"The notice clearly states the closure is 'while we upgrade our catalogue and borrowing system.'"},
+      {q:"What happens to items that were due for return on 15 July?",
+       options:["Customers will be charged a fine","The due date is extended to 17 July","Customers must use the drop box by 14 July","The items are automatically renewed for two weeks"],
+       correct:1,
+       explanation:"The notice states items due between 14–16 July 'will automatically have their due date extended to Thursday 17 July.'"},
+      {q:"What can customers do during the closure period?",
+       options:["Borrow new books as usual","Renew items online","Return books using the external drop box","Access the digital catalogue"],
+       correct:2,
+       explanation:"The only service available during closure is returning books via 'the external drop box at the main entrance'. Online renewals are specifically listed as unavailable."}
+    ]
+  },
+  {
+    title:"Gym Membership Receipt",
+    type:"receipt",
+    renderType:"receipt",
+    receiptData:{
+      header:"PEAK FITNESS CENTRE\n123 Harbour Road, Sydney\nTel: (02) 9876 5432",
+      rows:[
+        ["Member","J. Williams"],["Membership","Monthly Premium"],["Start date","01 Sep 2025"],
+        ["End date","30 Sep 2025"],["Pool access","Included"],["Classes","Unlimited"]
+      ],
+      total:"$79.00",
+      note:"Thank you for being a Peak Fitness member!\nQueries: reception@peakfitness.com.au"
+    },
+    questions:[
+      {q:"What type of membership has J. Williams purchased?",
+       options:["Annual Basic","Monthly Premium","Weekly Day Pass","Student Concession"],
+       correct:1,
+       explanation:"The receipt clearly shows 'Membership: Monthly Premium'."},
+      {q:"What does the membership include?",
+       options:["Pool access only","Unlimited classes only","Pool access and unlimited classes","Personal training sessions"],
+       correct:2,
+       explanation:"The receipt lists both 'Pool access: Included' and 'Classes: Unlimited' — both are part of the membership."},
+      {q:"For how long is this membership valid?",
+       options:["One week","One year","One month","Three months"],
+       correct:2,
+       explanation:"The start date is 01 Sep 2025 and the end date is 30 Sep 2025 — a period of one month."}
+    ]
+  },
+  {
+    title:"Train Timetable",
+    type:"schedule",
+    renderType:"schedule",
+    scheduleTitle:"Northbridge → City Central — Weekday Timetable",
+    scheduleRows:[
+      ["06:15","Express — no stops. Arrives City Central 06:48"],
+      ["07:00","All stations. Arrives City Central 07:52"],
+      ["07:30","Express — no stops. Arrives City Central 08:03"],
+      ["08:15","All stations. Arrives City Central 09:07"],
+      ["08:45","Express — no stops. Arrives City Central 09:18"],
+      ["09:30","All stations — engineering works: add 15 mins to journey time"]
+    ],
+    scheduleNote:"Engineering works affect the 09:30 service only. Express trains do not stop at intermediate stations.",
+    questions:[
+      {q:"A passenger needs to arrive at City Central by 8:00 a.m. Which is the latest train they can take?",
+       options:["The 06:15 express","The 07:00 all stations","The 07:30 express","The 08:15 all stations"],
+       correct:2,
+       explanation:"The 07:30 express arrives at 08:03 — just after 8:00 a.m. The 07:00 all stations arrives at 07:52, which is before 8:00 a.m. and is the latest train that still arrives on time."},
+      {q:"Which service is affected by engineering works?",
+       options:["The 07:00 all stations service","The 07:30 express service","The 08:45 express service","The 09:30 all stations service"],
+       correct:3,
+       explanation:"The timetable note states: 'Engineering works affect the 09:30 service only.'"},
+      {q:"What does 'Express' mean in this timetable?",
+       options:["The train runs faster than scheduled","The train does not stop at intermediate stations","The train has fewer carriages","The train requires a special ticket"],
+       correct:1,
+       explanation:"The footnote explains: 'Express trains do not stop at intermediate stations.'"}
+    ]
+  },
+  {
+    title:"Apartment Building Notice",
+    type:"sign",
+    renderType:"sign",
+    signTitle:"RESIDENTS — PLEASE READ",
+    signBody:`Hot water will be shut off in ALL apartments on Saturday 19 October between 8:00 a.m. and 1:00 p.m. for essential maintenance to the building's heating system.
+
+Cold water supply will NOT be affected.
+
+Residents requiring assistance during this time should contact the building manager:
+📞 0412 888 321
+
+We apologise for the inconvenience.
+— Building Management`,
+    questions:[
+      {q:"What is the main purpose of this notice?",
+       options:["To advertise building maintenance services","To warn residents about a temporary hot water outage","To announce new building rules","To request residents to report plumbing issues"],
+       correct:1,
+       explanation:"The notice exists to warn residents that hot water will be unavailable on a specific date and time — it is an advance warning, not an advertisement or rule change."},
+      {q:"Which of the following statements is true according to the notice?",
+       options:["All water supply will be shut off","The maintenance will last all day","Cold water will still be available","Residents must vacate during maintenance"],
+       correct:2,
+       explanation:"The notice explicitly states: 'Cold water supply will NOT be affected.' All water is not shut off, and the maintenance runs 8 a.m. to 1 p.m., not all day."},
+      {q:"How long will the hot water be shut off?",
+       options:["2 hours","5 hours","8 hours","All weekend"],
+       correct:1,
+       explanation:"The shutdown runs from 8:00 a.m. to 1:00 p.m. — a period of 5 hours."}
+    ]
+  },
+  {
+    title:"Social Media Post — Event Announcement",
+    type:"social media post",
+    renderType:"plain",
+    plainText:`🎨 STUDIO OPEN DAY — Saturday 25 October, 10 a.m. to 4 p.m.
+
+Come and explore the studios of 12 local artists at Warehouse 9, Fitzroy Street! Watch artists at work, ask questions, and buy original artwork directly from the creators — no gallery markup.
+
+FREE ENTRY. All welcome.
+
+🍕 Food trucks on site from 12 noon.
+🚗 Parking available on Fitzroy Street and surrounding streets.
+♿ Fully accessible venue.
+
+Follow us @FitzroyArtSpace for updates.`,
+    questions:[
+      {q:"What can visitors do at this event?",
+       options:["Take part in an art class","Buy artwork directly from artists","Register to become an artist at the studio","Book a studio space for rent"],
+       correct:1,
+       explanation:"The post says visitors can 'buy original artwork directly from the creators — no gallery markup'. There is no mention of art classes, studio rental, or artist registration."},
+      {q:"What does 'no gallery markup' most likely mean?",
+       options:["The artwork is not professionally made","Prices are lower because there is no middleman","The gallery does not accept credit cards","The artwork has not been officially valued"],
+       correct:1,
+       explanation:"'No gallery markup' means buyers pay the artist's price directly without an additional percentage added by a gallery acting as an intermediary — prices are therefore lower."},
+      {q:"Which of the following is NOT mentioned in the post?",
+       options:["The event is free to enter","Food will be available","Parking is available nearby","The event will be broadcast online"],
+       correct:3,
+       explanation:"Free entry, food trucks, and parking are all explicitly mentioned. Broadcasting online is not mentioned anywhere in the post."}
+    ]
+  },
+  {
+    title:"Medical Clinic Appointment Reminder",
+    type:"text message",
+    renderType:"plain",
+    plainText:`SMS from Riverside Medical Centre (Fri 10 Oct, 9:14 a.m.)
+
+Hi Ms. Tanaka,
+
+This is a reminder that you have an appointment with Dr. Ferreira on Monday 13 October at 2:30 p.m.
+
+Please arrive 10 minutes early to complete paperwork.
+If you need to cancel or reschedule, please call us on (03) 5512 9900 at least 24 hours before your appointment.
+
+A cancellation fee of $40 applies to missed appointments without prior notice.
+
+Riverside Medical Centre`,
+    questions:[
+      {q:"What is the purpose of this message?",
+       options:["To confirm a prescription has been filled","To remind a patient about an upcoming appointment","To inform a patient their test results are ready","To request payment for a previous visit"],
+       correct:1,
+       explanation:"The message is explicitly described as 'a reminder' about an upcoming appointment — this is its stated purpose."},
+      {q:"What must Ms. Tanaka do if she cannot attend?",
+       options:["Send an email to the clinic","Arrive early and explain in person","Call at least 24 hours before the appointment","Cancel online through the clinic's website"],
+       correct:2,
+       explanation:"The message states: 'please call us… at least 24 hours before your appointment' to cancel or reschedule. No online cancellation option is mentioned."},
+      {q:"What will happen if Ms. Tanaka misses the appointment without notice?",
+       options:["Her future appointments will be cancelled","She will be charged a $40 cancellation fee","She will need to re-register as a patient","No action will be taken"],
+       correct:1,
+       explanation:"The message states: 'A cancellation fee of $40 applies to missed appointments without prior notice.'"}
+    ]
+  },
+  {
+    title:"University Campus Map Sign",
+    type:"sign",
+    renderType:"sign",
+    signTitle:"WESTFIELD UNIVERSITY — CAMPUS INFORMATION",
+    signBody:`BUILDING HOURS (during semester):
+• Library: Mon–Fri 7:30 a.m. – 10:00 p.m. | Sat–Sun 9:00 a.m. – 6:00 p.m.
+• Student Centre: Mon–Fri 8:30 a.m. – 5:00 p.m. (closed weekends)
+• Sports Centre: Mon–Sun 6:00 a.m. – 9:00 p.m.
+
+IMPORTANT:
+All visitors must sign in at the main reception before entering academic buildings.
+Student ID must be carried at all times on campus.
+No food or drink in lecture theatres or computer labs.`,
+    questions:[
+      {q:"A student wants to use the library on Sunday afternoon at 7:00 p.m. Is this possible?",
+       options:["Yes, the library is open until 10:00 p.m. on Sundays","No, the library closes at 6:00 p.m. on Sundays","Yes, but only with a staff member present","No, the library is closed on weekends"],
+       correct:1,
+       explanation:"The sign shows the library closes at 6:00 p.m. on Saturdays and Sundays. A 7:00 p.m. Sunday visit is therefore not possible."},
+      {q:"Which building is open seven days a week?",
+       options:["The library","The Student Centre","The Sports Centre","All three buildings"],
+       correct:2,
+       explanation:"The Sports Centre hours show 'Mon–Sun 6:00 a.m. – 9:00 p.m.' — it is the only building listed as open every day. The Student Centre is closed weekends."},
+      {q:"What must visitors do when they arrive on campus?",
+       options:["Show their passport at the gate","Sign in at the main reception","Collect a visitor badge from security","Register online in advance"],
+       correct:1,
+       explanation:"The sign states: 'All visitors must sign in at the main reception before entering academic buildings.'"}
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ACADEMIC PASSAGE POOL
+// ═══════════════════════════════════════════════════════════════════════════════
+const ACADEMIC_POOL = [
+  {
+    title:"The Mirror Test",
+    topic:"Biology / Psychology",
+    passage:`Very young children cannot recognise themselves in a mirror; they usually achieve this milestone around 18 months of age. The ability to recognise oneself in the mirror is considered to be a key component of self-awareness and consciousness for humans. But what about animals?
+
+For many years, scientists have known that members of the great ape family could recognise themselves in mirrors. They measured this by the "mirror test," which involved putting a coloured mark on an ape's body, and then showing the ape its reflection in a mirror. If the ape tried to remove the mark on its own body, the scientists knew that the ape was recognising its reflection.
+
+Apes are close relatives of humans, but in recent years, scientists have discovered that other animals also pass the "mirror test." Elephants and dolphins have shown signs of self-recognition. These, like apes, are highly intelligent animals. But in a more recent experiment, a type of fish called the cleaner fish tried to scrape a mark off its body when it saw itself in the mirror. This suggests that even less intelligent animals may possess more self-awareness than previously suspected.`,
+    questions:[
+      {q:"According to the passage, all of the following are true about elephants EXCEPT:",
+       options:["They can recognise themselves in mirrors.","They are highly intelligent animals.","They possess qualities in common with apes.","They understand certain signs from other animals."],
+       correct:3,
+       explanation:"The passage says elephants pass the mirror test (self-recognition), are highly intelligent, and are grouped with apes as intelligent animals. It never mentions elephants understanding signs from other animals — this is the exception."},
+      {q:"What is the main idea of the passage?",
+       options:["Only great apes are capable of self-awareness.","Self-awareness may be more widespread in the animal kingdom than previously thought.","Human children develop self-awareness earlier than any animal.","The mirror test is an unreliable way of measuring intelligence."],
+       correct:1,
+       explanation:"The passage builds toward the conclusion that the cleaner fish result 'suggests that even less intelligent animals may possess more self-awareness than previously suspected' — the main idea is that self-awareness is more widespread than thought."},
+      {q:"In the context of the passage, what does the word 'milestone' mean?",
+       options:["A type of scientific test","An important stage of development","A distance measurement","A challenge that cannot be overcome"],
+       correct:1,
+       explanation:"'Milestone' is used when describing children reaching self-recognition at 18 months — it refers to an important developmental stage, not a test, measurement, or challenge."},
+      {q:"Why did scientists put coloured marks on animals in the mirror test?",
+       options:["To make the animals look different from each other","To decorate the animals for observation","To see if the animals would try to remove the mark from their own body","To test whether animals could see colour"],
+       correct:2,
+       explanation:"The passage explains that if the animal tried to remove the mark from its own body after seeing its reflection, this showed self-recognition — the mark was a test of whether the animal understood the reflection was itself."},
+      {q:"What does the cleaner fish experiment suggest?",
+       options:["Fish are more intelligent than apes.","All animals have self-awareness.","Self-awareness may exist in animals considered less intelligent.","The mirror test only works for mammals."],
+       correct:2,
+       explanation:"The passage states the cleaner fish result 'suggests that even less intelligent animals may possess more self-awareness than previously suspected' — not that all animals have it, but that it may extend further than assumed."}
+    ]
+  },
+  {
+    title:"The Rise of Vertical Farming",
+    topic:"Technology / Environment",
+    passage:`Traditional agriculture requires large areas of flat land, reliable rainfall, and suitable temperatures — conditions that are becoming harder to guarantee as climate change alters weather patterns globally. In response, a growing number of farmers and entrepreneurs are turning to vertical farming: the practice of growing crops in stacked layers inside climate-controlled buildings, typically in urban environments.
+
+Vertical farms use artificial lighting, hydroponic systems — which deliver nutrients directly to plant roots through water rather than soil — and carefully regulated temperature and humidity. Because conditions are fully controlled, crops can be grown year-round without being affected by seasons or extreme weather. Water usage is also dramatically reduced compared to conventional farming, with some systems using up to 95 percent less water.
+
+However, vertical farming is not without challenges. The energy costs required to power artificial lighting and climate-control systems are substantial, and critics argue that these energy demands may offset the environmental benefits. The upfront cost of establishing a vertical farm is also significantly higher than for a traditional farm. Despite these drawbacks, proponents argue that as energy becomes cleaner and cheaper, vertical farming will become an increasingly viable solution to global food security challenges.`,
+    questions:[
+      {q:"What is the main purpose of vertical farming according to the passage?",
+       options:["To replace all traditional farms within ten years","To grow crops in conditions independent of land, weather, and seasons","To reduce the cost of food for urban consumers","To eliminate the need for artificial lighting in agriculture"],
+       correct:1,
+       explanation:"The passage describes vertical farming as growing crops in controlled indoor environments, free from the land, weather, and seasonal constraints that affect traditional farming — this is its core purpose as described."},
+      {q:"What does the word 'hydroponic' refer to in the passage?",
+       options:["A system that uses soil enriched with minerals","A method of delivering nutrients to plants through water instead of soil","A type of artificial lighting designed for plant growth","A technique for controlling indoor temperature"],
+       correct:1,
+       explanation:"The passage defines hydroponic directly: 'systems which deliver nutrients directly to plant roots through water rather than soil.'"},
+      {q:"According to the passage, what is one significant advantage of vertical farming over conventional farming?",
+       options:["It requires no electricity to operate","It produces crops more quickly than traditional methods","It uses dramatically less water","It is cheaper to set up"],
+       correct:2,
+       explanation:"The passage states vertical farming can use 'up to 95 percent less water' than conventional farming. It requires substantial electricity, makes no speed comparison, and is noted to cost more to establish."},
+      {q:"What concern do critics raise about vertical farming?",
+       options:["Crops grown indoors have lower nutritional value.","The energy demands may cancel out environmental benefits.","Vertical farms produce too much food waste.","The technology is not yet reliable enough for large-scale use."],
+       correct:1,
+       explanation:"The passage states: 'critics argue that these energy demands may offset the environmental benefits' — this is the specific criticism raised."},
+      {q:"What does the word 'proponents' mean as used in the final sentence?",
+       options:["Critics who oppose vertical farming","Governments that regulate farming","Supporters who argue in favour of vertical farming","Scientists who study plant growth"],
+       correct:2,
+       explanation:"'Proponents' are people who argue in favour of something — in this context, supporters of vertical farming who believe it will become viable as energy improves."}
+    ]
+  },
+  {
+    title:"The Silk Road",
+    topic:"History",
+    passage:`The Silk Road was not a single road but a network of overland and maritime trade routes connecting East Asia with Central Asia, the Middle East, and the Mediterranean world. Active from roughly the second century BCE until the fifteenth century CE, it facilitated the exchange of goods including silk, spices, glassware, and precious metals across thousands of kilometres.
+
+The name "Silk Road" was coined by the German geographer Ferdinand von Richthofen in 1877, though ancient traders themselves would not have recognised this term. In fact, silk was only one of many commodities traded along the routes; the significance of the name reflects how highly prized Chinese silk was in the Roman Empire and other Western societies.
+
+Beyond material goods, the Silk Road served as a conduit for the spread of ideas, religions, technologies, and diseases. Buddhism spread from India to China via these routes, while Islam later travelled westward to new regions. The bubonic plague, which caused the devastating Black Death in fourteenth-century Europe, is believed to have spread along Silk Road trade networks. The Silk Road therefore shaped not only the economies but also the cultures and histories of entire civilisations.`,
+    questions:[
+      {q:"What is the main idea of the passage?",
+       options:["The Silk Road was primarily used for trading silk between China and Rome.","The Silk Road was a complex network that exchanged goods, ideas, and diseases across civilisations.","Ferdinand von Richthofen was the most important historian of ancient trade.","The Silk Road was the main cause of the Black Death in Europe."],
+       correct:1,
+       explanation:"The passage covers goods, ideas, religions, technologies, and diseases — not just silk. The final sentence summarises this: the Silk Road 'shaped not only the economies but also the cultures and histories of entire civilisations.'"},
+      {q:"According to the passage, who gave the Silk Road its name?",
+       options:["An ancient Chinese emperor","A Roman merchant","A German geographer named Ferdinand von Richthofen","An Arab scholar travelling the route"],
+       correct:2,
+       explanation:"The passage states that the name Silk Road was coined by the German geographer Ferdinand von Richthofen in 1877."},
+      {q:"Why does the passage say the name Silk Road can be considered misleading?",
+       options:["Silk was never actually traded on the route.","The route was mostly maritime, not overland.","Silk was just one of many goods traded along the routes.","The route was only used for a very short period of history."],
+       correct:2,
+       explanation:"The passage states 'silk was only one of many commodities traded along the routes' and that the name reflects how prized silk was in the West — implying the name overstates silk's role relative to all other trade."},
+      {q:"In the context of the passage, what does 'conduit' mean?",
+       options:["A barrier that prevented the spread of ideas","A type of ancient trading vessel","A channel or means through which something passes","A legal agreement between trading nations"],
+       correct:2,
+       explanation:"A conduit is a channel through which something flows or passes. The passage uses it to describe the Silk Road as the channel through which ideas, religions, technologies, and diseases spread between civilisations."},
+      {q:"Which of the following is NOT mentioned as something that spread along the Silk Road?",
+       options:["Buddhism","The bubonic plague","Islam","The printing press"],
+       correct:3,
+       explanation:"The passage mentions Buddhism, Islam, the bubonic plague, and technologies as things that spread along the Silk Road. The printing press is not mentioned anywhere in the passage."}
+    ]
+  },
+  {
+    title:"How Sleep Affects Memory",
+    topic:"Neuroscience / Psychology",
+    passage:`For much of human history, sleep was regarded as a passive state — a period of inactivity during which the brain simply rested. Modern neuroscience has fundamentally overturned this view. We now know that sleep is a highly active process, critical for a wide range of physiological and cognitive functions, including the consolidation of memories.
+
+Memory consolidation refers to the process by which newly acquired information is stabilised and transferred from short-term to long-term memory. Research has shown that this process occurs primarily during sleep, particularly during slow-wave sleep and rapid eye movement (REM) sleep. During slow-wave sleep, the hippocampus — a brain structure involved in forming new memories — replays recent experiences, reinforcing the neural pathways that represent them. During REM sleep, the brain appears to integrate new information with existing knowledge, strengthening connections between related concepts.
+
+Studies have consistently demonstrated that people who sleep after learning new material retain significantly more information than those who remain awake. Conversely, sleep deprivation seriously impairs the brain's ability to encode new memories, which helps explain why students who study all night before an examination often perform worse than those who studied less but slept adequately.`,
+    questions:[
+      {q:"What is the main purpose of the passage?",
+       options:["To argue that students should sleep more than they study","To explain how sleep contributes to memory formation","To describe the differences between short-term and long-term memory","To criticise the view that sleep is unimportant for health"],
+       correct:1,
+       explanation:"The passage focuses specifically on how sleep — particularly slow-wave and REM sleep — enables memory consolidation. This is the central topic, not a broader argument about student habits or memory types."},
+      {q:"According to the passage, what happens in the hippocampus during slow-wave sleep?",
+       options:["New information is deleted to make room for more memories","The brain integrates new information with existing knowledge","Recent experiences are replayed and neural pathways are reinforced","The brain prepares for the following day's learning"],
+       correct:2,
+       explanation:"The passage states: 'the hippocampus… replays recent experiences, reinforcing the neural pathways that represent them' — this is specifically the slow-wave sleep function described."},
+      {q:"In the context of the passage, what does 'consolidation' mean?",
+       options:["The forgetting of unnecessary information","The process of stabilising and storing newly learned information","The physical growth of the hippocampus during childhood","The act of reviewing notes before an exam"],
+       correct:1,
+       explanation:"The passage defines consolidation directly: 'the process by which newly acquired information is stabilised and transferred from short-term to long-term memory.'"},
+      {q:"What does the passage suggest about students who study all night without sleeping?",
+       options:["They will remember more because they spent longer studying.","They may perform worse than students who studied less but slept.","They will benefit from napping the following afternoon.","Their performance depends on the type of exam they take."],
+       correct:1,
+       explanation:"The passage states students who 'studied all night… often perform worse than those who studied less but slept adequately' — directly addressing this scenario."},
+      {q:"What was the traditional view of sleep described in the passage?",
+       options:["Sleep was considered essential for physical growth only.","Sleep was thought to be a passive state of rest for the brain.","Sleep was believed to interfere with memory formation.","Sleep was regarded as important for emotional wellbeing."],
+       correct:1,
+       explanation:"The opening sentence describes the traditional view: 'sleep was regarded as a passive state — a period of inactivity during which the brain simply rested.'"}
+    ]
+  },
+  {
+    title:"The Economics of Supply and Demand",
+    topic:"Economics",
+    passage:`One of the most fundamental principles in economics is the relationship between supply and demand. Demand refers to the quantity of a good or service that consumers are willing and able to purchase at a given price, while supply refers to the quantity that producers are willing and able to offer for sale at that price. When supply and demand are balanced, the market is said to be in equilibrium, and the price at which this balance occurs is called the equilibrium price.
+
+When demand for a product increases but supply remains constant, the equilibrium price rises. This is because consumers are competing for the same quantity of goods, and producers can therefore charge more. Conversely, if supply increases while demand remains constant — for example, when a new technology dramatically reduces production costs — prices tend to fall.
+
+These relationships are not merely theoretical. Prices for goods ranging from petrol to housing to seasonal vegetables all fluctuate in response to shifts in supply and demand. Understanding these dynamics helps businesses set prices strategically, enables governments to design effective economic policies, and allows consumers to make more informed purchasing decisions.`,
+    questions:[
+      {q:"What does the term 'equilibrium price' mean according to the passage?",
+       options:["The highest price consumers are willing to pay","The price set by the government to control inflation","The price at which the quantity supplied equals the quantity demanded","The average price of goods across an economy"],
+       correct:2,
+       explanation:"The passage defines equilibrium price as the price 'at which this balance occurs' — the balance being between supply and demand, i.e. when quantity supplied equals quantity demanded."},
+      {q:"According to the passage, what happens to prices when demand increases but supply stays the same?",
+       options:["Prices fall because consumers have less money to spend.","Prices stay the same because supply has not changed.","Prices rise because consumers are competing for the same quantity of goods.","Prices are set by the government to prevent shortages."],
+       correct:2,
+       explanation:"The passage states: 'When demand for a product increases but supply remains constant, the equilibrium price rises… consumers are competing for the same quantity of goods, and producers can therefore charge more.'"},
+      {q:"In the context of the passage, what does the word 'fluctuate' mean?",
+       options:["To remain stable over a long period","To rise and fall in response to changing conditions","To be controlled by government regulation","To decrease gradually over time"],
+       correct:1,
+       explanation:"The passage uses 'fluctuate' to describe how prices for petrol, housing, and vegetables change in response to shifts in supply and demand — meaning they rise and fall, not remain stable."},
+      {q:"The passage gives the example of 'a new technology that reduces production costs.' What effect does this have?",
+       options:["It reduces demand for the product.","It causes the equilibrium price to rise.","It increases supply and causes prices to fall.","It allows the government to regulate the market."],
+       correct:2,
+       explanation:"The passage describes this as an example of supply increasing while demand stays constant, resulting in prices falling: 'if supply increases while demand remains constant… prices tend to fall.'"},
+      {q:"What is the main argument of the final paragraph?",
+       options:["Supply and demand principles are too complex for ordinary people to understand.","Understanding supply and demand has practical value for businesses, governments, and consumers.","Governments should use supply and demand to fix prices in all markets.","The relationship between supply and demand is only relevant to large economies."],
+       correct:1,
+       explanation:"The final paragraph argues that supply and demand dynamics help businesses, governments, and consumers make better decisions — its main point is the practical usefulness of understanding these principles."}
+    ]
+  },
+  {
+    title:"The Development of Writing",
+    topic:"History / Linguistics",
+    passage:`Writing is one of humanity's most transformative inventions, yet it was not invented once but emerged independently in at least three separate civilisations: Mesopotamia, China, and Mesoamerica. The earliest known writing system, developed by the Sumerians of ancient Mesopotamia around 3200 BCE, began as a series of pictographic symbols used to record administrative information such as grain quantities and livestock counts.
+
+Over time, these pictographs evolved into cuneiform — a system of wedge-shaped marks pressed into clay tablets. Cuneiform gradually became capable of representing not just objects and numbers but also sounds and abstract ideas, transforming it into a full writing system capable of expressing the complete range of human language.
+
+The invention of writing had profound consequences for human civilisation. It enabled the accumulation and transmission of knowledge across generations, made large-scale trade and administration possible, and gave rise to literature, law, and recorded history. Historians often use the development of writing to mark the boundary between prehistory and history, since history, by definition, requires written records. Without writing, much of what we know about ancient civilisations, their beliefs, economies, and conflicts would simply have been lost.`,
+    questions:[
+      {q:"According to the passage, how many times was writing independently invented?",
+       options:["Once, in ancient Mesopotamia","Twice, in Mesopotamia and China","At least three times, in separate civilisations","Many times, in every ancient civilisation"],
+       correct:2,
+       explanation:"The passage states writing 'emerged independently in at least three separate civilisations: Mesopotamia, China, and Mesoamerica.'"},
+      {q:"What were the earliest Sumerian writing symbols primarily used for?",
+       options:["Recording religious ceremonies","Writing poetry and literature","Recording administrative information such as grain and livestock","Communicating with neighbouring civilisations"],
+       correct:2,
+       explanation:"The passage states the earliest symbols were 'used to record administrative information such as grain quantities and livestock counts' — practical record-keeping, not literature or religion."},
+      {q:"In the context of the passage, what does 'cuneiform' refer to?",
+       options:["A type of ancient clay pot used for storage","A system of wedge-shaped written marks developed from earlier pictographs","A language spoken in ancient Mesopotamia","A measurement system used in early trade"],
+       correct:1,
+       explanation:"The passage defines cuneiform directly: 'a system of wedge-shaped marks pressed into clay tablets' that evolved from pictographs."},
+      {q:"Why do historians use writing to mark the start of 'history' as distinct from 'prehistory'?",
+       options:["Because writing was the first human invention","Because history, by definition, requires written records","Because pictographic symbols were the first form of human communication","Because written laws created the first stable governments"],
+       correct:1,
+       explanation:"The passage states: 'Historians often use the development of writing to mark the boundary between prehistory and history, since history, by definition, requires written records.'"},
+      {q:"What is the main idea of the final paragraph?",
+       options:["Writing made ancient civilisations too dependent on records.","The invention of writing had wide-ranging and profound effects on human civilisation.","Without writing, human beings could not have developed language.","Cuneiform was the most important writing system ever invented."],
+       correct:1,
+       explanation:"The final paragraph lists multiple consequences of writing — knowledge transmission, trade, literature, law, recorded history — building to the conclusion that without it, much ancient knowledge would be lost. The main idea is writing's profound and wide-ranging impact."}
+    ]
+  },
+  {
+    title:"Coral Reefs Under Threat",
+    topic:"Environmental Science",
+    passage:`Coral reefs cover less than one percent of the ocean floor yet support an estimated twenty-five percent of all marine species, earning them the nickname "rainforests of the sea." They are built by tiny colonial animals called polyps, which secrete calcium carbonate skeletons that accumulate over thousands of years to form the complex three-dimensional structures we recognise as reefs.
+
+Despite their ecological importance, coral reefs are under severe threat. Rising ocean temperatures caused by climate change lead to coral bleaching — a stress response in which corals expel the symbiotic algae, called zooxanthellae, that live within their tissues. These algae provide corals with up to ninety percent of their energy through photosynthesis. When they are expelled, the coral turns white and, if temperatures do not return to normal quickly, the coral starves and dies.
+
+Additional threats include ocean acidification — caused by the ocean absorbing excess atmospheric carbon dioxide — which weakens coral skeletons, as well as physical damage from destructive fishing practices, coastal development, and pollution. Scientists estimate that between thirty and fifty percent of the world's coral reefs have already been lost, and without significant reductions in carbon emissions, the majority of remaining reefs could be lost by the end of this century.`,
+    questions:[
+      {q:"Why are coral reefs sometimes called 'rainforests of the sea'?",
+       options:["Because they are found in tropical regions with high rainfall","Because they support a very high proportion of all marine species","Because they are built from plant material similar to rainforest trees","Because they produce large amounts of oxygen for the atmosphere"],
+       correct:1,
+       explanation:"The passage explains the nickname directly after using it: coral reefs 'support an estimated twenty-five percent of all marine species' — their exceptional biodiversity is the reason for the comparison to rainforests."},
+      {q:"What happens to coral during bleaching?",
+       options:["The coral absorbs too much carbon dioxide and becomes acidic.","The coral grows too quickly and loses its colour.","The coral expels its symbiotic algae, causing it to turn white and potentially die.","The coral is physically damaged by storms and human activity."],
+       correct:2,
+       explanation:"The passage describes bleaching as the process where 'corals expel the symbiotic algae… The coral turns white and, if temperatures do not return to normal quickly, the coral starves and dies.'"},
+      {q:"According to the passage, what do zooxanthellae provide to corals?",
+       options:["Protection from predators","Up to ninety percent of the coral's energy through photosynthesis","The calcium carbonate needed to build the reef structure","A method of reproduction for coral polyps"],
+       correct:1,
+       explanation:"The passage states: 'These algae provide corals with up to ninety percent of their energy through photosynthesis.'"},
+      {q:"What does the word 'secrete' most likely mean in the context of the passage?",
+       options:["To hide something inside a protective structure","To produce and release a substance from the body","To absorb a chemical from the surrounding water","To break down a solid material into smaller particles"],
+       correct:1,
+       explanation:"The passage says polyps 'secrete calcium carbonate skeletons' — they produce and release this substance from their bodies to build the reef structure."},
+      {q:"What does the passage suggest is the most important step in protecting remaining coral reefs?",
+       options:["Banning all fishing in reef areas","Reducing carbon emissions significantly","Increasing ocean salinity to counter acidification","Building artificial reefs to replace natural ones"],
+       correct:1,
+       explanation:"The passage ends by stating that 'without significant reductions in carbon emissions, the majority of remaining reefs could be lost' — pointing to carbon emissions reduction as the critical factor for reef survival."}
+    ]
+  },
+  {
+    title:"The Psychology of First Impressions",
+    topic:"Psychology / Social Science",
+    passage:`Research in social psychology has consistently shown that people form lasting impressions of others within seconds of meeting them, often before a single word has been spoken. These rapid judgements are primarily based on visual cues — facial features, posture, clothing, and expressions — and are remarkably difficult to revise once formed.
+
+This phenomenon, sometimes called the "primacy effect," occurs because the brain processes first impressions using automatic, unconscious mechanisms that operate very quickly. Information that arrives first tends to be weighted more heavily in our overall judgement of a person, even when subsequent information contradicts it. In one classic experiment, participants rated a person described as "intelligent, industrious, impulsive, critical, stubborn, and envious" more positively than one described with the same words in reverse order — simply because positive traits appeared first.
+
+While first impressions can be useful shortcuts in everyday social interactions, they carry significant risks in high-stakes settings such as job interviews, court proceedings, and medical consultations. Research has shown that interviewers frequently make hiring decisions within the first few minutes of an interview and spend the remainder of the time seeking confirmation of their initial judgement. This can disadvantage candidates whose performance improves over time and may introduce bias based on irrelevant factors such as appearance or accent.`,
+    questions:[
+      {q:"What is the 'primacy effect' as described in the passage?",
+       options:["The tendency to remember the last piece of information more clearly","The brain's preference for processing negative information over positive information","The tendency for first information encountered to carry more weight in overall judgements","The scientific study of how first impressions affect long-term relationships"],
+       correct:2,
+       explanation:"The passage defines the primacy effect as the tendency for 'information that arrives first' to 'be weighted more heavily in our overall judgement of a person, even when subsequent information contradicts it.'"},
+      {q:"In the classic experiment described, why did participants rate the first description more positively?",
+       options:["The first description used more impressive vocabulary.","The positive traits appeared at the beginning of the list.","The first description was about a real person participants knew.","Participants had more time to think about the first description."],
+       correct:1,
+       explanation:"The passage explains that participants reacted more positively to the description with positive traits listed first — the only difference was the order of identical words, with positive traits appearing first."},
+      {q:"According to the passage, how quickly do job interviewers often make hiring decisions?",
+       options:["After carefully reviewing all the candidate's qualifications","After the interview is fully completed","Within the first few minutes of the interview","After consulting with other hiring managers"],
+       correct:2,
+       explanation:"The passage states: 'interviewers frequently make hiring decisions within the first few minutes of an interview and spend the remainder of the time seeking confirmation of their initial judgement.'"},
+      {q:"What does the word 'contradict' mean in the context of the passage?",
+       options:["To support or reinforce an existing belief","To go against or conflict with something","To prove something scientifically","To replace an idea with a better one"],
+       correct:1,
+       explanation:"The passage uses 'contradicts' when describing information that goes against an already-formed first impression — meaning to conflict with or oppose."},
+      {q:"What is the author's main concern about first impressions in high-stakes settings?",
+       options:["They cause people to become overconfident in social situations.","They may introduce unfair bias and disadvantage people who improve over time.","They make communication in professional settings more efficient.","They are more accurate than careful evaluation of evidence."],
+       correct:1,
+       explanation:"The final paragraph raises the concern that first impressions in job interviews can 'disadvantage candidates whose performance improves over time and may introduce bias based on irrelevant factors such as appearance or accent.'"}
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════════════════
+let dlCurrent = [];
+let acCurrent = [];
+let activeTab = 'daily';
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════════════════════════════════════════
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`panel-${tab}`).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    if ((tab === 'daily' && b.textContent.includes('Daily')) ||
+        (tab === 'academic' && b.textContent.includes('Academic'))) {
+      b.classList.add('active');
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// GENERATE DAILY LIFE
+// ═══════════════════════════════════════════════════════════════════════════════
+function generateDaily() {
+  const shuffled = [...DAILY_POOL].sort(() => Math.random() - 0.5);
+  dlCurrent = shuffled.slice(0, 5);
+  document.getElementById('dl-placeholder').style.display = 'none';
+  document.getElementById('dl-score-summary').classList.remove('visible');
+  document.getElementById('dl-score-val').textContent = '—';
+  const container = document.getElementById('dl-exercises');
+  container.innerHTML = '';
+  dlCurrent.forEach((ex, idx) => {
+    const div = document.createElement('div');
+    div.className = 'exercise';
+    div.innerHTML = `
+      <div class="ex-header">
+        <span class="ex-num">Exercise ${idx+1}</span>
+        <span class="ex-title">${esc(ex.title)}</span>
+        <span class="ex-type">${esc(ex.type)}</span>
+        <span class="ex-score" id="dl-exscore-${idx}"></span>
+      </div>
+      <div class="dl-body">
+        <div class="text-col">
+          <div class="text-type-label">Read the ${esc(ex.type)}.</div>
+          ${renderDailyText(ex)}
+        </div>
+        <div class="questions-col" id="dl-qcol-${idx}">
+          ${renderQuestions(ex.questions, `dl-${idx}`)}
+          <button class="check-btn" id="dl-checkbtn-${idx}" onclick="checkAnswers('dl',${idx})">Check Answers</button>
+          <div class="q-score-row" id="dl-qscore-${idx}" style="display:none"></div>
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function renderDailyText(ex) {
+  const r = ex.renderType;
+  if (r === 'email') {
+    const f = ex.emailFields;
+    return `<div class="styled-email">
+      <div class="email-fields">
+        <div class="email-field"><span class="ef-label">To:</span>${esc(f.to)}</div>
+        <div class="email-field"><span class="ef-label">From:</span>${esc(f.from)}</div>
+        <div class="email-field"><span class="ef-label">Date:</span>${esc(f.date)}</div>
+        <div class="email-field"><span class="ef-label">Subject:</span>${esc(f.subject)}</div>
+      </div>
+      <div class="email-body">${esc(ex.emailBody).replace(/\n/g,'<br>')}</div>
+    </div>`;
+  }
+  if (r === 'poster') {
+    return `<div class="styled-poster">
+      <div class="poster-title">${esc(ex.posterTitle)}</div>
+      <div class="poster-sub">${esc(ex.posterSub)}</div>
+      <div class="poster-body">${esc(ex.posterBody).replace(/\n/g,'<br>')}</div>
+    </div>`;
+  }
+  if (r === 'menu') {
+    let html = `<div class="styled-menu"><div class="menu-title">${esc(ex.menuTitle)}</div>`;
+    ex.menuSections.forEach(s => {
+      html += `<div class="menu-section">${esc(s.heading)}</div>`;
+      s.items.forEach(([name, price]) => {
+        html += `<div class="menu-item"><span>${esc(name)}</span><span>${esc(price)}</span></div>`;
+      });
+    });
+    html += `<div class="menu-note">${esc(ex.menuNote)}</div></div>`;
+    return html;
+  }
+  if (r === 'notice') {
+    return `<div class="styled-notice"><div class="notice-title">${esc(ex.noticeTitle)}</div>${esc(ex.noticeBody).replace(/\n/g,'<br>')}</div>`;
+  }
+  if (r === 'receipt') {
+    const d = ex.receiptData;
+    let html = `<div class="styled-receipt"><div class="receipt-header">${esc(d.header).replace(/\n/g,'<br>')}</div>`;
+    d.rows.forEach(([k,v]) => { html += `<div class="receipt-row"><span>${esc(k)}</span><span>${esc(v)}</span></div>`; });
+    html += `<div class="receipt-row receipt-total"><span>TOTAL</span><span>${esc(d.total)}</span></div>`;
+    html += `<div class="receipt-note">${esc(d.note).replace(/\n/g,'<br>')}</div></div>`;
+    return html;
+  }
+  if (r === 'schedule') {
+    let html = `<div class="styled-schedule"><div class="sched-title">${esc(ex.scheduleTitle)}</div>`;
+    ex.scheduleRows.forEach(([time, event]) => {
+      html += `<div class="sched-row"><div class="sched-time">${esc(time)}</div><div class="sched-event">${esc(event)}</div></div>`;
+    });
+    html += `</div><p style="font-size:0.75rem;color:var(--ink-light);margin-top:6px;font-style:italic;">${esc(ex.scheduleNote)}</p>`;
+    return html;
+  }
+  if (r === 'sign') {
+    return `<div class="styled-sign"><div class="sign-title">${esc(ex.signTitle)}</div><div class="sign-body">${esc(ex.signBody).replace(/\n/g,'<br>')}</div></div>`;
+  }
+  // plain
+  return `<div class="plain-text">${esc(ex.plainText).replace(/\n/g,'<br>')}</div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// GENERATE ACADEMIC
+// ═══════════════════════════════════════════════════════════════════════════════
+function generateAcademic() {
+  const shuffled = [...ACADEMIC_POOL].sort(() => Math.random() - 0.5);
+  acCurrent = shuffled.slice(0, 5);
+  document.getElementById('ac-placeholder').style.display = 'none';
+  document.getElementById('ac-score-summary').classList.remove('visible');
+  document.getElementById('ac-score-val').textContent = '—';
+  const container = document.getElementById('ac-exercises');
+  container.innerHTML = '';
+  acCurrent.forEach((ex, idx) => {
+    const div = document.createElement('div');
+    div.className = 'exercise';
+    const passageHTML = ex.passage.split('\n\n').map(p => `<p>${esc(p)}</p>`).join('');
+    div.innerHTML = `
+      <div class="ex-header">
+        <span class="ex-num">Passage ${idx+1}</span>
+        <span class="ex-title">${esc(ex.title)}</span>
+        <span class="ex-type">${esc(ex.topic)}</span>
+        <span class="ex-score" id="ac-exscore-${idx}"></span>
+      </div>
+      <div class="ac-body">
+        <div class="passage-col">
+          <div class="passage-title">${esc(ex.title)}</div>
+          <div class="passage-text">${passageHTML}</div>
+        </div>
+        <div class="questions-col" id="ac-qcol-${idx}">
+          ${renderQuestions(ex.questions, `ac-${idx}`)}
+          <button class="check-btn" id="ac-checkbtn-${idx}" onclick="checkAnswers('ac',${idx})">Check Answers</button>
+          <div class="q-score-row" id="ac-qscore-${idx}" style="display:none"></div>
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// RENDER QUESTIONS
+// ═══════════════════════════════════════════════════════════════════════════════
+function renderQuestions(questions, prefix) {
+  return questions.map((q, qi) => {
+    const opts = q.options.map((opt, oi) => `
+      <label class="q-option" id="${prefix}-q${qi}-o${oi}">
+        <input type="radio" name="${prefix}-q${qi}" value="${oi}">
+        ${esc(opt)}
+      </label>`).join('');
+    return `<div class="question-block">
+      <div class="q-text">${qi+1}. ${esc(q.q)}</div>
+      <div class="q-options">${opts}</div>
+      <div class="q-explanation" id="${prefix}-q${qi}-exp">${esc(q.explanation)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CHECK ANSWERS
+// ═══════════════════════════════════════════════════════════════════════════════
+function checkAnswers(pool, idx) {
+  const questions = pool === 'dl' ? dlCurrent[idx].questions : acCurrent[idx].questions;
+  const prefix = `${pool}-${idx}`;
+  let correct = 0;
+
+  questions.forEach((q, qi) => {
+    const selected = document.querySelector(`input[name="${prefix}-q${qi}"]:checked`);
+    const expEl = document.getElementById(`${prefix}-q${qi}-exp`);
+
+    // Disable all options
+    for (let oi = 0; oi < q.options.length; oi++) {
+      const lbl = document.getElementById(`${prefix}-q${qi}-o${oi}`);
+      if (lbl) {
+        lbl.querySelector('input').disabled = true;
+        // Reveal correct answer
+        if (oi === q.correct) lbl.classList.add('reveal-correct');
+      }
+    }
+
+    if (selected) {
+      const val = parseInt(selected.value);
+      const lbl = document.getElementById(`${prefix}-q${qi}-o${val}`);
+      if (val === q.correct) {
+        correct++;
+        if (lbl) { lbl.classList.remove('reveal-correct'); lbl.classList.add('correct'); }
+      } else {
+        if (lbl) lbl.classList.add('wrong');
+      }
+    }
+    // Always show explanation
+    if (expEl) expEl.classList.add('visible');
+  });
+
+  // Disable check button
+  const btn = document.getElementById(`${pool}-checkbtn-${idx}`);
+  if (btn) btn.disabled = true;
+
+  // Show per-exercise score
+  const scoreEl = document.getElementById(`${pool}-exscore-${idx}`);
+  const qScoreEl = document.getElementById(`${pool}-qscore-${idx}`);
+  const total = questions.length;
+  if (scoreEl) scoreEl.textContent = `${correct}/${total}`;
+  if (qScoreEl) { qScoreEl.style.display='block'; qScoreEl.textContent = `Score: ${correct} out of ${total}`; }
+
+  // Update total
+  updateTotalScore(pool);
+}
+
+function updateTotalScore(pool) {
+  const current = pool === 'dl' ? dlCurrent : acCurrent;
+  let totalCorrect = 0, totalQ = 0;
+  current.forEach((ex, idx) => {
+    const scoreEl = document.getElementById(`${pool}-exscore-${idx}`);
+    if (scoreEl && scoreEl.textContent.includes('/')) {
+      const [c, t] = scoreEl.textContent.split('/').map(Number);
+      totalCorrect += c; totalQ += t;
+    }
+  });
+  if (totalQ > 0) {
+    const sumEl = document.getElementById(`${pool}-score-summary`);
+    const valEl = document.getElementById(`${pool}-score-val`);
+    if (sumEl) sumEl.classList.add('visible');
+    if (valEl) valEl.textContent = `${totalCorrect} / ${totalQ}`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
