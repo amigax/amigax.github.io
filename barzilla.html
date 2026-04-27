@@ -666,7 +666,41 @@ footer a:hover { text-decoration: underline; }
   transform: translateY(0);
 }
 
-/* ── WINDOWS BADGE ── */
+/* ── LAUNCH BANNER ── */
+.launch-banner {
+  background: var(--green);
+  color: var(--dark);
+  text-align: center;
+  padding: 0.7rem 1rem;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  position: relative;
+  z-index: 101;
+}
+
+.launch-banner strong {
+  font-size: 1rem;
+}
+
+.launch-banner .coupon {
+  display: inline-block;
+  background: var(--dark);
+  color: var(--green);
+  padding: 0.15rem 0.6rem;
+  margin: 0 0.3rem;
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+}
+
+.launch-banner .ends {
+  opacity: 0.7;
+  font-weight: 400;
+  font-size: 0.75rem;
+  margin-left: 0.5rem;
+}
 .windows-badge {
   display: inline-flex;
   align-items: center;
@@ -720,7 +754,40 @@ footer a:hover { text-decoration: underline; }
 </head>
 <body>
 
-<!-- NAV -->
+<script>
+// ============================================================
+//  SITE CONFIG — edit these flags to control what's shown
+// ============================================================
+const CONFIG = {
+
+  // Launch offer banner — set to false to hide it
+  showLaunchBanner: true,
+  launchBannerText: 'Launch offer',
+  launchCouponCode: 'LAUNCH',
+  launchCouponSaving: 'Get $3 off',
+  launchBannerEnds: 'Limited time',
+
+  // Prices shown on the page
+  priceProFull:   '$12',
+  priceProLaunch: '$9',
+
+  // Buy links
+  linkProBuy:      'https://gum.co/barzilla',  // update to your Gumroad Pro product URL
+  linkFreeDemo:    'https://gum.co/barzilla-free', // update to your Gumroad free product URL
+
+  // Site URL (for any back-links)
+  siteUrl: 'https://amigax.github.io/barzilla.html',
+};
+// ============================================================
+</script>
+
+<!-- LAUNCH BANNER -->
+<div class="launch-banner" id="launchBanner" style="display:none;">
+  🦎 <strong id="bannerText"></strong> —
+  use code <span class="coupon" id="bannerCoupon"></span>
+  at checkout for <span id="bannerSaving"></span>
+  <span class="ends" id="bannerEnds"></span>
+</div>
 <nav>
   <a href="#" class="nav-logo">🦎 BarZilla!</a>
   <ul class="nav-links">
@@ -754,8 +821,8 @@ footer a:hover { text-decoration: underline; }
   </div>
 
   <div class="hero-cta">
-    <a href="https://gum.co/barzilla" class="btn-primary" target="_blank">
-      🦎 Buy BarZilla! Pro <span class="price-tag">$9</span>
+    <a class="btn-primary link-pro-buy" href="https://gum.co/barzilla" target="_blank">
+      🦎 Buy BarZilla! Pro <span class="price-tag price-launch">$9</span>
     </a>
     <a href="#free-demo" class="btn-secondary">
       Try Free Demo ↓
@@ -913,7 +980,7 @@ footer a:hover { text-decoration: underline; }
         <li class="locked">Custom colour picker</li>
         <li class="locked">3+ monitors</li>
       </ul>
-      <a href="https://www.garethmurfin.com" class="btn-secondary" style="width:100%;justify-content:center;" target="_blank">
+      <a class="btn-secondary link-free-demo" href="https://gum.co/barzilla-free" style="width:100%;justify-content:center;" target="_blank">
         Download Free
       </a>
     </div>
@@ -921,8 +988,10 @@ footer a:hover { text-decoration: underline; }
     <!-- PRO -->
     <div class="pricing-card featured">
       <div class="plan-name">Pro</div>
-      <div class="plan-price">$9</div>
-      <div class="plan-period">One-time payment — yours forever</div>
+      <div class="plan-price price-launch">$9</div>
+      <div class="plan-period">
+        One-time · normally <s class="price-full" style="opacity:0.5;">$12</s> · launch offer
+      </div>
       <ul class="plan-features">
         <li>Unlimited monitors</li>
         <li>Custom textures (any image)</li>
@@ -936,7 +1005,7 @@ footer a:hover { text-decoration: underline; }
         <li>All future updates</li>
         <li>Instant licence activation</li>
       </ul>
-      <a href="https://gum.co/barzilla" class="btn-primary" style="width:100%;justify-content:center;" target="_blank">
+      <a class="btn-primary link-pro-buy" href="https://gum.co/barzilla" style="width:100%;justify-content:center;" target="_blank">
         🦎 Buy BarZilla! Pro — $9
       </a>
     </div>
@@ -964,10 +1033,10 @@ footer a:hover { text-decoration: underline; }
     Join the zero-CPU revolution. One payment, all monitors, forever.
   </p>
   <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
-    <a href="https://gum.co/barzilla" class="btn-primary" target="_blank">
-      🦎 Buy BarZilla! Pro <span class="price-tag">$9</span>
+    <a class="btn-primary link-pro-buy" href="https://gum.co/barzilla" target="_blank">
+      🦎 Buy BarZilla! Pro <span class="price-tag price-launch">$9</span>
     </a>
-    <a href="https://www.garethmurfin.com" class="btn-secondary" target="_blank">
+    <a class="btn-secondary link-free-demo" href="https://gum.co/barzilla-free" target="_blank">
       Download Free Demo
     </a>
   </div>
@@ -996,6 +1065,25 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.1 });
 
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── Apply CONFIG ──
+
+// Launch banner
+if (CONFIG.showLaunchBanner) {
+  document.getElementById('launchBanner').style.display = 'block';
+  document.getElementById('bannerText').textContent    = CONFIG.launchBannerText;
+  document.getElementById('bannerCoupon').textContent  = CONFIG.launchCouponCode;
+  document.getElementById('bannerSaving').textContent  = CONFIG.launchCouponSaving;
+  document.getElementById('bannerEnds').textContent    = '— ' + CONFIG.launchBannerEnds;
+}
+
+// Prices — update every element with class "price-full" and "price-launch"
+document.querySelectorAll('.price-full').forEach(el => el.textContent = CONFIG.priceProFull);
+document.querySelectorAll('.price-launch').forEach(el => el.textContent = CONFIG.priceProLaunch);
+
+// Buy links — update every element with class "link-pro-buy" and "link-free-demo"
+document.querySelectorAll('.link-pro-buy').forEach(el => el.href = CONFIG.linkProBuy);
+document.querySelectorAll('.link-free-demo').forEach(el => el.href = CONFIG.linkFreeDemo);
 </script>
 
 </body>
