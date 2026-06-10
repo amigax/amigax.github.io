@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tynepunk SnoopDog — See What Your PC Is Really Doing</title>
+<style>
+  :root {
+    --bg:       #0C0C0C;
+    --bg2:      #111111;
+    --green:    #39ff14;
+    --dimgreen: #1a5c08;
+    --text:     #CCCCCC;
+    --muted:    #555555;
+    --border:   #222222;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Consolas', 'Courier New', monospace;
+    line-height: 1.6;
+  }
+
+  a { color: var(--green); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 80px 2rem 60px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(57,255,20,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .tag {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 1.2rem;
+  }
+
+  h1 {
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+
+  h1 span { color: var(--green); }
+
+  .subtitle {
+    font-size: 1.1rem;
+    color: var(--muted);
+    margin-bottom: 2.5rem;
+    max-width: 540px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .cta {
+    display: inline-block;
+    background: var(--green);
+    color: #000;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 14px 36px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity 0.15s;
+  }
+  .cta:hover { opacity: 0.85; text-decoration: none; }
+
+  .cta-note {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.8rem;
+  }
+
+  /* ── TERMINAL PREVIEW ── */
+  .terminal {
+    margin: 60px auto;
+    max-width: 900px;
+    padding: 0 2rem;
+  }
+
+  .term-window {
+    background: #0A0A0A;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .term-titlebar {
+    background: #1A1A1A;
+    padding: 8px 14px;
+    font-size: 0.75rem;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .term-dot { width:10px; height:10px; border-radius:50%; }
+  .term-dot.r { background:#ff5f57; }
+  .term-dot.y { background:#febc2e; }
+  .term-dot.g { background:#28c840; }
+
+  .term-body {
+    padding: 16px;
+    font-size: 0.8rem;
+    line-height: 2;
+  }
+
+  .row { display: flex; gap: 12px; align-items: baseline; }
+  .t  { color: var(--muted); min-width: 70px; }
+  .fr { color: #FF9800; min-width: 90px; font-weight: bold; }
+  .fw { color: #2196F3; min-width: 90px; font-weight: bold; }
+  .pc { color: #8BC34A; min-width: 90px; font-weight: bold; }
+  .rg { color: #00BCD4; min-width: 90px; font-weight: bold; }
+  .nt { color: #3F51B5; min-width: 90px; font-weight: bold; }
+  .pr { color: var(--green); min-width: 150px; }
+  .pa { color: var(--text); }
+
+  /* ── FEATURES ── */
+  .features {
+    padding: 60px 2rem;
+    border-top: 1px solid var(--border);
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .features h2 {
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 2rem;
+  }
+
+  .feat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 2rem;
+  }
+
+  .feat h3 {
+    color: #fff;
+    font-size: 0.95rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .feat p {
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="tag">Free Tool — Windows 10/11</p>
+  <h1>Tynepunk <span>SnoopDog</span></h1>
+  <p class="subtitle">See exactly what every process on your machine is reading, writing, and touching — in real time.</p>
+  <a href="https://github.com/amigax/snoopdog/releases/latest" class="cta">⬇ Download Free</a>
+  <span class="cta-note">Requires admin rights · Windows 10/11 · ~30MB</span>
+</section>
+
+<!-- TERMINAL PREVIEW -->
+<div class="terminal">
+  <div class="term-window">
+    <div class="term-titlebar">
+      <span class="term-dot r"></span>
+      <span class="term-dot y"></span>
+      <span class="term-dot g"></span>
+      <span style="margin-left:8px;">Tynepunk SnoopDog — watching everything</span>
+    </div>
+    <div class="term-body">
+      <div class="row"><span class="t">11:42:03.1</span><span class="fr">FILE READ</span><span class="pr">chrome</span><span class="pa">C:\Users\gaz\AppData\Local\Google\Chrome\User Data\Default\Preferences</span></div>
+      <div class="row"><span class="t">11:42:03.2</span><span class="rg">REG QUERY</span><span class="pr">code</span><span class="pa">HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer</span></div>
+      <div class="row"><span class="t">11:42:03.3</span><span class="fw">FILE WRITE</span><span class="pr">notepad</span><span class="pa">C:\Users\gaz\Documents\notes.txt</span></div>
+      <div class="row"><span class="t">11:42:03.4</span><span class="pc">PROC START</span><span class="pr">cmd</span><span class="pa">C:\Windows\System32\cmd.exe  Parent: explorer</span></div>
+      <div class="row"><span class="t">11:42:03.5</span><span class="nt">NET CONNECT</span><span class="pr">chrome</span><span class="pa">142.250.74.46:443  TCP</span></div>
+      <div class="row"><span class="t">11:42:03.6</span><span class="fr">FILE READ</span><span class="pr">code</span><span class="pa">D:\projects\myapp\src\index.ts</span></div>
+      <div class="row"><span class="t">11:42:03.7</span><span class="rg">REG SET</span><span class="pr">steam</span><span class="pa">HKCU\Software\Valve\Steam\ActiveProcess</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features">
+  <h2>What it does</h2>
+  <div class="feat-grid">
+    <div class="feat">
+      <h3>📁 File activity</h3>
+      <p>Every read, write, create, delete and rename — system-wide, every process, in real time.</p>
+    </div>
+    <div class="feat">
+      <h3>🗝 Registry activity</h3>
+      <p>Watch apps query, set and delete registry keys. Find out exactly where software stores its settings.</p>
+    </div>
+    <div class="feat">
+      <h3>⚡ Process events</h3>
+      <p>See every process start and exit with parent PID. Know what spawned what.</p>
+    </div>
+    <div class="feat">
+      <h3>🌐 Network connects</h3>
+      <p>TCP and UDP connections with destination IP and port. See what's phoning home.</p>
+    </div>
+    <div class="feat">
+      <h3>🔍 Live filtering</h3>
+      <p>Filter by process name or path substring. Type and the stream narrows instantly.</p>
+    </div>
+    <div class="feat">
+      <h3>⏸ Pause on keyword</h3>
+      <p>Set a path fragment as a breakpoint — auto-pauses the moment it appears.</p>
+    </div>
+    <div class="feat">
+      <h3>🎨 Per-process colours</h3>
+      <p>Each process gets its own row colour so you can visually track multiple apps at once.</p>
+    </div>
+    <div class="feat">
+      <h3>💾 Save &amp; copy</h3>
+      <p>Export the full log to txt/csv. Double-click any row to copy its path instantly.</p>
+    </div>
+  </div>
+</section>
+
+<!-- INSPIRED BY -->
+<section style="padding:40px 2rem; border-top:1px solid var(--border); text-align:center;">
+  <p style="color:var(--muted); font-size:0.85rem; max-width:600px; margin:0 auto;">
+    Inspired by <strong style="color:var(--text)">SnoopDos</strong> by Eddy Carroll for the Commodore Amiga (1992) —
+    the original tool that let you see what any program was actually doing.
+    Same idea, same spirit, three decades later.
+  </p>
+</section>
+
+<footer>
+  <p>Tynepunk SnoopDog is free and open source · <a href="https://github.com/amigax/snoopdog">GitHub</a> · Built by <a href="https://tynepunk.com">tynepunk.com</a></p>
+</footer>
+
+</body>
+</html>
