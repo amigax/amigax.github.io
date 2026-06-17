@@ -4,7 +4,15 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>BarZilla! — Multi-Monitor Taskbar for Windows</title>
-<meta name="description" content="The lightning-fast, zero-CPU multi-monitor taskbar for Windows. Custom textures, acrylic blur, thumbnail previews. Built different."/>
+<meta name="description" content="The near-zero-CPU multi-monitor taskbar for Windows — one independent taskbar per display, custom textures, acrylic blur, thumbnail previews, a built-in Chip-8 arcade, and the free SnoopDog system monitor."/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="BarZilla! — Multi-Monitor Taskbar for Windows"/>
+<meta property="og:description" content="A near-zero-CPU taskbar on every monitor. Custom textures, acrylic blur, thumbnail previews, built-in Chip-8 arcade, and the free SnoopDog system monitor."/>
+<meta property="og:url" content="https://amigax.github.io/barzilla.html"/>
+<!-- <meta property="og:image" content="https://amigax.github.io/barzilla-og.png"/>  ← add a 1200×630 share image and uncomment -->
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="BarZilla! — Multi-Monitor Taskbar for Windows"/>
+<meta name="twitter:description" content="A near-zero-CPU taskbar on every monitor. Custom textures, acrylic blur, thumbnail previews, built-in Chip-8 arcade, and the free SnoopDog system monitor."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet"/>
@@ -793,7 +801,8 @@ const CONFIG = {
   <ul class="nav-links">
     <li><a href="#features">Features</a></li>
     <li><a href="#pricing">Pricing</a></li>
-    <li><a href="https://tynepunk.com">About</a></li>
+    <li><a href="#snoopdog">SnoopDog</a></li>
+    <li><a href="#about">About</a></li>
   </ul>
 </nav>
 
@@ -807,8 +816,12 @@ const CONFIG = {
 
   <div class="hero-stats">
     <div class="stat">
-      <div class="stat-val">0%</div>
+      <div class="stat-val">&lt;1%</div>
       <div class="stat-label">CPU Usage</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">&lt;100MB</div>
+      <div class="stat-label">RAM</div>
     </div>
     <div class="stat">
       <div class="stat-val">∞</div>
@@ -821,7 +834,7 @@ const CONFIG = {
   </div>
 
   <div class="hero-cta">
-    <a class="btn-primary link-pro-buy" href="https://gum.co/barzilla" target="_blank">
+    <a class="btn-primary link-pro-buy" href="https://tynepunk.gumroad.com/l/barzilla" target="_blank">
       🦎 Buy BarZilla! Pro <span class="price-tag price-launch">$9</span>
     </a>
     <a href="#free-demo" class="btn-secondary">
@@ -837,7 +850,7 @@ const CONFIG = {
 <!-- TICKER -->
 <div class="ticker-wrap">
   <div class="ticker">
-    <span class="ticker-item">Zero CPU</span>
+    <span class="ticker-item">Near-Zero CPU</span>
     <span class="ticker-item">Custom Textures</span>
     <span class="ticker-item">Acrylic Blur</span>
     <span class="ticker-item">Thumbnail Previews</span>
@@ -845,7 +858,8 @@ const CONFIG = {
     <span class="ticker-item">Pinned Launcher</span>
     <span class="ticker-item">Volume Control</span>
     <span class="ticker-item">Built Different</span>
-    <span class="ticker-item">Zero CPU</span>
+    <span class="ticker-item">&lt;100MB RAM</span>
+    <span class="ticker-item">Near-Zero CPU</span>
     <span class="ticker-item">Custom Textures</span>
     <span class="ticker-item">Acrylic Blur</span>
     <span class="ticker-item">Thumbnail Previews</span>
@@ -853,19 +867,27 @@ const CONFIG = {
     <span class="ticker-item">Pinned Launcher</span>
     <span class="ticker-item">Volume Control</span>
     <span class="ticker-item">Built Different</span>
+    <span class="ticker-item">&lt;100MB RAM</span>
   </div>
 </div>
 
 <!-- CPU CALLOUT -->
 <div class="cpu-section">
   <div class="cpu-inner">
-    <span class="cpu-number">0%</span>
+    <span class="cpu-number">&lt;1%</span>
     <p class="cpu-label">CPU Usage. Always.</p>
-    <p class="cpu-detail">DisplayFusion crashes. UltraMon bloats. BarZilla! just works — event-driven, GPU-composited, using the same Windows shell APIs Microsoft built the taskbar on. Your CPU never notices it's there.</p>
+    <p class="cpu-detail">DisplayFusion crashes. UltraMon bloats. BarZilla! just works — event-driven, GPU-composited, using the same Windows shell APIs Microsoft built the taskbar on. Your CPU never notices it's there, and the whole thing sits well under 100&nbsp;MB of RAM.</p>
   </div>
 </div>
 
 <hr class="divider"/>
+
+<!-- SCREENSHOT STRIP — drop in real PNGs and uncomment this block
+<section style="max-width:1100px;margin:0 auto;padding:2rem;">
+  <img src="screenshots/barzilla-multimonitor.png" alt="BarZilla! running a bar on every monitor"
+       style="width:100%;border:1px solid var(--border);box-shadow:0 0 40px rgba(57,255,20,0.08);"/>
+</section>
+-->
 
 <!-- FEATURES -->
 <section id="features" style="max-width:1200px;margin:0 auto;padding:6rem 2rem;">
@@ -949,6 +971,24 @@ const CONFIG = {
       <p>Click once to bring a window forward, click again to minimise. Instant focus via AttachThreadInput — bypasses Windows' focus-stealing restrictions perfectly.</p>
     </div>
 
+    <div class="feature-card">
+      <span class="feature-icon">↔️</span>
+      <h3>Drag to Reassign</h3>
+      <p>Drag a window onto another monitor and it jumps to the correct bar the instant you drop it. Hooked straight to EVENT_SYSTEM_MOVESIZEEND — no polling, no lag.</p>
+    </div>
+
+    <div class="feature-card">
+      <span class="feature-icon">📋</span>
+      <h3>Clipboard-Aware Launchers</h3>
+      <p>One-click buttons for File Explorer, PowerShell and Command Prompt that read your clipboard — copy a folder path, click, and they open right there. Otherwise they just open at home.</p>
+    </div>
+
+    <div class="feature-card">
+      <span class="feature-icon">🕹️</span>
+      <h3>Built-In Chip-8 Arcade</h3>
+      <p>A full Chip-8 emulator tucked inside the About window with 90+ classic ROMs — plus a gecko hand-assembled in raw opcodes. Because a taskbar should have secrets.</p>
+    </div>
+
   </div>
 </section>
 
@@ -981,7 +1021,7 @@ const CONFIG = {
         <li class="locked">Custom colour picker</li>
         <li class="locked">3+ BarZilla! bars (use Windows taskbar on extras)</li>
       </ul>
-      <a class="btn-secondary link-free-demo" href="https://gum.co/barzilla-free" style="width:100%;justify-content:center;" target="_blank">
+      <a class="btn-secondary link-free-demo" href="https://tynepunk.gumroad.com/l/barzillafree" style="width:100%;justify-content:center;" target="_blank">
         Download Free
       </a>
     </div>
@@ -1006,7 +1046,7 @@ const CONFIG = {
         <li>All future updates</li>
         <li>Instant licence activation</li>
       </ul>
-      <a class="btn-primary link-pro-buy" href="https://gum.co/barzilla" style="width:100%;justify-content:center;" target="_blank">
+      <a class="btn-primary link-pro-buy" href="https://tynepunk.gumroad.com/l/barzilla" style="width:100%;justify-content:center;" target="_blank">
         🦎 Buy BarZilla! Pro — $9
       </a>
     </div>
@@ -1028,24 +1068,109 @@ const CONFIG = {
   </div>
 </section>
 
+<hr class="divider"/>
+
+<!-- SNOOPDOG COMPANION -->
+<section id="snoopdog" class="reveal" style="max-width:1000px;margin:0 auto;padding:6rem 2rem;">
+  <div style="border:1px solid var(--border);background:linear-gradient(180deg,var(--panel),var(--dark2));padding:3rem 2.5rem;position:relative;overflow:hidden;">
+
+    <div style="text-align:center;">
+      <div class="section-label" style="justify-content:center;">Free Companion Tool</div>
+      <span style="font-size:4rem;display:block;margin-bottom:1rem;filter:drop-shadow(0 0 30px rgba(57,255,20,0.5));">🐕</span>
+      <h2 style="margin-bottom:1rem;">Meet <span style="color:var(--green);text-shadow:0 0 40px rgba(57,255,20,0.4);">SnoopDog</span></h2>
+      <p style="color:var(--muted);max-width:640px;margin:0 auto;font-size:1.05rem;line-height:1.7;">
+        See exactly what your PC is doing. SnoopDog is a real-time, kernel-wide system monitor — every file opened,
+        registry key touched, process spawned and network call made, streaming live as it happens.
+      </p>
+      <p style="color:var(--text);max-width:640px;margin:1rem auto 0;font-size:0.95rem;line-height:1.7;">
+        It's <strong style="color:var(--green);">included with BarZilla!</strong> and launches straight from the bar — and it's also free and open source as a standalone download.
+      </p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1.25rem;margin:2.5rem 0;">
+      <div style="border:1px solid var(--border);background:var(--dark3);padding:1.2rem;">
+        <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;letter-spacing:0.05em;color:var(--white);text-transform:uppercase;margin-bottom:0.4rem;">🔎 Live Filters</h3>
+        <p style="font-size:0.85rem;color:var(--muted);line-height:1.5;">Start typing and the event stream narrows instantly.</p>
+      </div>
+      <div style="border:1px solid var(--border);background:var(--dark3);padding:1.2rem;">
+        <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;letter-spacing:0.05em;color:var(--white);text-transform:uppercase;margin-bottom:0.4rem;">⏸ Pause on Keyword</h3>
+        <p style="font-size:0.85rem;color:var(--muted);line-height:1.5;">Set a path fragment as a breakpoint — it auto-pauses the moment it appears.</p>
+      </div>
+      <div style="border:1px solid var(--border);background:var(--dark3);padding:1.2rem;">
+        <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;letter-spacing:0.05em;color:var(--white);text-transform:uppercase;margin-bottom:0.4rem;">🎨 Per-Process Colours</h3>
+        <p style="font-size:0.85rem;color:var(--muted);line-height:1.5;">Each process gets its own row colour so you can track several apps at once.</p>
+      </div>
+      <div style="border:1px solid var(--border);background:var(--dark3);padding:1.2rem;">
+        <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;letter-spacing:0.05em;color:var(--white);text-transform:uppercase;margin-bottom:0.4rem;">💾 Save &amp; Copy</h3>
+        <p style="font-size:0.85rem;color:var(--muted);line-height:1.5;">Export the full log to txt/csv. Double-click any row to copy its path.</p>
+      </div>
+    </div>
+
+    <p style="text-align:center;color:var(--muted);font-size:0.85rem;max-width:620px;margin:0 auto 2rem;line-height:1.6;">
+      Inspired by <strong style="color:var(--text);">SnoopDos</strong> by Eddy Carroll for the Commodore Amiga (1992) —
+      the original tool for seeing what any program was really up to. Same idea, same spirit, three decades on.
+    </p>
+
+    <div style="text-align:center;">
+      <a class="btn-primary" href="https://amigax.github.io/snoopdog" target="_blank">🐕 Get SnoopDog — Free →</a>
+      <p style="color:var(--muted);font-size:0.75rem;margin-top:1rem;letter-spacing:0.1em;text-transform:uppercase;">Free &amp; open source · Windows 10 / 11 · x64</p>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- ABOUT -->
+<section id="about" class="reveal" style="max-width:760px;margin:0 auto;padding:6rem 2rem;text-align:center;">
+  <div class="section-label" style="justify-content:center;">About</div>
+  <h2 style="margin-bottom:1.5rem;">Built by Someone<br/>Who Misses the Amiga</h2>
+  <p style="color:var(--muted);font-size:1.05rem;line-height:1.8;">
+    BarZilla! comes from Tynepunk — a one-person studio with roots in the Commodore Amiga era,
+    back when software was fast, lean and had a bit of personality. That's the bar everything here is held to:
+    no bloat, no background services churning your CPU, no subscriptions. Just sharp tools that respect your machine.
+  </p>
+  <p style="color:var(--text);font-size:1rem;line-height:1.8;margin-top:1.5rem;">
+    Developed by <a href="https://www.linkedin.com/in/androidguy/" target="_blank" style="color:var(--green);">Gareth Murfin</a> of Tynepunk — 30 years of apps and games.
+  </p>
+  <a href="https://tynepunk.com" target="_blank" class="btn-secondary" style="margin-top:2rem;">More from Tynepunk →</a>
+</section>
+
+<hr class="divider"/>
+
 <!-- FINAL CTA -->
 <div style="background:var(--dark2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:5rem 2rem;text-align:center;" class="reveal">
   <span style="font-size:5rem;display:block;margin-bottom:1.5rem;filter:drop-shadow(0 0 30px rgba(57,255,20,0.5));">🦎</span>
   <h2 style="margin-bottom:1rem;">Ready to Unleash Your Monitors?</h2>
   <p style="color:var(--muted);max-width:500px;margin:0 auto 2.5rem;font-size:1.05rem;line-height:1.7;">
-    Join the zero-CPU revolution. One payment, all monitors, forever.
+    Join the near-zero-CPU revolution. One payment, all monitors, forever.
   </p>
   <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
-    <a class="btn-primary link-pro-buy" href="https://gum.co/barzilla" target="_blank">
+    <a class="btn-primary link-pro-buy" href="https://tynepunk.gumroad.com/l/barzilla" target="_blank">
       🦎 Buy BarZilla! Pro <span class="price-tag price-launch">$9</span>
     </a>
-    <a class="btn-secondary link-free-demo" href="https://gum.co/barzilla-free" target="_blank">
+    <a class="btn-secondary link-free-demo" href="https://tynepunk.gumroad.com/l/barzillafree" target="_blank">
       Download Free Demo
     </a>
   </div>
 </div>
 
 <!-- FOOTER -->
+
+<div style="background:var(--dark2);border-top:1px solid var(--border);padding:3rem 2rem;text-align:center;" class="reveal">
+  <div style="max-width:800px;margin:0 auto;">
+    <p style="font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.35em;text-transform:uppercase;color:var(--green);margin-bottom:1rem;">Also included</p>
+    <p style="color:var(--muted);font-size:0.9rem;line-height:1.8;">
+      Caps Lock indicator &nbsp;·&nbsp;
+      Empty Recycle Bin shortcut &nbsp;·&nbsp;
+      Calendar flyout on date click &nbsp;·&nbsp;
+      Task Manager quick-launch &nbsp;·&nbsp;
+      Launch SnoopDog from the bar &nbsp;·&nbsp;
+      Start with Windows option
+    </p>
+  </div>
+</div>
+
 <footer>
   <span class="footer-logo">🦎 BarZilla!</span>
   <img src="data:image/png;base64,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" style="max-width:120px;margin-bottom:1rem;opacity:0.9;" alt="TYNEPUNK"/><br/>
