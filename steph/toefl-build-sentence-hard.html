@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stephie's Build a Sentence — Hard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#f5f1e8; --cream-dark:#e9e3d6; --ink:#141019; --ink-mid:#332b3d; --ink-light:#6f6578;
+    --plum:#5d3a6b; --plum-light:#a67cb8; --plum-pale:#efe4f3; --border:#c9bfc9; --shadow:rgba(20,16,25,.14);
+    --green:#27ae60; --red:#c0392b; --blue:#2471a3; --green-pale:#eaf7ee; --red-pale:#fdf2f2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--cream);color:var(--ink);font-family:'Lora',Georgia,serif;min-height:100vh;
+    background-image:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(93,58,107,.055) 27px,rgba(93,58,107,.055) 28px);}
+  header{background:var(--ink);color:var(--cream);padding:28px 40px 22px;display:flex;align-items:flex-end;gap:20px;
+    border-bottom:4px solid var(--plum-light);position:relative;overflow:hidden;}
+  header::before{content:'';position:absolute;inset:0;
+    background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(166,124,184,.05) 10px,rgba(166,124,184,.05) 11px);}
+  .header-title{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;letter-spacing:-.5px;line-height:1;
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .hard-chip{font-family:'Source Code Pro',monospace;font-size:.6rem;letter-spacing:2px;background:var(--plum-light);
+    color:var(--ink);padding:3px 9px;border-radius:2px;text-transform:uppercase;font-weight:500;}
+  .header-sub{font-family:'Lora',serif;font-style:italic;color:var(--plum-light);font-size:.95rem;margin-bottom:2px;}
+  .header-badge{margin-left:auto;background:var(--plum);color:var(--cream);font-family:'Source Code Pro',monospace;
+    font-size:.7rem;padding:4px 10px;border-radius:2px;letter-spacing:1px;text-transform:uppercase;align-self:flex-start;margin-top:4px;}
+  .site-nav{background:var(--cream-dark);border-bottom:1px solid var(--border);padding:0 40px;display:flex;flex-wrap:wrap;}
+  .site-nav a{display:inline-block;padding:10px 12px;font-family:'Lora',serif;font-style:italic;font-size:.85rem;
+    color:var(--plum);text-decoration:none;border-bottom:2px solid transparent;transition:border-color .15s;}
+  .site-nav a:hover{border-bottom-color:var(--plum);}
+  .site-nav a.active{border-bottom-color:var(--plum);font-weight:600;font-style:normal;}
+
+  .controls{display:flex;gap:12px;padding:18px 40px;background:var(--cream);border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center;}
+  .btn{font-family:'Playfair Display',serif;font-weight:600;font-size:.85rem;padding:10px 20px;border:2px solid var(--ink);
+    background:var(--ink);color:var(--cream);cursor:pointer;letter-spacing:.3px;transition:all .15s;border-radius:2px;}
+  .btn:hover{background:var(--ink-mid);transform:translateY(-1px);box-shadow:0 4px 12px var(--shadow);}
+  .btn:active{transform:translateY(0);}
+  .btn-outline{background:transparent;color:var(--ink);}
+  .btn-outline:hover{background:var(--ink);color:var(--cream);}
+  .btn-plum{background:var(--plum);border-color:var(--plum);color:#fff;}
+  .btn-plum:hover{background:#4a2e56;border-color:#4a2e56;}
+  .btn-generate{font-size:.95rem;padding:12px 28px;}
+  .copy-group{margin-left:auto;display:flex;gap:8px;align-items:center;}
+  .copy-label{font-family:'Lora',serif;font-style:italic;font-size:.8rem;color:var(--ink-light);}
+  .score-summary{font-family:'Source Code Pro',monospace;font-size:.8rem;color:var(--ink-light);display:none;align-items:center;gap:8px;}
+  .score-summary.visible{display:flex;}
+  .score-big{font-size:1.1rem;font-weight:700;color:var(--ink);}
+
+  .task-banner{background:var(--plum-pale);border-bottom:1px solid var(--border);padding:13px 40px;font-size:.85rem;color:var(--ink-mid);line-height:1.6;}
+  .task-banner strong{color:var(--ink);}
+
+  .main{max-width:900px;margin:0 auto;padding:36px 40px 60px;}
+  .placeholder{text-align:center;padding:80px 0;color:var(--ink-light);font-style:italic;font-size:1.05rem;}
+  .placeholder-icon{font-size:3rem;margin-bottom:16px;opacity:.35;}
+  .exercises{display:flex;flex-direction:column;gap:34px;}
+
+  .exercise{background:#fff;border:1px solid var(--border);border-radius:3px;box-shadow:0 2px 10px var(--shadow);
+    overflow:hidden;animation:slideIn .3s ease both;}
+  @keyframes slideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .exercise:nth-child(1){animation-delay:.02s}.exercise:nth-child(2){animation-delay:.05s}
+  .exercise:nth-child(3){animation-delay:.08s}.exercise:nth-child(4){animation-delay:.11s}
+  .exercise:nth-child(5){animation-delay:.14s}.exercise:nth-child(6){animation-delay:.17s}
+  .exercise:nth-child(7){animation-delay:.20s}.exercise:nth-child(8){animation-delay:.23s}
+  .exercise:nth-child(9){animation-delay:.26s}.exercise:nth-child(10){animation-delay:.29s}
+
+  .ex-header{background:var(--ink);color:var(--cream);padding:11px 20px;display:flex;align-items:center;gap:12px;}
+  .ex-num{font-family:'Source Code Pro',monospace;font-size:.66rem;letter-spacing:2px;text-transform:uppercase;color:var(--plum-light);}
+  .ex-tag{font-family:'Lora',serif;font-style:italic;font-size:.76rem;color:var(--plum-light);margin-left:auto;}
+  .ex-mark{font-family:'Source Code Pro',monospace;font-size:.75rem;margin-left:10px;}
+  .ex-mark.ok{color:#7fe0a0;} .ex-mark.bad{color:#f5a3a3;}
+
+  .ex-body{padding:20px 22px 22px;}
+  .prompt-row{display:flex;gap:10px;align-items:flex-start;margin-bottom:16px;}
+  .avatar{width:32px;height:32px;border-radius:50%;background:var(--blue);color:#fff;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:.72rem;font-weight:700;}
+  .avatar.b{background:var(--plum);}
+  .prompt-bubble{background:#eef4fb;border:1px solid #cfe0f0;border-radius:3px 12px 12px 12px;
+    padding:9px 14px;font-size:.92rem;line-height:1.6;color:var(--ink);}
+
+  .answer-row{display:flex;gap:10px;align-items:flex-start;}
+  .answer-line{flex:1;background:#fdfaff;border:1px solid var(--border);border-left:3px solid var(--plum);
+    border-radius:3px 12px 12px 12px;padding:12px 14px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-height:52px;}
+  .fixed-word,.lead-word,.tail-word{font-size:.95rem;color:var(--ink);padding:5px 2px;}
+
+  .slot{min-width:66px;min-height:32px;border-bottom:2px solid var(--ink-mid);display:inline-flex;
+    align-items:center;justify-content:center;padding:4px 8px;font-size:.9rem;cursor:pointer;
+    transition:all .15s;border-radius:2px 2px 0 0;}
+  .slot.empty{background:rgba(93,58,107,.05);}
+  .slot.empty:hover{background:var(--plum-pale);border-bottom-color:var(--plum);}
+  .slot.filled{background:var(--plum-pale);border:1.5px solid var(--plum-light);border-radius:3px;color:var(--ink);font-weight:500;}
+  .slot.filled:hover{background:#e3d0ea;}
+  .slot.drop-target{background:var(--plum-pale);border-bottom-color:var(--plum);box-shadow:0 0 0 2px var(--plum-light);}
+  .slot.correct{background:var(--green-pale);border:1.5px solid var(--green);color:#155724;border-radius:3px;}
+  .slot.wrong{background:var(--red-pale);border:1.5px solid var(--red);color:#721c24;border-radius:3px;
+    text-decoration:line-through;text-decoration-color:rgba(192,57,43,.5);}
+  .slot.revealed{background:var(--green-pale);border:1.5px dashed var(--green);color:#155724;border-radius:3px;}
+
+  .bank-label{font-family:'Source Code Pro',monospace;font-size:.65rem;letter-spacing:1.5px;text-transform:uppercase;
+    color:var(--ink-light);margin:16px 0 7px;display:flex;align-items:center;gap:8px;}
+  .decoy-hint{font-family:'Lora',serif;font-style:italic;text-transform:none;letter-spacing:0;color:var(--plum);font-size:.72rem;}
+  .tile-bank{display:flex;flex-wrap:wrap;gap:7px;min-height:38px;padding:9px;background:var(--cream);
+    border:1px dashed var(--border);border-radius:3px;}
+  .tile{background:#fff;border:1.5px solid var(--ink-mid);border-radius:3px;padding:6px 12px;font-size:.9rem;
+    cursor:grab;user-select:none;transition:all .12s;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  .tile:hover{background:var(--plum-pale);border-color:var(--plum);transform:translateY(-1px);box-shadow:0 3px 7px var(--shadow);}
+  .tile:active{cursor:grabbing;transform:translateY(0);}
+  .tile.dragging{opacity:.4;}
+  .bank-empty-msg{font-family:'Lora',serif;font-style:italic;font-size:.8rem;color:var(--ink-light);padding:4px;}
+
+  .ex-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center;}
+  .mini-btn{font-family:'Playfair Display',serif;font-weight:600;font-size:.76rem;padding:6px 14px;
+    border:1.5px solid var(--plum);background:var(--plum);color:#fff;border-radius:2px;cursor:pointer;transition:all .15s;}
+  .mini-btn:hover{background:#4a2e56;}
+  .mini-btn:disabled{opacity:.4;cursor:not-allowed;}
+  .mini-btn.ghost{background:transparent;color:var(--plum);}
+  .mini-btn.ghost:hover{background:var(--plum);color:#fff;}
+
+  .feedback{display:none;margin-top:13px;border-radius:3px;overflow:hidden;border:1px solid var(--border);}
+  .feedback.visible{display:block;}
+  .fb-answer{background:var(--green-pale);border-left:3px solid var(--green);padding:10px 14px;
+    font-size:.92rem;line-height:1.7;color:#14532d;}
+  .fb-answer strong{font-family:'Source Code Pro',monospace;font-size:.68rem;text-transform:uppercase;
+    letter-spacing:1px;color:var(--green);display:block;margin-bottom:3px;}
+  .fb-note{background:#fff;border-top:1px solid var(--border);padding:10px 14px;font-size:.83rem;
+    line-height:1.65;color:var(--ink-mid);font-style:italic;}
+  .fb-note strong{font-family:'Playfair Display',serif;font-style:normal;font-size:.7rem;text-transform:uppercase;
+    letter-spacing:.6px;color:var(--plum);display:block;margin-bottom:4px;}
+  .fb-distractor{background:var(--red-pale);border-top:1px solid var(--border);padding:8px 14px;
+    font-size:.8rem;color:#721c24;font-style:italic;}
+
+  .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);
+    color:var(--cream);font-family:'Lora',serif;font-size:.9rem;padding:12px 24px;border-radius:2px;opacity:0;
+    transition:all .25s;pointer-events:none;z-index:1000;border-left:3px solid var(--plum-light);white-space:nowrap;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  @media(max-width:640px){
+    header{padding:20px;flex-wrap:wrap;} .controls{padding:14px 16px;} .main{padding:20px 16px 50px;}
+    .header-title{font-size:1.35rem;} .site-nav{padding:0 16px;} .task-banner{padding:12px 16px;}
+    .copy-group{margin-left:0;width:100%;} .ex-body{padding:16px;}
+  }
+
+  /* ── unified site nav ── */
+  .sn-bar{background:#ede8df;border-bottom:1px solid #ccc0a8;padding:0 34px;
+    display:flex;flex-wrap:wrap;align-items:center;gap:0;}
+  .sn-bar a{display:inline-block;padding:11px 11px;font-family:'Lora',Georgia,serif;
+    font-style:italic;font-size:.84rem;color:var(--sn-accent,#8b6914);text-decoration:none;
+    border-bottom:2px solid transparent;transition:border-color .15s,background .15s,color .15s;white-space:nowrap;}
+  .sn-bar a:hover{border-bottom-color:var(--sn-accent,#8b6914);background:rgba(0,0,0,.035);}
+  .sn-bar a.sn-active{border-bottom-color:var(--sn-accent,#8b6914);font-weight:600;font-style:normal;}
+  .sn-bar a.sn-home{font-family:'Playfair Display',Georgia,serif;font-style:normal;font-weight:700;
+    font-size:.8rem;color:#1a1510;margin-right:8px;padding-right:15px;
+    border-right:1px solid #ccc0a8;border-bottom:none;}
+  .sn-bar a.sn-home:hover{color:var(--sn-accent,#8b6914);background:none;border-bottom:none;}
+  @media(max-width:640px){.sn-bar{padding:0 10px;} .sn-bar a{padding:9px 7px;font-size:.77rem;}
+    .sn-bar a.sn-home{margin-right:5px;padding-right:9px;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="header-sub">Stephie's Academic English Practice</div>
+    <div class="header-title">Build a Sentence <span class="hard-chip">Hard</span></div>
+  </div>
+  <div class="header-badge">TOEFL Prep</div>
+</header>
+
+<nav class="sn-bar" style="--sn-accent:#5d3a6b">
+  <a class="sn-home" href="/steph/">&#8592; Menu</a>
+  <a href="/toefl-blanks.html">Gap Fill</a>
+  <a href="/toefl-ctest.html">C-Test</a>
+  <a href="/toefl-reading_v4.html">Reading</a>
+  <a href="/toefl-discussion.html">Academic Discussion</a>
+  <a href="/toefl-email.html">Write an Email</a>
+  <a href="/toefl-build-sentence.html">Build a Sentence</a>
+  <a href="#" class="sn-active">Hard</a>
+</nav>
+
+
+<div class="controls">
+  <button class="btn btn-generate" onclick="generate()">&#8635; Generate 10 Sentences</button>
+  <button class="btn btn-outline" id="checkAllBtn" onclick="checkAll()" style="display:none">Check All</button>
+  <button class="btn btn-outline" id="revealAllBtn" onclick="revealAll()" style="display:none">Show All Answers</button>
+  <div class="score-summary" id="scoreSummary">Score: <span class="score-big" id="scoreVal">&mdash;</span></div>
+  <div class="copy-group">
+    <span class="copy-label">Copy:</span>
+    <button class="btn btn-plum"    id="copyStudentBtn" onclick="copyAll(false)" style="display:none">Student Copy</button>
+    <button class="btn btn-outline" id="copyTeacherBtn" onclick="copyAll(true)"  style="display:none">Teacher Copy</button>
+  </div>
+</div>
+
+<div class="task-banner">
+  <strong>Advanced level.</strong> Longer sentences, formal and academic register, and every question carries
+  <strong>two decoy tiles</strong> that will not be used. Tap a tile to place it, or drag it exactly where you want.
+  Drag one slot onto another to swap. Tap a filled slot to send that tile back.
+</div>
+
+<main class="main">
+  <div class="placeholder" id="placeholder">
+    <div class="placeholder-icon">&#9876;</div>
+    Click <em>Generate 10 Sentences</em> to begin.<br>
+    <span style="font-size:.85rem;margin-top:8px;display:block;">60 sentences: negative inversion, clefts, subjunctives, absolutes, fronting and reduced relatives.</span>
+  </div>
+  <div class="exercises" id="exercises"></div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════════
+// HARD POOL — 60 items. Every item carries two decoy tiles.
+// ═══════════════════════════════════════════════════════════════════════════════
+const POOL = [
+{prompt:"The reading room looked completely different after the refurbishment.",lead:"",tail:".",
+ answer:["In the far corner","stood","a display case","containing","the earliest","manuscripts","in the collection"],fixed:[],
+ extras:["a display case stood","which contained"],tag:"Locative inversion",
+ note:"After a fronted place adverbial the verb comes before the subject: stood a display case. Containing is a reduced relative clause standing for which contained."},
+
+{prompt:"Nobody expected the lecture to fill the entire hall.",lead:"",tail:".",
+ answer:["Such was","the level","of interest","that","additional seating","had to be","brought in"],fixed:[],
+ extras:["so was","the interest level was"],tag:"Such + inversion",
+ note:"Such was + noun phrase + that expresses an extreme degree. Inversion is obligatory, and SO cannot replace SUCH before a noun."},
+
+{prompt:"The experiment kept producing inconsistent readings.",lead:"",tail:".",
+ answer:["Only by","recalibrating","the instrument","were we able","to obtain","reliable results"],fixed:[],
+ extras:["we were able","to recalibrate"],tag:"Only by + inversion",
+ note:"Only + prepositional phrase at the front triggers inversion in the main clause: were we able. The preposition BY must be followed by a gerund."},
+
+{prompt:"The translation took her almost three years to complete.",lead:"",tail:".",
+ answer:["Demanding","though","the work","was,","she never","considered","abandoning it"],fixed:[],
+ extras:["although","to abandon"],tag:"Concessive inversion with though",
+ note:"Adjective + though + subject + be means although it was very demanding. Consider always takes a gerund, never an infinitive."},
+
+{prompt:"The committee was unhappy with the draft regulations.",lead:"",tail:".",
+ answer:["They insisted","that every clause","be reviewed","by an independent","legal adviser","before publication"],fixed:[],
+ extras:["is reviewed","should to be"],tag:"Mandative subjunctive",
+ note:"After insist, demand or require + that, the verb takes the bare infinitive form regardless of the subject: that every clause BE reviewed."},
+
+{prompt:"The rescue team reached them within the hour.",lead:"",tail:".",
+ answer:["But for","the quick thinking","of a passer-by,","the outcome","could have been","very different"],fixed:[],
+ extras:["if not","would be"],tag:"But for + noun phrase",
+ note:"But for means if it had not been for. It takes a noun phrase, not a clause, and pairs with a perfect modal in the result."},
+
+{prompt:"I have been offered a place on the doctoral programme.",lead:"",tail:".",
+ answer:["Were I","to accept","the offer,","I would have","to relocate","almost immediately"],fixed:[],
+ extras:["if I would","should I"],tag:"Were + subject + to-infinitive",
+ note:"Were I to accept is the inverted formal equivalent of If I were to accept, used for hypothetical future situations."},
+
+{prompt:"How did the interview with the minister actually go?",lead:"",tail:".",
+ answer:["Not a single","direct answer","did we get","from him","in over","an hour"],fixed:[],
+ extras:["we got","did not"],tag:"Fronted negative object",
+ note:"When a negative object is fronted for emphasis, subject-auxiliary inversion follows: did we get, not we got."},
+
+{prompt:"The error had been sitting in the spreadsheet for months.",lead:"",tail:".",
+ answer:["It was not until","the annual audit","that","anyone noticed","the figures","had been transposed"],fixed:[],
+ extras:["when","did anyone notice"],tag:"It was not until ... that",
+ note:"In the cleft version there is NO inversion: that anyone noticed. Inversion only happens in the fronted version, Not until the audit did anyone notice."},
+
+{prompt:"The product launch did not go smoothly at all.",lead:"",tail:".",
+ answer:["Hardly","had the site","gone live","when","the servers","began to fail"],fixed:[],
+ extras:["than","did the site"],tag:"Hardly ... when",
+ note:"Hardly and scarcely pair with WHEN; only no sooner pairs with than. The fronted negative adverb forces inversion."},
+
+{prompt:"Everyone keeps praising the design of the new library.",lead:"",tail:".",
+ answer:["A quiet place","to work","is","what","the students","actually asked for"],fixed:[],
+ extras:["that","which"],tag:"Reverse wh-cleft",
+ note:"The reverse wh-cleft puts the focused element first: X is what Y. Only WHAT can introduce this nominal clause."},
+
+{prompt:"The fieldwork had to be postponed until the spring.",lead:"",tail:".",
+ answer:["The permits","having been delayed,","the team","had no choice","but to","reschedule the survey"],fixed:[],
+ extras:["because","than"],tag:"Absolute construction",
+ note:"A noun + participle absolute gives the reason with no conjunction. Have no choice BUT is followed by a to-infinitive."},
+
+{prompt:"There are conflicting accounts of when the temple was built.",lead:"",tail:".",
+ answer:["The structure","is thought","to have been","completed","some two centuries","earlier than","previously assumed"],fixed:[],
+ extras:["was thinking","to complete"],tag:"Passive raising + perfect infinitive",
+ note:"Is thought to have been completed: the perfect infinitive shows the completion happened before the thinking."},
+
+{prompt:"She did not argue with the reviewers at all.",lead:"",tail:".",
+ answer:["What she did","was","rewrite","the entire","methodology","section"],fixed:[],
+ extras:["was to rewriting","did"],tag:"What-cleft with do",
+ note:"In a what-cleft built on DO, the focused verb appears as a bare infinitive after BE: was rewrite."},
+
+{prompt:"He refused to change a single line of the code.",lead:"",tail:".",
+ answer:["No matter how","carefully","we explained","the problem,","he remained","entirely unconvinced"],fixed:[],
+ extras:["did we explain","however much"],tag:"No matter how + adverb",
+ note:"No matter how takes the adverb, then normal statement order. Unlike negative adverbials, it does NOT cause inversion."},
+
+{prompt:"Some of these findings are quite uncomfortable reading.",lead:"",tail:".",
+ answer:["However","inconvenient","the conclusions","may be,","they cannot","simply be","set aside"],fixed:[],
+ extras:["may they be","although"],tag:"However + adjective + may be",
+ note:"However pulls the adjective to the front with it, then the subject and may be follow in normal order."},
+
+{prompt:"The first two trials produced nothing conclusive.",lead:"",tail:".",
+ answer:["The control group","showed no change,","nor","did the treatment group","display","any measurable","improvement"],fixed:[],
+ extras:["neither of","the treatment group did"],tag:"Nor + inversion",
+ note:"Nor links two negative clauses and requires inversion with do-support: nor did the treatment group display."},
+
+{prompt:"He is still struggling badly with the statistics module.",lead:"",tail:".",
+ answer:["If he","had attended","the workshops","last term,","he would not be","in this position","now"],fixed:[],
+ extras:["would not have been","had he attended"],tag:"Mixed conditional",
+ note:"Past perfect in the if-clause with would + bare infinitive in the result gives a past cause with a present consequence."},
+
+{prompt:"The board was completely blindsided by the resignation.",lead:"",tail:".",
+ answer:["Nobody","had anticipated","his having","resigned","so soon","after the merger"],fixed:[],
+ extras:["him resign","to resign"],tag:"Perfect gerund with possessive",
+ note:"His having resigned is a perfect gerund with a possessive subject, standard in formal English after verbs like anticipate."},
+
+{prompt:"People say the policy failed because it was badly designed.",lead:"",tail:".",
+ answer:["The problem","was not so much","the design","as","the complete absence","of any","enforcement mechanism"],fixed:[],
+ extras:["but","than"],tag:"Not so much X as Y",
+ note:"This correlative pair takes AS, never than or but, and the two halves must be grammatically parallel."},
+
+{prompt:"Publication was held up for another six months.",lead:"",tail:".",
+ answer:["Only after","the third round","of peer review","was the paper","finally accepted","for publication"],fixed:[],
+ extras:["the paper was","did the paper"],tag:"Only after + inversion",
+ note:"When BE is the verb, inversion moves BE itself: was the paper accepted. Do-support would be wrong here."},
+
+{prompt:"Some colleagues still dispute the significance of the result.",lead:"",tail:".",
+ answer:["There is no denying","that the effect","is small,","but","its consistency","across studies","is striking"],fixed:[],
+ extras:["to deny","although"],tag:"There is no + gerund",
+ note:"There is no denying that is a fixed structure requiring a gerund. BUT is needed to join the two independent clauses."},
+
+{prompt:"Should we announce the delay publicly?",lead:"",tail:".",
+ answer:["The last thing","we want","is for","the funders","to hear about it","from the press"],fixed:[],
+ extras:["that","hearing"],tag:"Is for + object + infinitive",
+ note:"When the subject of the infinitive differs from the main subject, English uses for + object + to-infinitive."},
+
+{prompt:"Everyone is focused on getting the sample size up.",lead:"",tail:".",
+ answer:["More important","than the sample size","is","whether","the participants","were selected","at random"],fixed:[],
+ extras:["is more important","if"],tag:"Fronted comparative + inversion",
+ note:"With a fronted comparative complement the verb precedes its subject clause. WHETHER is required because IF cannot introduce a subject clause."},
+
+{prompt:"The dataset was released without any documentation.",lead:"",tail:".",
+ answer:["So opaque","were the variable names","that","reproducing","the analysis","proved","almost impossible"],fixed:[],
+ extras:["was","the variable names were"],tag:"So + adjective + inversion",
+ note:"Fronted so + adjective requires inversion, and the verb must agree with the plural subject: WERE the variable names."},
+
+{prompt:"They have finally agreed to share the raw data.",lead:"",tail:".",
+ answer:["Access was granted","on condition that","the material","not be","redistributed","to third parties"],fixed:[],
+ extras:["is not","should not to be"],tag:"Negative subjunctive",
+ note:"The negative subjunctive is formed with NOT + bare infinitive, with no do-support: that the material not be redistributed."},
+
+{prompt:"She did not mention the discrepancy in the meeting.",lead:"",tail:".",
+ answer:["She said nothing","for fear that","raising it","publicly","might undermine","the whole","submission"],fixed:[],
+ extras:["to raise","would have"],tag:"For fear that",
+ note:"For fear that introduces a clause with may or might. Here the subject of that clause is the gerund phrase raising it publicly."},
+
+{prompt:"That particular result has never been replicated.",lead:"",tail:".",
+ answer:["Seldom","has a finding","of such magnitude","been reported","without","independent confirmation"],fixed:[],
+ extras:["a finding has","did"],tag:"Seldom + inversion",
+ note:"Seldom is a negative-frequency adverb; fronting it inverts the auxiliary and subject: has a finding been reported."},
+
+{prompt:"Why has the review process taken quite so long?",lead:"",tail:".",
+ answer:["It is widely held","that","the delay","stems from","a shortage","of qualified","reviewers"],fixed:[],
+ extras:["what","holding"],tag:"Extraposition with anticipatory it",
+ note:"The real subject, the that-clause, moves to the end and anticipatory IT fills the subject position."},
+
+{prompt:"The conclusions are being reported as definitive.",lead:"",tail:".",
+ answer:["By no means","is the evidence","strong enough","to justify","the claims","being made","in the media"],fixed:[],
+ extras:["the evidence is","which are made"],tag:"By no means + inversion",
+ note:"By no means is a negative adverbial forcing inversion. Being made is a reduced passive relative for that are being made."},
+
+{prompt:"They have asked us to release the preliminary numbers.",lead:"",tail:".",
+ answer:["I would sooner","wait","for the full dataset","than","publish figures","we may later","have to retract"],fixed:[],
+ extras:["to wait","then"],tag:"Would sooner ... than",
+ note:"Would sooner takes bare infinitives on both sides of THAN, and the two must be parallel: wait ... publish."},
+
+{prompt:"I checked the appendix and the supplementary files.",lead:"",tail:".",
+ answer:["Nowhere","in the entire report","is there","any mention","of how","the outliers","were handled"],fixed:[],
+ extras:["there is","did"],tag:"Nowhere + inversion",
+ note:"With existential there, the fronted negative place adverbial gives IS THERE rather than there is."},
+
+{prompt:"I understand you disagreed with the appointment.",lead:"",tail:".",
+ answer:["I raised","one or two concerns,","not that","anyone","was particularly","interested","in hearing them"],fixed:[],
+ extras:["although","to hear"],tag:"Not that (dismissive afterthought)",
+ note:"Not that introduces an afterthought meaning although it is not the case that. Interested IN takes a gerund."},
+
+{prompt:"The archive was almost impossible to navigate.",lead:"",tail:".",
+ answer:["It was","such a disorganised","collection","that","locating","a single document","could take days"],fixed:[],
+ extras:["so disorganised","so a"],tag:"Such a + adjective + noun",
+ note:"With a singular countable noun use SUCH A + adjective + noun. SO is only used with a bare adjective or adverb."},
+
+{prompt:"The funder has been named in the acknowledgements.",lead:"",tail:".",
+ answer:["In no way","does this","imply","that the sponsor","had any influence","over the","study design"],fixed:[],
+ extras:["this does","to imply"],tag:"In no way + inversion",
+ note:"In no way is a negative adverbial requiring do-support and inversion: does this imply."},
+
+{prompt:"You seem to have solved the indexing problem.",lead:"",tail:".",
+ answer:["It only occurred","to me","afterwards","that","the same approach","might work","for the archive"],fixed:[],
+ extras:["to occur","what"],tag:"It occurred to me that",
+ note:"Impersonal IT + occur to + person + that-clause is the standard pattern for a sudden realisation."},
+
+{prompt:"The reviewers have raised some serious objections.",lead:"",tail:".",
+ answer:["Be that as it may,","the deadline","for resubmission","remains","unchanged","and cannot","be extended"],fixed:[],
+ extras:["however","is remaining"],tag:"Be that as it may",
+ note:"A fossilised subjunctive idiom meaning even if that is true. Remain is a stative verb and resists the continuous form."},
+
+{prompt:"She left the seminar before the discussion ended.",lead:"",tail:".",
+ answer:["She slipped out","quietly","so as not to","disturb","those who","were still","taking notes"],fixed:[],
+ extras:["for not to","in order to not"],tag:"So as not to",
+ note:"Negative purpose is expressed by so as not to or in order not to. Both put NOT before TO."},
+
+{prompt:"He was on the original steering committee.",lead:"",tail:".",
+ answer:["He is one","of the few","researchers","who have","been involved","since the very","beginning"],fixed:[],
+ extras:["has","which"],tag:"Agreement in one of the ... who",
+ note:"The relative clause modifies researchers, which is plural, so the verb is HAVE rather than has."},
+
+{prompt:"The department has cut the number of contact hours.",lead:"",tail:".",
+ answer:["Rather than","reducing","teaching time,","they might","have considered","redesigning","the assessment"],fixed:[],
+ extras:["to reduce","redesign"],tag:"Rather than + parallel gerunds",
+ note:"The forms on either side of rather than must match: reducing pairs with redesigning."},
+
+{prompt:"The pattern was invisible in the raw numbers.",lead:"",tail:".",
+ answer:["Only when","the data","were plotted","did the seasonal","variation","become","apparent"],fixed:[],
+ extras:["was","the seasonal variation"],tag:"Only when + inversion",
+ note:"Inversion falls in the MAIN clause, not the time clause. Data takes a plural verb in formal academic writing."},
+
+{prompt:"You clearly think the methodology is flawed.",lead:"",tail:".",
+ answer:["Far be it from me","to question","her expertise,","but","the sampling frame","does seem","unusually narrow"],fixed:[],
+ extras:["questioning","although"],tag:"Far be it from me to",
+ note:"A fixed subjunctive idiom used to soften criticism, always followed by a to-infinitive."},
+
+{prompt:"Can I cite the unpublished chapter in my thesis?",lead:"",tail:".",
+ answer:["You may quote","from it,","provided that","you make","the manuscript","status","explicit"],fixed:[],
+ extras:["providing to","if only"],tag:"Provided that",
+ note:"Provided that introduces a condition and takes a normal present-tense clause. It is more formal than IF."},
+
+{prompt:"He agreed to review two of the three submissions.",lead:"",tail:".",
+ answer:["The third","he declined","to read","at all,","citing","a conflict","of interest"],fixed:[],
+ extras:["did he decline","because of"],tag:"Object fronting (topicalisation)",
+ note:"A fronted object that is NOT negative does not trigger inversion: the third he declined, not the third did he decline."},
+
+{prompt:"Both groups improved over the course of the study.",lead:"",tail:".",
+ answer:["The control group","improved","steadily,","as did","the participants","receiving","the intervention"],fixed:[],
+ extras:["as the participants did","which received"],tag:"As + inversion",
+ note:"As did X is an inverted comparative meaning and so did X. Receiving is a reduced relative for who were receiving."},
+
+{prompt:"Almost half the cohort dropped out before the follow-up.",lead:"",tail:".",
+ answer:["Little wonder","that","the attrition rate","was cited","as","the principal","weakness"],fixed:[],
+ extras:["it is little wonder to","which"],tag:"Little wonder that (elliptical)",
+ note:"Little wonder that is an elliptical form of it is little wonder that, with the it is simply omitted."},
+
+{prompt:"Different reviewers have suggested different fixes.",lead:"",tail:".",
+ answer:["Whatever","the eventual solution","may be,","it will need","to be agreed","before","the next meeting"],fixed:[],
+ extras:["may it be","whichever"],tag:"Whatever + subject + may be",
+ note:"Whatever + noun + may be forms a concessive clause. The subject comes before MAY, with no inversion."},
+
+{prompt:"We are still waiting for the ethics decision.",lead:"",tail:".",
+ answer:["The committee","has yet","to confirm","the date","on which","the amendment","will take effect"],fixed:[],
+ extras:["have","which"],tag:"Have yet to + fronted preposition",
+ note:"Have yet to means has not yet. On which is a formal fronted-preposition relative; WHICH alone would strand the preposition at the end."},
+
+{prompt:"The archive closes in twenty minutes.",lead:"",tail:".",
+ answer:["We might","as well","come back","tomorrow","as try","to rush","through the boxes"],fixed:[],
+ extras:["than","to come"],tag:"Might as well X as Y",
+ note:"Might as well takes bare infinitives on both sides and pairs with AS, not than."},
+
+{prompt:"Which figures should we include in the appendix?",lead:"",tail:".",
+ answer:["Any results","not yet","verified","by a second","analyst","should be","clearly flagged"],fixed:[],
+ extras:["which are not","verifying"],tag:"Reduced negative relative",
+ note:"Not yet verified is a reduced passive relative standing for which have not yet been verified."},
+
+{prompt:"How much of the budget can we reallocate?",lead:"",tail:".",
+ answer:["What remains","of the equipment","allocation","can be","redirected","towards","fieldwork costs"],fixed:[],
+ extras:["that remains","which"],tag:"Nominal relative as subject",
+ note:"WHAT here means the thing which and introduces a noun clause acting as the subject. That or which cannot be used this way."},
+
+{prompt:"The grant covers more than we had expected.",lead:"",tail:".",
+ answer:["Not only","does it cover","the fieldwork,","but it also","extends to","conference","attendance"],fixed:[],
+ extras:["it covers","and also"],tag:"Not only ... but also",
+ note:"Not only forces do-support and inversion, and the correlative must be completed by but ... also."},
+
+{prompt:"What happens if the equipment fails mid-experiment?",lead:"",tail:".",
+ answer:["In the event","that the sensor","malfunctions,","the run","should be","aborted","immediately"],fixed:[],
+ extras:["of that","will malfunction"],tag:"In the event that",
+ note:"In the event that takes a present-tense clause for a possible future situation. WILL is not used in this conditional clause."},
+
+{prompt:"Several different factors contributed to the discrepancy.",lead:"",tail:".",
+ answer:["It was","in the transcription","stage","that","the majority","of errors","were introduced"],fixed:[],
+ extras:["when","which"],tag:"It-cleft with prepositional focus",
+ note:"An it-cleft can focus a prepositional phrase, and the linking word stays THAT even when the focus is a stage or a time."},
+
+{prompt:"You appear to be suggesting the data were fabricated.",lead:"",tail:".",
+ answer:["Nothing could be","further from","the truth;","what I","questioned","was the","coding procedure"],fixed:[],
+ extras:["furthest","that I"],tag:"Fixed idiom + wh-cleft",
+ note:"Nothing could be further from the truth uses the comparative FURTHER, not the superlative. A wh-cleft then supplies the contrast."},
+
+{prompt:"The reviewer wants an additional control condition.",lead:"",tail:".",
+ answer:["She recommended","that we","should include","a placebo arm","before","resubmitting","the manuscript"],fixed:[],
+ extras:["included","to include"],tag:"Should-subjunctive after recommend",
+ note:"British English often uses should + bare infinitive after recommend or suggest; American English prefers the bare subjunctive, that we include."},
+
+{prompt:"The response rate was much better than forecast.",lead:"",tail:".",
+ answer:["As many as","three quarters","of those","contacted","agreed","to take part","in the follow-up"],fixed:[],
+ extras:["agrees","was contacted"],tag:"Quantifier agreement",
+ note:"Three quarters of those contacted is plural, so the verb is AGREED. Contacted is a reduced relative for who were contacted."},
+
+{prompt:"Why was the second cohort dropped from the analysis?",lead:"",tail:".",
+ answer:["Owing to","the fact that","recruitment","fell short,","the second","cohort was","excluded entirely"],fixed:[],
+ extras:["due of","having fallen"],tag:"Owing to the fact that",
+ note:"Owing to functions as a preposition and needs a noun phrase after it; the fact that converts the following clause into one."},
+
+{prompt:"How does the new submission system actually work?",lead:"",tail:".",
+ answer:["They have introduced","a process","whereby","each manuscript","is screened","before","it reaches a reviewer"],fixed:[],
+ extras:["where","which"],tag:"Relative adverb whereby",
+ note:"Whereby means by which and introduces a relative clause describing a method or arrangement."},
+
+{prompt:"Do the findings apply outside the original population?",lead:"",tail:".",
+ answer:["The conclusions","hold","only insofar as","the sample","resembles","the wider","population"],fixed:[],
+ extras:["as far","that"],tag:"Insofar as",
+ note:"Insofar as means to the extent that and introduces a clause limiting the scope of a claim."},
+
+{prompt:"The equipment was returned in an unusable state.",lead:"",tail:".",
+ answer:["Never before","had a piece","of apparatus","been returned","in so poor","a condition"],fixed:[],
+ extras:["a piece had","such poor"],tag:"Never before + inversion",
+ note:"Never before is a negative adverbial forcing inversion. Note the formal order in SO POOR A condition, an alternative to such a poor condition."}
+];
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════════════════
+let current = [], slotState = [], checked = [], dragData = null;
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// GENERATE
+// ═══════════════════════════════════════════════════════════════════════════════
+function generate(){
+  current = shuffle([...POOL]).slice(0,10);
+  current.forEach(ex => { delete ex._bankOrder; });
+  slotState = current.map(ex => ex.answer.map((_,i)=> ex.fixed.includes(i) ? ex.answer[i] : null));
+  checked   = current.map(()=>false);
+
+  document.getElementById("placeholder").style.display = "none";
+  ["checkAllBtn","revealAllBtn","copyStudentBtn","copyTeacherBtn"].forEach(id=>{
+    document.getElementById(id).style.display = "";
+  });
+  document.getElementById("scoreSummary").classList.remove("visible");
+  document.getElementById("scoreVal").textContent = "\u2014";
+
+  const box = document.getElementById("exercises");
+  box.innerHTML = "";
+
+  current.forEach((ex,i)=>{
+    const div = document.createElement("div");
+    div.className = "exercise";
+    div.innerHTML =
+      '<div class="ex-header">' +
+        '<span class="ex-num">Question ' + (i+1) + '</span>' +
+        '<span class="ex-tag">' + esc(ex.tag) + '</span>' +
+        '<span class="ex-mark" id="mark-' + i + '"></span>' +
+      '</div>' +
+      '<div class="ex-body">' +
+        '<div class="prompt-row"><div class="avatar">A</div>' +
+          '<div class="prompt-bubble">' + esc(ex.prompt) + '</div></div>' +
+        '<div class="answer-row"><div class="avatar b">B</div>' +
+          '<div class="answer-line" id="line-' + i + '"></div></div>' +
+        '<div class="bank-label">Word tiles' +
+          '<span class="decoy-hint">two of these are decoys</span></div>' +
+        '<div class="tile-bank" id="bank-' + i + '"></div>' +
+        '<div class="ex-actions">' +
+          '<button class="mini-btn" id="chk-' + i + '" onclick="checkOne(' + i + ')">Check</button>' +
+          '<button class="mini-btn ghost" onclick="resetOne(' + i + ')">Reset</button>' +
+          '<button class="mini-btn ghost" onclick="revealOne(' + i + ')">Show answer</button>' +
+        '</div>' +
+        '<div class="feedback" id="fb-' + i + '"></div>' +
+      '</div>';
+    box.appendChild(div);
+    renderLine(i); renderBank(i);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════════════════════
+function renderLine(i){
+  const ex = current[i], line = document.getElementById("line-" + i);
+  line.innerHTML = "";
+  if(ex.lead){
+    const l = document.createElement("span"); l.className = "lead-word"; l.textContent = ex.lead; line.appendChild(l);
+  }
+  ex.answer.forEach((_,si)=>{
+    if(ex.fixed.includes(si)){
+      const f = document.createElement("span"); f.className = "fixed-word";
+      f.textContent = ex.answer[si]; line.appendChild(f); return;
+    }
+    const val = slotState[i][si], slot = document.createElement("span");
+    slot.className = "slot " + (val ? "filled" : "empty");
+    slot.textContent = val || "";
+    slot.dataset.ex = i; slot.dataset.slot = si;
+    if(!checked[i]){
+      slot.onclick     = () => { if(slotState[i][si]) clearSlot(i,si); };
+      slot.ondragover  = e => { e.preventDefault(); slot.classList.add("drop-target"); };
+      slot.ondragleave = () => slot.classList.remove("drop-target");
+      slot.ondrop      = e => { e.preventDefault(); slot.classList.remove("drop-target"); handleDrop(i,si); };
+      if(val){ slot.draggable = true; slot.ondragstart = () => { dragData = {exIdx:i, from:"slot", tile:val, slotIdx:si}; }; }
+    }
+    line.appendChild(slot);
+  });
+  if(ex.tail){
+    const t = document.createElement("span"); t.className = "tail-word"; t.textContent = ex.tail; line.appendChild(t);
+  }
+}
+
+function renderBank(i){
+  const ex = current[i], bank = document.getElementById("bank-" + i);
+  bank.innerHTML = "";
+  const placed = slotState[i].filter(Boolean);
+  const pool = ex._bankOrder || (ex._bankOrder = shuffle(
+    ex.answer.filter((_,k)=>!ex.fixed.includes(k)).concat(ex.extras || [])
+  ));
+  const remaining = [], used = [...placed];
+  pool.forEach(t=>{ const k = used.indexOf(t); if(k>-1) used.splice(k,1); else remaining.push(t); });
+
+  if(!remaining.length){
+    const m = document.createElement("span"); m.className = "bank-empty-msg";
+    m.textContent = "All tiles placed \u2014 but remember two were decoys.";
+    bank.appendChild(m); return;
+  }
+  remaining.forEach(t=>{
+    const tile = document.createElement("span");
+    tile.className = "tile"; tile.textContent = t;
+    if(!checked[i]){
+      tile.draggable   = true;
+      tile.ondragstart = () => { dragData = {exIdx:i, from:"bank", tile:t}; tile.classList.add("dragging"); };
+      tile.ondragend   = () => tile.classList.remove("dragging");
+      tile.onclick     = () => placeInFirstEmpty(i,t);
+    }
+    bank.appendChild(tile);
+  });
+  bank.ondragover = e => e.preventDefault();
+  bank.ondrop = e => {
+    e.preventDefault();
+    if(dragData && dragData.exIdx === i && dragData.from === "slot") clearSlot(i, dragData.slotIdx);
+    dragData = null;
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PLACEMENT
+// ═══════════════════════════════════════════════════════════════════════════════
+function placeInFirstEmpty(i,tile){
+  const ex = current[i];
+  for(let si=0; si<ex.answer.length; si++){
+    if(ex.fixed.includes(si)) continue;
+    if(!slotState[i][si]){ slotState[i][si] = tile; renderLine(i); renderBank(i); return; }
+  }
+  showToast("All slots are full \u2014 tap a slot to free one.");
+}
+
+function handleDrop(i,si){
+  if(!dragData || dragData.exIdx !== i){ dragData = null; return; }
+  if(dragData.from === "slot" && dragData.slotIdx === si){ dragData = null; return; }
+  const incoming = dragData.tile, displaced = slotState[i][si];
+  if(dragData.from === "slot") slotState[i][dragData.slotIdx] = displaced || null;
+  slotState[i][si] = incoming;
+  dragData = null; renderLine(i); renderBank(i);
+}
+
+function clearSlot(i,si){ slotState[i][si] = null; renderLine(i); renderBank(i); }
+
+function resetOne(i){
+  const ex = current[i];
+  slotState[i] = ex.answer.map((_,k)=> ex.fixed.includes(k) ? ex.answer[k] : null);
+  checked[i] = false;
+  document.getElementById("fb-" + i).classList.remove("visible");
+  document.getElementById("mark-" + i).textContent = "";
+  document.getElementById("chk-" + i).disabled = false;
+  renderLine(i); renderBank(i); updateScore();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CHECKING
+// ═══════════════════════════════════════════════════════════════════════════════
+function checkOne(i){
+  const ex = current[i]; checked[i] = true;
+  let allRight = true;
+  document.getElementById("line-" + i).querySelectorAll(".slot").forEach(slotEl=>{
+    const si = parseInt(slotEl.dataset.slot), val = slotState[i][si];
+    slotEl.classList.remove("empty","filled");
+    slotEl.onclick = null; slotEl.draggable = false;
+    if(val === ex.answer[si]) slotEl.classList.add("correct");
+    else {
+      allRight = false;
+      if(val) slotEl.classList.add("wrong");
+      else { slotEl.classList.add("revealed"); slotEl.textContent = ex.answer[si]; }
+    }
+  });
+  const mark = document.getElementById("mark-" + i);
+  mark.textContent = allRight ? "\u2713 Correct" : "\u2717 Not quite";
+  mark.className   = "ex-mark " + (allRight ? "ok" : "bad");
+  showFeedback(i);
+  document.getElementById("chk-" + i).disabled = true;
+  renderBank(i); updateScore();
+}
+
+function revealOne(i){
+  const ex = current[i];
+  slotState[i] = [...ex.answer]; checked[i] = true;
+  renderLine(i);
+  document.getElementById("line-" + i).querySelectorAll(".slot").forEach(s=>{
+    s.classList.remove("empty","filled"); s.classList.add("revealed");
+    s.onclick = null; s.draggable = false;
+  });
+  const mark = document.getElementById("mark-" + i);
+  mark.textContent = "answer shown"; mark.className = "ex-mark";
+  document.getElementById("chk-" + i).disabled = true;
+  showFeedback(i); renderBank(i);
+}
+
+function showFeedback(i){
+  const ex = current[i], fb = document.getElementById("fb-" + i);
+  const full = (ex.lead ? ex.lead + " " : "") + ex.answer.join(" ") + ex.tail;
+  fb.innerHTML =
+    '<div class="fb-answer"><strong>Correct sentence</strong>' + esc(full) + '</div>' +
+    '<div class="fb-note"><strong>' + esc(ex.tag) + '</strong>' + esc(ex.note) + '</div>' +
+    '<div class="fb-distractor">Decoy tiles (not used): ' + ex.extras.map(esc).join("  \u00b7  ") + '</div>';
+  fb.classList.add("visible");
+}
+
+function checkAll(){ current.forEach((_,i)=>{ if(!checked[i]) checkOne(i); }); }
+function revealAll(){ current.forEach((_,i)=>{ if(!checked[i]) revealOne(i); }); }
+
+function updateScore(){
+  let right = 0, done = 0;
+  current.forEach((ex,i)=>{
+    if(!checked[i]) return;
+    done++;
+    if(ex.answer.every((t,si)=> slotState[i][si] === t)) right++;
+  });
+  const sum = document.getElementById("scoreSummary"), val = document.getElementById("scoreVal");
+  if(done){ sum.classList.add("visible"); val.textContent = right + " / " + done; }
+  else { sum.classList.remove("visible"); val.textContent = "\u2014"; }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// COPY
+// ═══════════════════════════════════════════════════════════════════════════════
+function copyAll(withAnswers){
+  if(!current.length) return;
+  let out = "BUILD A SENTENCE (ADVANCED)\nMove the words to make a grammatical sentence. Two tiles in each question are decoys.\n\n";
+  current.forEach((ex,i)=>{
+    out += (i+1) + ". " + ex.prompt + "\n";
+    out += "   " + (ex.lead ? ex.lead + " " : "") +
+           ex.answer.map((t,si)=> ex.fixed.includes(si) ? t : "_____").join(" ") + ex.tail + "\n";
+    out += "   " + shuffle(ex.answer.filter((_,k)=>!ex.fixed.includes(k)).concat(ex.extras)).join(" / ") + "\n";
+    if(withAnswers){
+      out += "   ANSWER: " + (ex.lead ? ex.lead + " " : "") + ex.answer.join(" ") + ex.tail + "\n";
+      out += "   GRAMMAR (" + ex.tag + "): " + ex.note + "\n";
+      out += "   Decoys: " + ex.extras.join(", ") + "\n";
+    }
+    out += "\n";
+  });
+  navigator.clipboard.writeText(out)
+    .then(()=>showToast(withAnswers ? "\u2713 Teacher copy (with answers) copied!" : "\u2713 Student copy copied!"))
+    .catch(()=>showToast("Copy failed \u2014 try Ctrl+C"));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════════════════════
+function shuffle(a){
+  const r = [...a];
+  for(let i=r.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [r[i],r[j]]=[r[j],r[i]]; }
+  return r;
+}
+function showToast(m){
+  const t = document.getElementById("toast");
+  t.textContent = m; t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), 2600);
+}
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+</script>
+</body>
+</html>
