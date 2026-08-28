@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stephie's Reading Practice — Hard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#f5f1e8; --cream-dark:#e9e3d6; --paper:#fffdfa;
+    --ink:#141019; --ink-mid:#332b3d; --ink-light:#6f6578;
+    --plum:#5d3a6b; --plum-light:#a67cb8; --plum-pale:#efe4f3;
+    --border:#c9bfc9; --shadow:rgba(20,16,25,.14);
+    --green:#27ae60; --red:#c0392b; --blue:#2471a3; --amber:#b7791f;
+    --green-pale:#eaf7ee; --red-pale:#fdf2f2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--cream);color:var(--ink);font-family:'Lora',Georgia,serif;min-height:100vh;
+    background-image:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(93,58,107,.055) 27px,rgba(93,58,107,.055) 28px);}
+
+  header{background:var(--ink);color:var(--cream);padding:28px 40px 22px;display:flex;align-items:flex-end;gap:20px;
+    border-bottom:4px solid var(--plum-light);position:relative;overflow:hidden;}
+  header::before{content:'';position:absolute;inset:0;
+    background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(166,124,184,.05) 10px,rgba(166,124,184,.05) 11px);}
+  .header-title{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;letter-spacing:-.5px;line-height:1;
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .hard-chip{font-family:'Source Code Pro',monospace;font-size:.6rem;letter-spacing:2px;background:var(--plum-light);
+    color:var(--ink);padding:3px 9px;border-radius:2px;text-transform:uppercase;font-weight:500;}
+  .header-sub{font-family:'Lora',serif;font-style:italic;color:var(--plum-light);font-size:.95rem;margin-bottom:2px;}
+  .header-badge{margin-left:auto;background:var(--plum);color:var(--cream);font-family:'Source Code Pro',monospace;
+    font-size:.7rem;padding:4px 10px;border-radius:2px;letter-spacing:1px;text-transform:uppercase;align-self:flex-start;margin-top:4px;}
+
+  /* nav */
+    .sn-bar a{display:inline-block;padding:11px 11px;font-family:'Lora',Georgia,serif;font-style:italic;
+    font-size:.84rem;color:var(--sn-accent);text-decoration:none;border-bottom:2px solid transparent;
+    transition:border-color .15s,background .15s,color .15s;white-space:nowrap;}
+  .sn-bar a:hover{border-bottom-color:var(--sn-accent);background:rgba(0,0,0,.035);}
+  .sn-bar a.sn-active{border-bottom-color:var(--sn-accent);font-weight:600;font-style:normal;}
+  .sn-bar a.sn-home{font-family:'Playfair Display',Georgia,serif;font-style:normal;font-weight:700;font-size:.8rem;
+    color:var(--ink);margin-right:8px;padding-right:15px;border-right:1px solid var(--border);border-bottom:none;}
+  .sn-bar a.sn-home:hover{color:var(--sn-accent);background:none;border-bottom:none;}
+
+  /* tabs */
+  .tab-bar{display:flex;background:var(--ink);border-bottom:3px solid var(--plum);}
+  .tab-btn{font-family:'Playfair Display',serif;font-size:.9rem;font-weight:600;padding:14px 26px;background:none;
+    border:none;color:rgba(245,241,232,.5);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-3px;
+    transition:all .15s;letter-spacing:.2px;}
+  .tab-btn:hover{color:var(--cream);}
+  .tab-btn.active{color:var(--plum-light);border-bottom-color:var(--plum-light);}
+
+  .controls{display:flex;gap:12px;padding:18px 40px;background:var(--cream);border-bottom:1px solid var(--border);
+    flex-wrap:wrap;align-items:center;}
+  .btn{font-family:'Playfair Display',serif;font-weight:600;font-size:.85rem;padding:10px 20px;border:2px solid var(--ink);
+    background:var(--ink);color:var(--cream);cursor:pointer;letter-spacing:.3px;transition:all .15s;border-radius:2px;}
+  .btn:hover{background:var(--ink-mid);transform:translateY(-1px);box-shadow:0 4px 12px var(--shadow);}
+  .btn:active{transform:translateY(0);}
+  .btn-outline{background:transparent;color:var(--ink);}
+  .btn-outline:hover{background:var(--ink);color:var(--cream);}
+  .btn-generate{font-size:.95rem;padding:12px 28px;}
+
+  .pool-meter{font-family:'Source Code Pro',monospace;font-size:.68rem;color:var(--ink-light);
+    display:flex;align-items:center;gap:8px;}
+  .meter-track{width:92px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+  .meter-fill{height:100%;background:var(--plum-light);border-radius:3px;transition:width .35s;}
+  .score-summary{margin-left:auto;font-family:'Source Code Pro',monospace;font-size:.8rem;color:var(--ink-light);
+    display:none;align-items:center;gap:8px;}
+  .score-summary.visible{display:flex;}
+  .score-big{font-size:1.1rem;font-weight:700;color:var(--ink);}
+
+  .tab-panel{display:none;} .tab-panel.active{display:block;}
+  .task-banner{background:var(--plum-pale);border-bottom:1px solid var(--border);padding:13px 40px;
+    font-size:.85rem;color:var(--ink-mid);line-height:1.6;}
+  .task-banner strong{color:var(--ink);}
+
+  .main{max-width:980px;margin:0 auto;padding:34px 40px 60px;}
+  .placeholder{text-align:center;padding:80px 0;color:var(--ink-light);font-style:italic;font-size:1.05rem;}
+  .placeholder-icon{font-size:3rem;margin-bottom:16px;opacity:.35;}
+  .exercises{display:flex;flex-direction:column;gap:40px;}
+
+  .exercise{background:#fff;border:1px solid var(--border);border-radius:3px;box-shadow:0 2px 10px var(--shadow);
+    overflow:hidden;animation:slideIn .3s ease both;}
+  @keyframes slideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .exercise:nth-child(1){animation-delay:.02s}.exercise:nth-child(2){animation-delay:.07s}
+  .exercise:nth-child(3){animation-delay:.12s}.exercise:nth-child(4){animation-delay:.17s}
+  .exercise:nth-child(5){animation-delay:.22s}
+
+  .ex-header{background:var(--ink);color:var(--cream);padding:12px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .ex-num{font-family:'Source Code Pro',monospace;font-size:.66rem;letter-spacing:2px;text-transform:uppercase;color:var(--plum-light);}
+  .ex-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:600;}
+  .ex-type{font-family:'Lora',serif;font-style:italic;font-size:.76rem;color:var(--plum-light);margin-left:auto;}
+  .ex-score{font-family:'Source Code Pro',monospace;font-size:.74rem;color:var(--plum-light);margin-left:10px;}
+
+  /* layout */
+  .split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);}
+  .split.wide-left{grid-template-columns:minmax(0,56%) minmax(0,44%);}
+  @media(max-width:760px){.split,.split.wide-left{grid-template-columns:1fr;}}
+  .text-col{padding:22px;border-right:1px solid var(--border);background:var(--cream);}
+  @media(max-width:760px){.text-col{border-right:none;border-bottom:1px solid var(--border);}}
+  .text-type-label{font-family:'Source Code Pro',monospace;font-size:.63rem;letter-spacing:2px;
+    text-transform:uppercase;color:var(--plum);margin-bottom:10px;}
+
+  /* styled daily-life texts */
+  .doc{background:#fff;border:1px solid #ccc;border-radius:2px;font-size:.82rem;}
+  .doc + .doc{margin-top:10px;}
+  .doc-head{border-bottom:1px solid #ccc;padding:8px 10px;background:#f7f7f7;font-family:'Source Code Pro',monospace;font-size:.7rem;color:#555;}
+  .doc-head b{color:var(--ink);}
+  .doc-body{padding:10px 12px;font-family:'Lora',serif;font-size:.85rem;line-height:1.7;}
+  .thread-label{font-family:'Source Code Pro',monospace;font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;
+    color:var(--ink-light);margin:12px 0 5px;}
+  .notice{background:#fffbe6;border-left:4px solid #d99a00;padding:11px 13px;font-size:.85rem;line-height:1.7;border-radius:2px;}
+  .notice-t{font-family:'Playfair Display',serif;font-weight:700;margin-bottom:5px;color:#7a5200;}
+  .fineprint{font-size:.73rem;line-height:1.6;color:#555;border-top:1px dashed #bbb;margin-top:8px;padding-top:7px;}
+  .table-doc{width:100%;border-collapse:collapse;font-size:.78rem;background:#fff;}
+  .table-doc th{background:var(--plum);color:#fff;padding:6px 8px;text-align:left;font-family:'Playfair Display',serif;font-size:.72rem;font-weight:600;}
+  .table-doc td{padding:6px 8px;border-bottom:1px solid #ddd;vertical-align:top;}
+  .table-doc tr:last-child td{border-bottom:none;}
+  .table-doc .num{font-family:'Source Code Pro',monospace;}
+  .chat{display:flex;flex-direction:column;gap:6px;}
+  .msg{max-width:86%;padding:7px 11px;border-radius:11px;font-size:.83rem;line-height:1.6;}
+  .msg.them{background:#ececec;border-bottom-left-radius:3px;align-self:flex-start;}
+  .msg.you{background:#d9ecff;border-bottom-right-radius:3px;align-self:flex-end;}
+  .msg-time{font-family:'Source Code Pro',monospace;font-size:.6rem;color:var(--ink-light);margin-top:2px;display:block;}
+  .plain{font-size:.87rem;line-height:1.8;}
+  .plain p{margin-bottom:9px;}
+
+  /* academic passage */
+  .passage-title{font-family:'Playfair Display',serif;font-size:1.02rem;font-weight:700;text-align:center;
+    margin-bottom:6px;}
+  .passage-meta{text-align:center;font-family:'Source Code Pro',monospace;font-size:.62rem;letter-spacing:1.4px;
+    text-transform:uppercase;color:var(--ink-light);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .passage-text{font-size:.9rem;line-height:1.9;}
+  .passage-text p{margin-bottom:11px;}
+  .passage-text .pnum{font-family:'Source Code Pro',monospace;font-size:.62rem;color:var(--plum);
+    vertical-align:super;margin-right:5px;}
+  .hl{background:var(--plum-pale);padding:0 2px;border-bottom:1px dotted var(--plum);}
+
+  /* questions */
+  .q-col{padding:18px 20px;background:#fbfafc;display:flex;flex-direction:column;gap:17px;}
+  .q-block{}
+  .q-kind{font-family:'Source Code Pro',monospace;font-size:.58rem;letter-spacing:1.4px;text-transform:uppercase;
+    color:var(--plum);background:var(--plum-pale);padding:2px 6px;border-radius:2px;display:inline-block;margin-bottom:6px;}
+  .q-text{font-size:.87rem;line-height:1.6;margin-bottom:9px;font-weight:500;}
+  .q-options{display:flex;flex-direction:column;gap:6px;}
+  .q-option{display:flex;align-items:flex-start;gap:9px;padding:8px 10px;border:1.5px solid var(--border);
+    border-radius:3px;cursor:pointer;transition:all .12s;background:#fff;font-size:.84rem;line-height:1.5;}
+  .q-option:hover{border-color:var(--plum);background:var(--plum-pale);}
+  .q-option input{margin-top:3px;accent-color:var(--plum);flex-shrink:0;}
+  .q-option.correct{background:var(--green-pale);border-color:var(--green);color:#155724;}
+  .q-option.wrong{background:var(--red-pale);border-color:var(--red);color:#721c24;}
+  .q-option.reveal{background:var(--green-pale);border-color:var(--green);}
+  .q-exp{display:none;margin-top:8px;padding:9px 12px;background:#fff;border-left:3px solid var(--plum);
+    font-size:.79rem;line-height:1.65;color:var(--ink-mid);font-style:italic;border-radius:0 2px 2px 0;}
+  .q-exp.visible{display:block;}
+  .q-exp b{font-style:normal;color:var(--plum);}
+  .check-btn{align-self:flex-start;font-family:'Playfair Display',serif;font-weight:600;font-size:.78rem;
+    padding:7px 17px;border:1.5px solid var(--plum);background:var(--plum);color:#fff;border-radius:2px;
+    cursor:pointer;transition:all .15s;margin-top:2px;}
+  .check-btn:hover{background:#4a2e56;}
+  .check-btn:disabled{opacity:.4;cursor:not-allowed;}
+  .q-score{font-family:'Source Code Pro',monospace;font-size:.72rem;color:var(--ink-light);
+    padding-top:7px;border-top:1px solid var(--border);display:none;}
+  .q-score.visible{display:block;}
+
+  .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);
+    color:var(--cream);font-family:'Lora',serif;font-size:.9rem;padding:12px 24px;border-radius:2px;opacity:0;
+    transition:all .25s;pointer-events:none;z-index:1000;border-left:3px solid var(--plum-light);}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  @media(max-width:640px){
+    header{padding:20px;flex-wrap:wrap;} .controls{padding:14px 16px;} .main{padding:20px 14px 50px;}
+    .header-title{font-size:1.35rem;}     .task-banner{padding:12px 16px;} .tab-btn{padding:12px 14px;font-size:.8rem;}
+  }
+
+  /* ── unified site nav ── */
+  .sn-bar{background:#ede8df;border-bottom:1px solid #ccc0a8;padding:0 34px;
+    display:flex;flex-wrap:wrap;align-items:center;}
+  .sn-bar a{display:inline-block;padding:11px 10px;font-family:'Lora',Georgia,serif;
+    font-style:italic;font-size:.83rem;color:var(--sn-accent,#8b6914);text-decoration:none;
+    border-bottom:2px solid transparent;transition:border-color .15s,background .15s,color .15s;white-space:nowrap;}
+  .sn-bar a:hover{border-bottom-color:var(--sn-accent,#8b6914);background:rgba(0,0,0,.035);}
+  .sn-bar a.sn-active{border-bottom-color:var(--sn-accent,#8b6914);font-weight:600;font-style:normal;}
+  .sn-bar a.sn-home{font-family:'Playfair Display',Georgia,serif;font-style:normal;font-weight:700;
+    font-size:.8rem;color:#1a1510;margin-right:8px;padding-right:14px;
+    border-right:1px solid #ccc0a8;border-bottom:none;}
+  .sn-bar a.sn-home:hover{color:var(--sn-accent,#8b6914);background:none;border-bottom:none;}
+  .sn-bar a.sn-plus{color:#5d3a6b;}
+  .sn-bar a.sn-plus:hover{border-bottom-color:#5d3a6b;}
+  @media(max-width:640px){.sn-bar{padding:0 10px;} .sn-bar a{padding:9px 6px;font-size:.75rem;}
+    .sn-bar a.sn-home{margin-right:4px;padding-right:8px;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="header-sub">Stephie's Academic English Practice</div>
+    <div class="header-title">Reading Exercises <span class="hard-chip">Hard</span></div>
+  </div>
+  <div class="header-badge">TOEFL Prep</div>
+</header>
+
+<nav class="sn-bar" style="--sn-accent:#5d3a6b">
+  <a class="sn-home" href="index.html">&#8592; Menu</a>
+  <a href="toefl-blanks.html">Gap Fill</a>
+  <a href="toefl-ctest.html">C-Test</a>
+  <a href="toefl-reading.html">Reading</a>
+  <a href="#" class="sn-plus sn-active">Reading+</a>
+  <a href="toefl-discussion.html">Academic Discussion</a>
+  <a href="toefl-email.html">Write an Email</a>
+  <a href="toefl-build-sentence.html">Build a Sentence</a>
+  <a href="toefl-build-sentence-hard.html" class="sn-plus">Sentence+</a>
+</nav>
+
+
+<div class="tab-bar">
+  <button class="tab-btn active" id="tb-daily" onclick="switchTab('daily')">&#128240; Daily Life &mdash; Hard</button>
+  <button class="tab-btn" id="tb-ac" onclick="switchTab('ac')">&#128218; Academic &mdash; Hard</button>
+</div>
+
+<!-- ════════════ DAILY ════════════ -->
+<div class="tab-panel active" id="panel-daily">
+  <div class="controls">
+    <button class="btn btn-generate" onclick="gen('daily')">&#8635; Generate 4 Exercises</button>
+    <button class="btn btn-outline" onclick="resetPool('daily')">Reset pool</button>
+    <div class="pool-meter">
+      <span id="daily-meter-txt">&mdash;</span>
+      <span class="meter-track"><span class="meter-fill" id="daily-meter" style="width:0%"></span></span>
+    </div>
+    <div class="score-summary" id="daily-sum">Score: <span class="score-big" id="daily-val">&mdash;</span></div>
+  </div>
+  <div class="task-banner">
+    <strong>Daily Life &mdash; Hard.</strong> Longer texts, small print, conditions and exceptions, and documents that
+    must be cross-referenced against each other. Several questions ask what can be <em>inferred</em> rather than what is stated.
+  </div>
+  <main class="main">
+    <div class="placeholder" id="daily-ph">
+      <div class="placeholder-icon">&#128240;</div>
+      Click <em>Generate 4 Exercises</em> to begin.<br>
+      <span style="font-size:.85rem;margin-top:8px;display:block;">14 texts &middot; 5 questions each &middot; nothing repeats until the pool is used up.</span>
+    </div>
+    <div class="exercises" id="daily-ex"></div>
+  </main>
+</div>
+
+<!-- ════════════ ACADEMIC ════════════ -->
+<div class="tab-panel" id="panel-ac">
+  <div class="controls">
+    <button class="btn btn-generate" onclick="gen('ac')">&#8635; Generate 3 Passages</button>
+    <button class="btn btn-outline" onclick="resetPool('ac')">Reset pool</button>
+    <div class="pool-meter">
+      <span id="ac-meter-txt">&mdash;</span>
+      <span class="meter-track"><span class="meter-fill" id="ac-meter" style="width:0%"></span></span>
+    </div>
+    <div class="score-summary" id="ac-sum">Score: <span class="score-big" id="ac-val">&mdash;</span></div>
+  </div>
+  <div class="task-banner">
+    <strong>Academic &mdash; Hard.</strong> Denser passages of 280&ndash;330 words with abstract argument.
+    Questions cover main idea, inference, vocabulary in context, rhetorical purpose, sentence simplification and EXCEPT items.
+  </div>
+  <main class="main">
+    <div class="placeholder" id="ac-ph">
+      <div class="placeholder-icon">&#128218;</div>
+      Click <em>Generate 3 Passages</em> to begin.<br>
+      <span style="font-size:.85rem;margin-top:8px;display:block;">12 passages &middot; 7 questions each &middot; nothing repeats until the pool is used up.</span>
+    </div>
+    <div class="exercises" id="ac-ex"></div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════ DAILY LIFE — HARD ═══════════════════════ */
+const DAILY = [
+{
+ title:"Conference Reimbursement Policy", type:"policy + email",
+ doc:`<div class="notice"><div class="notice-t">Postgraduate Travel Fund — Claim Conditions</div>
+Claims must be submitted within <b>30 days</b> of the final day of travel. Late claims are considered only where the delay is attributable to the Finance Office.
+<br><br>Reimbursable: standard-class rail, economy air, conference registration, and accommodation up to £120 per night.
+<br>Not reimbursable: meals, taxi fares under £15, travel insurance, or any expense incurred before the award letter is dated.
+<div class="fineprint">Where an itemised receipt is unavailable, a bank statement extract may be substituted, but only for amounts below £25. Accommodation exceeding the nightly cap will be reimbursed at the cap; the balance is the claimant's responsibility. Claimants who have received a departmental bursary in the same academic year may claim only 50% of eligible costs.</div></div>
+<div class="thread-label">Email received</div>
+<div class="doc"><div class="doc-head"><b>From:</b> r.mensah@finance.univ.ac.uk &middot; <b>Sent:</b> 14 Nov</div>
+<div class="doc-body">Dear Ms Alvarez,<br><br>Your award letter is dated 2 October. Our records show you also received the Kessler bursary in March this year. Please note this when preparing your claim. Your conference ended on 21 October.<br><br>Regards,<br>R. Mensah</div></div>`,
+ qs:[
+  {k:"Inference",q:"Ms Alvarez booked her flight on 28 September. What is the most likely consequence?",
+   o:["It will be reimbursed in full as economy air travel.","It will be reimbursed at 50% like her other costs.","It will not be reimbursed, as it predates the award letter.","It will be reimbursed only if she provides a bank statement."],c:2,
+   e:"The policy excludes any expense incurred before the award letter is dated. Her letter is dated 2 October, so a 28 September booking falls outside the eligible window entirely — the bursary and receipt rules never come into play."},
+  {k:"Detail",q:"What is the final date on which her claim can normally be submitted?",
+   o:["1 November","20 November","21 November","14 December"],c:1,
+   e:"Claims are due within 30 days of the final day of travel. The conference ended 21 October, so the deadline falls on 20 November."},
+  {k:"Application",q:"She stayed four nights at £145 per night. How much of the accommodation is eligible before any other adjustment?",
+   o:["£580","£480","£240","£290"],c:1,
+   e:"The cap is £120 per night, so eligible accommodation is 4 × £120 = £480. The £25 excess per night is her own responsibility."},
+  {k:"Inference",q:"Why does Mr Mensah mention the Kessler bursary?",
+   o:["To confirm she is ineligible to claim anything at all.","To indicate that her claim will be reduced to half of eligible costs.","To remind her that bursary recipients must claim within 14 days.","To explain why her award letter was issued late."],c:1,
+   e:"The fine print states that claimants who received a departmental bursary in the same academic year may claim only 50% of eligible costs. He is flagging that this reduction applies to her."},
+  {k:"Detail",q:"For which of the following could a bank statement replace an itemised receipt?",
+   o:["A £140 hotel night","A £22 rail ticket","A £15 taxi fare","A £310 registration fee"],c:1,
+   e:"Substitution is permitted only for amounts below £25. The £22 rail ticket qualifies; the taxi fare is non-reimbursable in any case, and the other two exceed the threshold."}
+ ]
+},
+{
+ title:"Two Tenancy Listings", type:"comparison",
+ doc:`<div class="doc"><div class="doc-head"><b>Listing A</b> &middot; 12 Merrow Street</div>
+<div class="doc-body">£1,050 pcm. Two bedrooms, first floor. Available 1 Feb. <b>Bills not included.</b> Deposit: five weeks' rent. Minimum term 12 months. No pets. EPC rating D. Council tax band C (tenant liable). Twelve-minute walk to Northgate station. Note: property is above a commercial bakery which operates from 04:00.</div></div>
+<div class="doc"><div class="doc-head"><b>Listing B</b> &middot; Flat 7, Kelbrook Court</div>
+<div class="doc-body">£1,240 pcm <b>including water, broadband and council tax</b> (electricity and gas excluded). One bedroom plus study, third floor, no lift. Available 15 Feb. Deposit: five weeks' rent. Minimum term 6 months, rolling thereafter. Pets considered. EPC rating B. Twenty-two-minute walk to Northgate station, or six minutes to the 14 bus which runs to the station every ten minutes.</div></div>
+<div class="fineprint">Council tax band C in this borough is charged at approximately £142 per month. Average monthly water charge for a two-person household is around £34.</div>`,
+ qs:[
+  {k:"Application",q:"Ignoring gas and electricity, which listing costs less per month once council tax and water are accounted for?",
+   o:["Listing A, by roughly £14","Listing B, by roughly £14","Listing A, by roughly £86","They cost approximately the same"],c:0,
+   e:"Listing A comes to £1,050 + £142 council tax + £34 water = £1,226. Listing B is £1,240 with those already included. Listing A is therefore cheaper, but only by about £14 — far less than the £190 gap in the headline rent suggests."},
+  {k:"Inference",q:"Which tenant would find Listing A least suitable?",
+   o:["Someone who works night shifts and sleeps during the day","Someone who commutes daily to Northgate station","Someone who needs a second room for working from home","Someone who wants to sign a long lease"],c:0,
+   e:"The bakery below operates from 04:00, which would badly disrupt daytime sleep. The other three profiles are either well served by A or unaffected."},
+  {k:"Detail",q:"Which of these is true of Listing B but NOT Listing A?",
+   o:["The deposit is lower","A short initial commitment is possible","It is closer to the station on foot","It has more bedrooms"],c:1,
+   e:"B has a six-month minimum term versus A's twelve. Deposits are identical at five weeks, A is closer on foot, and A has two bedrooms to B's one plus study."},
+  {k:"Vocabulary",q:"In this context, 'rolling thereafter' most nearly means that after six months the tenancy",
+   o:["must be renegotiated at a higher rent","continues automatically on a short-term basis","converts into a twelve-month fixed term","ends unless the landlord grants an extension"],c:1,
+   e:"A rolling (or periodic) tenancy continues automatically period by period once the fixed term expires, rather than ending or requiring a new fixed term."},
+  {k:"Inference",q:"A tenant with a cat and a tight winter heating budget should note that",
+   o:["only A permits pets, but B is cheaper to heat","only B permits pets, and B is likely cheaper to heat","both permit pets, but A is cheaper to heat","neither permits pets"],c:1,
+   e:"A states 'no pets'; B says pets are considered. B's EPC rating of B indicates better energy efficiency than A's D, implying lower heating costs."}
+ ]
+},
+{
+ title:"Insurance Claim Correspondence", type:"email chain",
+ doc:`<div class="doc"><div class="doc-head"><b>1.</b> From: claims@harbourinsure.com &middot; 3 Mar</div>
+<div class="doc-body">Dear Mr Duarte, we acknowledge your claim (ref HC-88214) for water damage. Before we can proceed, please supply a plumber's report confirming the cause. Under section 4(c), gradual deterioration is excluded; sudden escape of water is covered.</div></div>
+<div class="doc"><div class="doc-head"><b>2.</b> From: t.duarte@mailbox.com &middot; 9 Mar</div>
+<div class="doc-body">Report attached. The plumber states the joint had been weeping for "some months" before it failed completely on 28 February, flooding the kitchen overnight.</div></div>
+<div class="doc"><div class="doc-head"><b>3.</b> From: claims@harbourinsure.com &middot; 17 Mar</div>
+<div class="doc-body">Thank you. We are declining the claim under 4(c). You may request an internal review within 28 days, and thereafter refer the matter to the Financial Ombudsman Service, which is free of charge. Please note our decision does not affect your no-claims position.</div></div>`,
+ qs:[
+  {k:"Inference",q:"Why did the plumber's report weaken rather than strengthen Mr Duarte's claim?",
+   o:["It arrived after the deadline for supporting evidence.","It described a long-developing fault rather than a sudden one.","It failed to specify the date of the flooding.","It suggested the damage was caused deliberately."],c:1,
+   e:"Section 4(c) excludes gradual deterioration. By stating the joint had been weeping for months, the report placed the cause in the excluded category rather than the covered 'sudden escape' category."},
+  {k:"Detail",q:"By what date must Mr Duarte request an internal review?",
+   o:["31 March","14 April","28 April","17 May"],c:1,
+   e:"The decision letter is dated 17 March and allows 28 days, giving a deadline of 14 April."},
+  {k:"Purpose",q:"Why does the final email mention his no-claims position?",
+   o:["To warn him that pursuing the claim further would be costly","To reassure him that the refusal carries no additional penalty","To indicate that his premium will rise at renewal","To explain why the claim was declined"],c:1,
+   e:"The remark is reassurance: although the claim failed, his no-claims record is untouched, so he suffers no secondary loss from having claimed."},
+  {k:"Inference",q:"What can be inferred about the Financial Ombudsman Service?",
+   o:["It is the insurer's own internal appeals department.","It can be approached only after the insurer's own review.","It charges a fee based on the value of the claim.","It automatically reviews all declined claims."],c:1,
+   e:"The sequencing — internal review 'within 28 days, and thereafter refer the matter to the Ombudsman' — indicates the Ombudsman is an external body approached after the insurer's own process. The email states it is free."},
+  {k:"Vocabulary",q:"As used in the plumber's report, 'weeping' most nearly means",
+   o:["making a high-pitched noise","leaking slowly","corroding from the outside","expanding under pressure"],c:1,
+   e:"A weeping joint is one releasing water slowly over time. The contrast with 'failed completely' confirms it describes slow leakage preceding total failure."}
+ ]
+},
+{
+ title:"Course Handbook — Assessment Rules", type:"handbook",
+ doc:`<div class="notice"><div class="notice-t">MSc Environmental Policy — Assessment Regulations (extract)</div>
+<b>7.1</b> Coursework submitted late without an approved extension is capped at the pass mark (50) for up to five working days, and awarded zero thereafter.<br>
+<b>7.2</b> Extension requests must be lodged <i>before</i> the deadline except where sudden illness prevents this; retrospective requests require documentary evidence dated within 48 hours of the deadline.<br>
+<b>7.3</b> A student who fails a module may resit once. The resit mark is capped at 50 regardless of performance.<br>
+<b>7.4</b> Where a module is failed a second time, the Board of Examiners may permit repetition of the module in attendance, normally in the following academic year.<br>
+<b>7.5</b> The dissertation may not be resat; a failed dissertation may only be repeated under 7.4.
+<div class="fineprint">Word limits are enforced at +10%. Work exceeding this is marked only to the point at which the limit is reached. Bibliographies and appendices are excluded from the count; footnotes containing substantive argument are included.</div></div>`,
+ qs:[
+  {k:"Application",q:"A student submits three working days late with no extension and the work is judged worth 68. What mark is recorded?",
+   o:["68","58","50","0"],c:2,
+   e:"Under 7.1, work up to five working days late without an approved extension is capped at the pass mark of 50, so the recorded mark is 50 rather than the 68 earned."},
+  {k:"Inference",q:"A student falls ill the night before a deadline and submits an extension request two days afterwards with a doctor's note dated that same day. Under 7.2, the request is",
+   o:["automatically granted, as illness is always accepted","likely refused, because the evidence is dated too late","automatically refused, as retrospective requests are never allowed","granted only if the work is also submitted within five days"],c:1,
+   e:"Retrospective requests are permitted for sudden illness, but the evidence must be dated within 48 hours of the deadline. A note dated two days after may fall outside that window, making refusal likely."},
+  {k:"Detail",q:"A student fails the dissertation. What options are available?",
+   o:["A capped resit, as with any other module","Repetition in attendance if the Board permits","An automatic second attempt the following term","No further attempt of any kind"],c:1,
+   e:"7.5 removes the dissertation from the normal resit route, leaving only repetition under 7.4, which requires the Board's permission."},
+  {k:"Application",q:"An essay has a 4,000-word limit. Which submission would be marked only in part?",
+   o:["4,300 words of main text plus a 600-word appendix","4,250 words of main text plus a 400-word bibliography","4,300 words of main text plus 150 words of substantive footnotes","4,100 words of main text with no notes or appendices"],c:2,
+   e:"The enforced ceiling is 4,400 words. Appendices and bibliographies are excluded from the count, so the first two total 4,300 and 4,250 countable words — both inside the limit. Substantive footnotes ARE counted, so the third reaches 4,450 and would be marked only to the point at which the limit is reached."},
+  {k:"Inference",q:"What does the treatment of footnotes suggest about the department's concern?",
+   o:["That students may use footnotes to evade the word limit","That footnotes are considered unnecessary in policy writing","That referencing conventions vary between modules","That appendices are more important than footnotes"],c:0,
+   e:"By counting footnotes that contain substantive argument while exempting bibliographies, the rule targets the practice of shifting argument into notes to stay nominally within the limit."}
+ ]
+},
+{
+ title:"Airline Disruption Notice", type:"notice + table",
+ doc:`<div class="notice"><div class="notice-t">Passenger Rights — Delay and Cancellation</div>
+Entitlements depend on flight distance and the length of delay <b>at arrival</b>, not departure. Compensation is not payable where the disruption results from extraordinary circumstances (severe weather, air traffic control strikes, security alerts). Airline staff shortages and technical faults are <b>not</b> extraordinary circumstances.</div>
+<table class="table-doc"><tr><th>Distance</th><th>Delay at arrival</th><th>Compensation</th><th>Care provided from</th></tr>
+<tr><td>Under 1,500 km</td><td class="num">3 hrs +</td><td class="num">€250</td><td class="num">2 hrs</td></tr>
+<tr><td>1,500–3,500 km</td><td class="num">3 hrs +</td><td class="num">€400</td><td class="num">3 hrs</td></tr>
+<tr><td>Over 3,500 km</td><td class="num">4 hrs +</td><td class="num">€600</td><td class="num">4 hrs</td></tr>
+</table>
+<div class="fineprint">"Care" means meals, refreshments and two communications, and accommodation where an overnight stay becomes necessary. Care is owed regardless of the cause of disruption, including extraordinary circumstances. Where a passenger is rerouted and arrives within two hours of the original scheduled time on a short-haul flight, compensation is reduced by 50%.</div>`,
+ qs:[
+  {k:"Application",q:"A 2,800 km flight is delayed by a technical fault and arrives 3 hours 40 minutes late. The passenger is entitled to",
+   o:["nothing, as technical faults are extraordinary","€250 and care from 2 hours","€400 and care from 3 hours","€600 and care from 4 hours"],c:2,
+   e:"2,800 km falls in the 1,500–3,500 km band: €400 for a delay of 3 hours or more, with care from 3 hours. Technical faults are explicitly not extraordinary, so compensation stands."},
+  {k:"Inference",q:"A flight is cancelled because of a severe storm and passengers wait overnight. What are they owed?",
+   o:["Compensation and care","Care only","Compensation only","Neither, as weather is extraordinary"],c:1,
+   e:"Extraordinary circumstances remove the compensation entitlement, but the fine print states care is owed regardless of cause — including accommodation where an overnight stay is necessary."},
+  {k:"Detail",q:"Entitlement is calculated using",
+   o:["the delay in departing","the delay in arriving","whichever delay is longer","the total time spent in the airport"],c:1,
+   e:"The opening line is explicit: entitlements depend on the length of delay at arrival, not departure."},
+  {k:"Application",q:"On a 900 km route a passenger is rerouted and lands 1 hour 50 minutes after the original scheduled arrival. Compensation is",
+   o:["€250","€125","€0","€400"],c:1,
+   e:"Short-haul rerouting arriving within two hours of the original time halves the €250 entitlement to €125. Note the delay still exceeds nothing — the reduction, not removal, applies."},
+  {k:"Inference",q:"Which disruption would most likely result in compensation being refused?",
+   o:["A delay caused by a shortage of cabin crew","A delay caused by a national air traffic control strike","A delay caused by a faulty cargo door","A delay caused by late arrival of the inbound aircraft due to crew scheduling"],c:1,
+   e:"An air traffic control strike is listed as an extraordinary circumstance. Crew shortages and technical faults are expressly excluded from that category, so those attract compensation."}
+ ]
+},
+{
+ title:"Text Thread — Rearranging Plans", type:"messages",
+ doc:`<div class="chat">
+<div class="msg them">Hey — slight problem. The 6:40 got cancelled so I'm on the 7:15 now, gets in 8:52.<span class="msg-time">17:31</span></div>
+<div class="msg you">No worries. Table's booked for 8:30 though. Want me to push it?<span class="msg-time">17:33</span></div>
+<div class="msg them">If they can do 9:15 that'd be safest. It's a fifteen-minute walk from the station and I'll have the bag.<span class="msg-time">17:34</span></div>
+<div class="msg you">They said 9 or nothing after that — Fridays are mad.<span class="msg-time">17:41</span></div>
+<div class="msg them">9 works, I'll leg it. Don't order for me, last time was a disaster 😅<span class="msg-time">17:43</span></div>
+<div class="msg you">Understood. Rob's coming too btw, he finishes at 8.<span class="msg-time">17:45</span></div>
+<div class="msg them">Ah — he won't eat anything with coriander in it, just so you know.<span class="msg-time">17:47</span></div>
+</div>`,
+ qs:[
+  {k:"Inference",q:"How much time will the sender have between arriving and the new booking?",
+   o:["About 8 minutes","About 23 minutes","About 45 minutes","About an hour"],c:0,
+   e:"The train gets in at 8:52 and the table is moved to 9:00 — eight minutes, against a fifteen-minute walk. This is why they say they will 'leg it'."},
+  {k:"Vocabulary",q:"'I'll leg it' in this exchange means",
+   o:["I will take a taxi instead","I will hurry on foot","I will arrive late and apologise","I will cancel and go home"],c:1,
+   e:"'Leg it' is informal British English for running or moving quickly on foot — consistent with the fifteen-minute walk and the eight-minute window."},
+  {k:"Inference",q:"Why does the sender say 'don't order for me'?",
+   o:["They want to arrive before anyone eats.","A previous attempt to order on their behalf went badly.","They are no longer intending to eat.","They dislike the restaurant's menu."],c:1,
+   e:"The phrase 'last time was a disaster' with a laughing emoji refers back to a previous occasion when someone ordered for them and it went wrong."},
+  {k:"Detail",q:"What is mentioned about Rob?",
+   o:["He will arrive before the others","He finishes work at 8 and avoids coriander","He booked the original table","He is travelling on the same train"],c:1,
+   e:"Two facts are given: he finishes at 8, and he will not eat anything containing coriander. Nothing indicates he arrives first or made the booking."},
+  {k:"Inference",q:"Why was 9:15 not booked?",
+   o:["The station is too far from the restaurant.","The restaurant had no availability after 9 that evening.","Rob would not have finished work.","The sender preferred an earlier time."],c:1,
+   e:"The reply '9 or nothing after that — Fridays are mad' indicates the restaurant could not accommodate a later slot on a busy Friday."}
+ ]
+},
+{
+ title:"Gym Membership Terms", type:"contract extract",
+ doc:`<div class="doc"><div class="doc-head"><b>Meridian Fitness</b> &middot; Membership Agreement (extract)</div>
+<div class="doc-body"><b>3.1</b> The minimum term is twelve months from the first payment date.<br>
+<b>3.2</b> Cancellation within the minimum term is permitted only on relocation of more than 15 miles from any Meridian branch, or on medical grounds evidenced by a registered practitioner.<br>
+<b>3.3</b> After the minimum term, membership continues monthly and may be cancelled with 30 days' written notice.<br>
+<b>3.4</b> Membership may be frozen for up to three months in any twelve-month period at £6 per month. Frozen months do not count towards the minimum term.<br>
+<b>3.5</b> Off-peak members may not access the club between 17:00 and 20:00 on weekdays. Entry attempts during restricted hours will be refused at the barrier.
+<div class="fineprint">Class bookings open 7 days ahead for full members and 3 days ahead for off-peak members. A £5 charge applies to classes booked and not attended without 4 hours' notice. This charge applies to all membership types.</div></div></div>`,
+ qs:[
+  {k:"Application",q:"A member joins on 1 March and freezes for two months in July and August. When does the minimum term end?",
+   o:["28 February the following year","30 April the following year","31 December the same year","1 March the following year"],c:1,
+   e:"3.4 states frozen months do not count towards the minimum term. Twelve countable months from 1 March would end 28 February, but two frozen months push the end date two months later, to 30 April."},
+  {k:"Inference",q:"A member moves 18 miles from their usual branch but 9 miles from a different Meridian branch. Under 3.2 they",
+   o:["may cancel, as the move exceeds 15 miles","may not cancel, as they remain within 15 miles of a branch","may cancel only with medical evidence","may freeze but not cancel"],c:1,
+   e:"The clause specifies more than 15 miles from ANY Meridian branch. Remaining 9 miles from another branch means the relocation ground is not satisfied."},
+  {k:"Detail",q:"An off-peak member arrives at 18:20 on a Wednesday. What happens?",
+   o:["They are admitted on payment of a supplement.","They are refused entry at the barrier.","They are admitted but may not book classes.","They are admitted only for classes already booked."],c:1,
+   e:"3.5 restricts off-peak access between 17:00 and 20:00 on weekdays and states entry attempts during those hours will be refused at the barrier — no supplement or exception is offered."},
+  {k:"Application",q:"An off-peak member books a class and cancels three hours beforehand. The result is",
+   o:["no charge, as off-peak members are exempt","a £5 charge, as notice was under four hours","a £6 charge, equivalent to the freeze fee","no charge, as the class was cancelled rather than missed"],c:1,
+   e:"The fine print imposes £5 where a booked class is not attended without four hours' notice, and states the charge applies to all membership types. Three hours' notice falls short."},
+  {k:"Inference",q:"What advantage do full members have when booking classes?",
+   o:["They pay no cancellation charge.","They may book four days earlier than off-peak members.","They may attend classes during restricted hours only.","They receive priority on waiting lists."],c:1,
+   e:"Bookings open 7 days ahead for full members and 3 days ahead for off-peak — a four-day advantage. The cancellation charge explicitly applies to all types."}
+ ]
+},
+{
+ title:"Recipe with Substitutions", type:"instructions",
+ doc:`<div class="doc"><div class="doc-head"><b>Slow-Braised Fennel and Butter Beans</b> &middot; serves 4</div>
+<div class="doc-body">Preheat to 150°C (fan 130°C / gas 2). Trim two large fennel bulbs, reserving the fronds. Halve lengthways, then quarter if the bulbs are especially thick.<br><br>
+Colour the fennel cut-side down in a heavy casserole until deep gold — this will take longer than you expect and should not be rushed. Remove. Soften one sliced onion in the same pan, adding a splash of water if it catches.<br><br>
+Return the fennel, add 400g drained butter beans, 300ml stock and a strip of pared lemon zest. Cover and transfer to the oven for 55 minutes, or 40 if you have quartered rather than halved the bulbs.<br><br>
+Finish with the chopped fronds and a squeeze of lemon.
+<div class="fineprint">Cannellini beans work equally well; chickpeas do not, as they remain firm over this cooking time. If using dried beans, soak overnight and pre-cook before adding — otherwise they will not soften in the braise. Vegetable stock keeps the dish vegan; chicken stock deepens it but is not necessary.</div></div></div>`,
+ qs:[
+  {k:"Inference",q:"Why does the recipe warn that colouring the fennel 'should not be rushed'?",
+   o:["The fennel will burn if the heat is too low.","Proper browning develops flavour that the braise depends on.","Rushing prevents the beans from absorbing the stock.","The pan must reach temperature before the onion is added."],c:1,
+   e:"The instruction to colour until 'deep gold' and the warning against rushing point to browning as a flavour-building step — the note that it takes longer than expected implies impatience would compromise the result."},
+  {k:"Application",q:"A cook quarters the bulbs and uses dried cannellini beans. What must they do?",
+   o:["Oven-braise for 55 minutes and add the beans dry","Oven-braise for 40 minutes and pre-cook the beans","Oven-braise for 55 minutes and pre-cook the beans","Oven-braise for 40 minutes and add the beans dry"],c:1,
+   e:"Quartered bulbs take 40 minutes rather than 55. Dried beans must be soaked and pre-cooked, as they will not soften during the braise."},
+  {k:"Detail",q:"Which substitution does the recipe advise against?",
+   o:["Cannellini beans","Chickpeas","Vegetable stock","Chicken stock"],c:1,
+   e:"Chickpeas are singled out as unsuitable because they remain firm over this cooking time. The other three are all endorsed."},
+  {k:"Vocabulary",q:"'A strip of pared lemon zest' indicates the zest should be",
+   o:["finely grated","removed in a thin piece with the pith avoided","squeezed for juice only","dried before use"],c:1,
+   e:"To pare is to remove the outer layer thinly. A 'strip' contrasts with grating and implies a single piece that can be lifted out after cooking."},
+  {k:"Inference",q:"What does 'adding a splash of water if it catches' address?",
+   o:["The onion beginning to stick and burn","The pan cooling too quickly","The stock reducing too far","The fennel releasing excess liquid"],c:0,
+   e:"'Catching' describes food starting to stick and scorch on the pan base; a little water lifts it and prevents burning, especially in a pan already used for browning."}
+ ]
+},
+{
+ title:"Library Fines and Access Rules", type:"policy",
+ doc:`<div class="notice"><div class="notice-t">Borrowing Regulations — Central and Branch Libraries</div>
+Standard loans run for three weeks and may be renewed twice, provided no reservation has been placed by another user. Reserved items cannot be renewed under any circumstances.<br><br>
+Fines accrue at 20p per day per item, to a maximum of £8 per item. Borrowing is suspended once total fines reach £15. Suspension is lifted on payment reducing the balance below £15.<br><br>
+Short-loan items (marked with a red band) run for 7 days, may not be renewed, and accrue fines at 80p per day with no maximum.
+<div class="fineprint">Under-18 members do not accrue fines but are suspended once any item is 21 days overdue. Reference-only stock does not leave the building. Inter-library loans are subject to the lending library's terms, which may be stricter than our own; renewals are at their discretion.</div></div>`,
+ qs:[
+  {k:"Application",q:"An adult keeps a standard item 50 days overdue. What fine is owed on that item?",
+   o:["£10.00","£8.00","£15.00","£40.00"],c:1,
+   e:"At 20p per day, 50 days would give £10, but the maximum per item is £8, so the fine is capped at £8."},
+  {k:"Inference",q:"Why might a short-loan item accrue a larger fine than a standard item kept for the same period?",
+   o:["Short-loan items have a longer borrowing period.","The daily rate is higher and no maximum applies.","Short-loan fines are doubled after 21 days.","Short-loan items cannot be returned to branch libraries."],c:1,
+   e:"Short-loan fines run at 80p per day — four times the standard rate — and crucially have no cap, so they continue accruing indefinitely."},
+  {k:"Detail",q:"A standard item has been renewed once and another user then reserves it. The borrower may",
+   o:["renew it once more, as two renewals are permitted","not renew it, because a reservation now exists","renew it only in person at the Central Library","renew it for a shortened period of 7 days"],c:1,
+   e:"Renewal is permitted 'provided no reservation has been placed', and reserved items cannot be renewed under any circumstances — the unused second renewal is irrelevant."},
+  {k:"Application",q:"A 16-year-old member has an item 25 days overdue. The consequence is",
+   o:["a fine of £5.00","a fine of £8.00","suspension, with no fine","no fine and no suspension"],c:2,
+   e:"Under-18 members accrue no fines but are suspended once any item is 21 days overdue. At 25 days, suspension applies without any monetary charge."},
+  {k:"Inference",q:"What should a borrower expect when renewing an inter-library loan?",
+   o:["Renewal is guaranteed for three weeks.","Renewal depends on the lending library and may be refused.","Renewal is impossible in all cases.","Renewal is handled automatically after 21 days."],c:1,
+   e:"The fine print states such loans follow the lending library's terms, which may be stricter, and that renewals are at their discretion — so renewal is possible but not assured."}
+ ]
+},
+{
+ title:"Museum Exhibition Signage", type:"sign + map key",
+ doc:`<div class="notice"><div class="notice-t">Threads of Empire — Gallery 6</div>
+Timed entry. Your ticket admits you within a 30-minute window from the time printed; late arrivals are admitted only if capacity allows.<br><br>
+Photography without flash is permitted throughout except in the Textile Room, where light levels are controlled to protect the dyes. Sketching is welcome; pencils only, no ink.<br><br>
+Large bags and umbrellas must be left in the cloakroom (free, ground floor). Backpacks may be carried on one shoulder if worn in front.</div>
+<table class="table-doc"><tr><th>Room</th><th>Content</th><th>Notes</th></tr>
+<tr><td>6a</td><td>Trade routes and cartography</td><td>Step-free</td></tr>
+<tr><td>6b</td><td>Textile Room</td><td>Low light; no photography</td></tr>
+<tr><td>6c</td><td>Workshop reconstruction</td><td>Handling table; audio loop</td></tr>
+<tr><td>6d</td><td>Contemporary responses</td><td>Contains one film with strobe effects</td></tr>
+</table>`,
+ qs:[
+  {k:"Detail",q:"A visitor with a ticket printed 14:00 arrives at 14:40. They",
+   o:["will be refused entry outright","may enter only if there is spare capacity","must exchange their ticket for a later slot","may enter but must leave by 15:00"],c:1,
+   e:"The 30-minute window from 14:00 closes at 14:30. Arriving at 14:40 makes them a late arrival, admitted 'only if capacity allows'."},
+  {k:"Inference",q:"Why is photography prohibited specifically in Room 6b?",
+   o:["The objects there are on loan from another institution.","Controlled lighting protects the dyes from further exposure.","The room is too narrow for visitors to stop safely.","Flash photography would disturb the audio loop."],c:1,
+   e:"The sign links the prohibition to light levels being controlled to protect the dyes — cumulative light exposure damages textile colour, so even non-flash photography is excluded there."},
+  {k:"Inference",q:"Which room would most warrant a warning for a visitor with photosensitive epilepsy?",
+   o:["6a","6b","6c","6d"],c:3,
+   e:"Room 6d contains a film with strobe effects, which is the recognised trigger risk. The other rooms present no such hazard."},
+  {k:"Detail",q:"A visitor arrives with a backpack. They may",
+   o:["carry it normally on both shoulders","wear it on one shoulder in front of the body","carry it only if it contains no umbrella","take it in only after security inspection"],c:1,
+   e:"The sign permits backpacks 'carried on one shoulder if worn in front' — a common museum rule preventing accidental contact with displays."},
+  {k:"Inference",q:"Which room is most clearly signalled as suitable for a wheelchair user?",
+   o:["6a","6b","6c","6d"],c:0,
+   e:"Only 6a carries the note 'step-free'. The absence of that note elsewhere does not confirm inaccessibility, but 6a is the one explicitly indicated."}
+ ]
+},
+{
+ title:"Job Advertisement and Person Specification", type:"advert",
+ doc:`<div class="doc"><div class="doc-head"><b>Research Assistant (Fixed Term, 18 months)</b> &middot; Ref RA-2291</div>
+<div class="doc-body">Salary £31,400–£34,900 depending on experience. 0.8 FTE considered for the right candidate. Closing date 4 April, interviews week commencing 21 April.<br><br>
+<b>Essential:</b> Postgraduate degree in a quantitative discipline; demonstrable experience with R or Python; evidence of writing for publication.<br>
+<b>Desirable:</b> Experience of longitudinal datasets; familiarity with survey weighting; a second language.<br><br>
+The post is based in Leeds with an expectation of two days on site per week. Applications from candidates seeking to job-share are welcome.
+<div class="fineprint">Candidates who do not meet all essential criteria will not be shortlisted. Meeting desirable criteria is used only to distinguish between candidates already meeting all essential ones. Sponsorship for a Skilled Worker visa is available for this role only at 1.0 FTE.</div></div></div>`,
+ qs:[
+  {k:"Inference",q:"An applicant has a postgraduate degree, strong Python skills, longitudinal data experience and two languages, but no publications. They will",
+   o:["be shortlisted on the strength of the desirable criteria","not be shortlisted, as an essential criterion is unmet","be shortlisted only if applying at 0.8 FTE","be offered an interview at the panel's discretion"],c:1,
+   e:"Evidence of writing for publication is essential, and the fine print states candidates not meeting all essential criteria will not be shortlisted. Desirable criteria only separate candidates who already meet every essential one."},
+  {k:"Detail",q:"What does the advert say about part-time working?",
+   o:["It is not available for this post.","0.8 FTE may be considered, and job-shares are welcome.","Only job-shares are permitted, not reduced hours.","Part-time is available after the first six months."],c:1,
+   e:"Two provisions are given: 0.8 FTE considered for the right candidate, and applications from job-sharers welcomed."},
+  {k:"Inference",q:"A candidate requiring visa sponsorship should note that",
+   o:["sponsorship is unavailable for this post entirely","they must apply for the full-time option to be sponsored","sponsorship depends on meeting all desirable criteria","sponsorship is decided after interview"],c:1,
+   e:"Sponsorship is available 'only at 1.0 FTE', so a candidate needing it cannot take the 0.8 FTE route."},
+  {k:"Vocabulary",q:"'Demonstrable experience' most nearly means experience that",
+   o:["was gained recently","can be shown or evidenced","was gained in a paid role","exceeds three years"],c:1,
+   e:"Demonstrable means capable of being shown or proved — the applicant must be able to evidence it, regardless of when or in what setting it was acquired."},
+  {k:"Inference",q:"What does 'an expectation of two days on site per week' imply about the role?",
+   o:["It is fully remote.","It is hybrid, with partial home working.","It requires relocation to Leeds.","It involves travel to multiple sites."],c:1,
+   e:"Requiring two on-site days implies the remainder may be worked elsewhere — a hybrid pattern. Full relocation is not stated, only a Leeds base."}
+ ]
+},
+{
+ title:"Utility Bill and Tariff Change", type:"bill",
+ doc:`<div class="doc"><div class="doc-head"><b>Northvale Energy</b> &middot; Statement 04 &middot; Account 7781-K</div>
+<div class="doc-body">Period: 1 Jan – 31 Mar<br>
+Electricity used: 742 kWh &nbsp;·&nbsp; Unit rate: 24.8p &nbsp;·&nbsp; Standing charge: 53p/day<br>
+Gas used: 3,110 kWh &nbsp;·&nbsp; Unit rate: 6.1p &nbsp;·&nbsp; Standing charge: 31p/day<br><br>
+<b>Balance carried forward from Statement 03: £62.40 in credit</b><br>
+Monthly direct debit: £110
+<div class="fineprint">Your fixed tariff ends 30 June. From 1 July you will move automatically to the Standard Variable tariff unless you select a new fixed deal. The Standard Variable unit rates are currently 27.9p (electricity) and 7.4p (gas). Exit fees of £25 per fuel apply if you leave a fixed tariff early; no exit fee applies in the final 49 days of a fixed term.</div></div></div>`,
+ qs:[
+  {k:"Application",q:"From roughly what date could this customer switch away without paying exit fees?",
+   o:["1 April","12 May","30 June","1 July"],c:1,
+   e:"No exit fee applies in the final 49 days of the fixed term, which ends 30 June. Counting back 49 days lands around 12 May."},
+  {k:"Inference",q:"If usage stayed identical, what would happen to costs after 1 July with no action taken?",
+   o:["They would fall, as variable rates are lower.","They would rise, as both variable unit rates are higher.","They would stay the same until a new deal is selected.","They would depend entirely on the standing charge."],c:1,
+   e:"Standard Variable rates (27.9p and 7.4p) exceed the current fixed rates (24.8p and 6.1p), so identical usage would cost more from 1 July if the customer does nothing."},
+  {k:"Detail",q:"What does 'balance carried forward: £62.40 in credit' indicate?",
+   o:["The customer owes £62.40.","The customer has overpaid by £62.40.","£62.40 of the bill is disputed.","£62.40 is the standing charge total."],c:1,
+   e:"A credit balance means the account holds money in the customer's favour — they have paid more than they have used, typically through level direct debits in a low-usage period."},
+  {k:"Application",q:"What is the electricity standing charge for this 90-day period?",
+   o:["£27.90","£47.70","£53.00","£18.40"],c:1,
+   e:"53p per day over 90 days gives 90 × £0.53 = £47.70."},
+  {k:"Inference",q:"A customer leaves both fuels on 1 May. What exit fee applies?",
+   o:["Nothing, as the term is nearly over","£25 in total","£50 in total","£25 per fuel per month remaining"],c:2,
+   e:"1 May falls outside the fee-free final 49 days, which begin around 12 May. Exit fees are £25 per fuel, and both electricity and gas are supplied, giving £50."}
+ ]
+},
+{
+ title:"Parking Restrictions Notice", type:"street sign",
+ doc:`<div class="notice"><div class="notice-t">Controlled Parking Zone H — Restrictions</div>
+<b>Mon–Sat 08:30–18:30:</b> Permit holders only. Maximum stay for visitors 2 hours, no return within 3 hours.<br>
+<b>Sun and Bank Holidays:</b> No restriction.<br><br>
+Loading is permitted for up to 20 minutes at any time, provided the vehicle is actively loading or unloading and the driver is present or nearby.<br><br>
+Blue Badge holders may park for up to 3 hours in permit bays, displaying badge and clock.
+<div class="fineprint">Single yellow line: restrictions apply during zone hours only. Double yellow line: no waiting at any time, including Sundays. Loading exemptions do not apply where kerb markings indicate a loading ban. Penalty Charge Notices are reduced by 50% if paid within 14 days.</div></div>`,
+ qs:[
+  {k:"Application",q:"A visitor parks in a permit bay at 17:00 on Saturday and returns at 18:45. Have they complied?",
+   o:["No — the two-hour maximum was exceeded","Yes — restrictions end at 18:30","No — visitors may never use permit bays","Yes — Saturday is unrestricted"],c:1,
+   e:"They parked at 17:00 with restrictions ending at 18:30, so only 90 restricted minutes elapsed — inside the two-hour limit. The time after 18:30 is unrestricted."},
+  {k:"Inference",q:"A driver waits on a double yellow line on a Sunday afternoon with the engine running. This is",
+   o:["permitted, as Sunday is unrestricted","not permitted, as double yellows apply at all times","permitted for up to 20 minutes as loading","permitted only for Blue Badge holders"],c:1,
+   e:"The fine print distinguishes the two: single yellow follows zone hours, but double yellow means no waiting at any time, including Sundays. The Sunday exemption applies to the zone, not to double yellows."},
+  {k:"Detail",q:"For the loading exemption to apply, the driver must",
+   o:["display a permit in the windscreen","be present or nearby and actively loading","have booked a loading slot in advance","complete the activity within 10 minutes"],c:1,
+   e:"The sign requires the vehicle to be actively loading or unloading with the driver present or nearby, for a maximum of 20 minutes."},
+  {k:"Application",q:"A Blue Badge holder parks in a permit bay at 10:00 on Tuesday. Until when may they stay?",
+   o:["12:00","13:00","18:30","No limit applies"],c:1,
+   e:"Blue Badge holders may park up to 3 hours in permit bays, taking them to 13:00 — longer than the two-hour visitor maximum but not unlimited."},
+  {k:"Inference",q:"A £70 PCN is issued on 2 June and paid on 14 June. The amount payable is",
+   o:["£70","£35","£140","£0"],c:1,
+   e:"Payment within 14 days attracts a 50% reduction. 14 June is twelve days after issue, so £35 is payable."}
+ ]
+},
+{
+ title:"Volunteer Role Description", type:"description",
+ doc:`<div class="doc"><div class="doc-head"><b>Riverbank Trust</b> &middot; Volunteer Habitat Surveyor</div>
+<div class="doc-body">Surveys run March to September, in pairs, on a rota of roughly one weekend morning per fortnight. Training is provided over two Saturdays in February; attendance at both is required before surveying begins.<br><br>
+Volunteers record species presence using the Trust's app. Accuracy matters more than volume: an uncertain record should be logged as "possible" rather than omitted or overstated.<br><br>
+We ask for a commitment of one full season. Volunteers under 18 must be accompanied by an adult volunteer, who need not be a relative.
+<div class="fineprint">Expenses: standard-class travel reimbursed on production of receipts; mileage at 45p per mile for the first 100 miles per season and 25p thereafter. Waterproofs and a hand lens are provided on loan and must be returned at season end. Volunteers who withdraw mid-season are asked to return equipment within 14 days.</div></div></div>`,
+ qs:[
+  {k:"Inference",q:"A volunteer attends only the first February training Saturday. They may",
+   o:["begin surveying and complete training later","not begin surveying until both sessions are attended","survey only if paired with an experienced volunteer","survey but not use the recording app"],c:1,
+   e:"Attendance at both sessions is explicitly required before surveying begins — no partial or deferred route is offered."},
+  {k:"Application",q:"A volunteer drives 130 miles over the season. What mileage is due?",
+   o:["£58.50","£52.50","£45.00","£32.50"],c:1,
+   e:"First 100 miles at 45p = £45.00; remaining 30 miles at 25p = £7.50. Total £52.50."},
+  {k:"Inference",q:"What does the guidance on uncertain records reveal about the Trust's priorities?",
+   o:["It prefers a smaller but more confidently identified dataset.","It values the total number of records above all else.","It expects volunteers to consult an expert before logging.","It discourages recording rare species."],c:0,
+   e:"Stating that accuracy matters more than volume, and providing a 'possible' category rather than forcing a yes or no, shows the Trust prizes honest, well-calibrated data over inflated counts."},
+  {k:"Detail",q:"What is said about volunteers under 18?",
+   o:["They are not accepted.","They must be accompanied by an adult volunteer, related or not.","They must be accompanied by a parent or guardian.","They may survey alone after training."],c:1,
+   e:"The description requires an accompanying adult volunteer and specifies that person 'need not be a relative'."},
+  {k:"Inference",q:"Why might the Trust ask for a full-season commitment?",
+   o:["Training is costly and pairs and rotas depend on reliability.","Volunteers are paid per season rather than per survey.","Equipment cannot be reissued during the season.","Species can only be identified by the same observer."],c:0,
+   e:"Two Saturdays of training, fortnightly paired rotas and loaned equipment all imply significant setup per volunteer, which only pays off across a whole season."}
+ ]
+},
+{
+ title:"Product Recall Notice", type:"recall",
+ doc:`<div class="notice"><div class="notice-t">Safety Recall — Aurelia Cordless Kettle, Model AK-9</div>
+Affected units: serial numbers beginning <b>AK9-22</b> or <b>AK9-23</b>, sold between March 2022 and January 2024. The serial number is on the underside of the base unit, not the jug.<br><br>
+Fault: in a small number of units the base connector may overheat during repeated rapid boiling cycles. There have been no reported injuries.<br><br>
+<b>Stop using the product immediately.</b> Do not return it to the retailer. Register at aurelia-recall.com or call the freephone line for a prepaid return pack and a full refund or free replacement.
+<div class="fineprint">Proof of purchase is helpful but not required; the serial number alone is sufficient. Units purchased second-hand are covered. Refunds are issued at the original retail price, not the price paid. Replacements are of the current model AK-11, which has a different base and is not compatible with existing AK-9 jugs.</div></div>`,
+ qs:[
+  {k:"Detail",q:"Where should an owner look to identify whether their kettle is affected?",
+   o:["On the handle of the jug","On the underside of the base unit","On the original packaging only","Inside the lid of the jug"],c:1,
+   e:"The notice specifies the serial number is on the underside of the base unit, explicitly not the jug."},
+  {k:"Inference",q:"Someone who bought the kettle second-hand for £12 and lost the receipt should expect",
+   o:["no remedy, as proof of purchase is required","a refund of £12","a refund at the original retail price","a replacement only, with no refund option"],c:2,
+   e:"Second-hand units are covered, proof of purchase is not required, and refunds are issued at the original retail price rather than the price actually paid."},
+  {k:"Inference",q:"Why does the notice mention that there have been no reported injuries?",
+   o:["To suggest the recall is not urgent","To provide reassurance while still requiring the product be withdrawn","To limit the manufacturer's liability for future claims","To indicate that only some units need returning"],c:1,
+   e:"It reassures owners that no harm has yet occurred, while the bolded instruction to stop using the product immediately maintains the urgency of the action required."},
+  {k:"Detail",q:"What should owners NOT do?",
+   o:["Register online","Call the freephone line","Take the kettle back to the shop","Stop using the kettle"],c:2,
+   e:"The notice states plainly: do not return it to the retailer. The manufacturer is handling returns directly via a prepaid pack."},
+  {k:"Inference",q:"An owner accepting a replacement should be aware that",
+   o:["their existing jug will not fit the new base","the replacement is a refurbished AK-9","they must pay the difference in model price","the replacement carries no warranty"],c:0,
+   e:"The fine print states the AK-11 has a different base and is not compatible with existing AK-9 jugs, so the old jug becomes unusable."}
+ ]
+}
+];
+
+/* ═══════════════════════ ACADEMIC — HARD ═══════════════════════ */
+const AC = [
+{
+ title:"The Problem of Induction", topic:"Philosophy of Science",
+ paras:[
+"Every time a scientist generalises from observed cases to a universal law, an old philosophical difficulty is quietly assumed away. We observe that copper conducts electricity in every sample tested, and conclude that copper conducts electricity — full stop. But the inference from some to all is not deductively valid. No accumulation of confirming instances can guarantee that the next instance will conform.",
+"David Hume framed the difficulty in the eighteenth century and it has resisted comfortable resolution ever since. Any attempt to justify induction by pointing to its past success is itself an inductive argument, and therefore circular: it assumes the very reliability it seeks to establish. Attempts to ground induction in a principle of the uniformity of nature fare no better, since that principle can be defended only by appeal to experience, which returns us to the same circle.",
+"Karl Popper's response was radical: abandon the attempt to justify induction and deny that science depends on it. On his account, scientists do not confirm theories, they attempt to refute them. A theory that has withstood serious attempts at falsification is not thereby shown to be true; it is merely, for the present, unrefuted. Science advances not by accumulating support but by eliminating error.",
+"Popper's solution has attracted persistent criticism. Working scientists rarely abandon a well-established theory on the strength of a single disconfirming result, and it is not obvious that they are irrational to hesitate. A failed prediction may indict the theory, but it may equally indict an auxiliary assumption, a piece of apparatus, or the competence of the experimenter. If falsification can always be deflected onto some other part of the system, its logical cleanliness begins to look less decisive than Popper supposed."
+ ],
+ qs:[
+ {k:"Main idea",q:"What is the central concern of the passage?",
+  o:["That Hume was mistaken about the nature of causation","That inductive reasoning resists justification, and that Popper's alternative is itself contested","That scientific theories are rarely tested rigorously enough","That the uniformity of nature has been experimentally confirmed"],c:1,
+  e:"The passage sets out Hume's problem, shows why standard justifications are circular, presents Popper's falsificationism as a response, and then details objections to it. The arc is the difficulty and the contested status of its best-known solution."},
+ {k:"Inference",q:"The passage implies that justifying induction by its track record fails because",
+  o:["the track record is in fact poor","the argument presupposes what it aims to prove","past success cannot be measured objectively","scientists rarely record their failed predictions"],c:1,
+  e:"The text calls such an argument 'itself an inductive argument, and therefore circular: it assumes the very reliability it seeks to establish' — the flaw is circularity, not a poor record."},
+ {k:"Vocabulary",q:"As used in paragraph 4, 'indict' most nearly means",
+  o:["reverse","implicate","publicise","strengthen"],c:1,
+  e:"To indict here is to point the finger of blame at something — a failed prediction may implicate the theory, or instead implicate the apparatus or the experimenter."},
+ {k:"Purpose",q:"Why does the author mention copper in the first paragraph?",
+  o:["To show that some generalisations are more secure than others","To provide a concrete instance of the inference from some to all","To illustrate a case where induction has failed","To contrast physical with chemical properties"],c:1,
+  e:"The copper example makes the abstract move from observed cases to a universal law tangible, immediately before the author points out that this move is not deductively valid."},
+ {k:"Simplify",q:"Which best captures the meaning of: 'A theory that has withstood serious attempts at falsification is not thereby shown to be true; it is merely, for the present, unrefuted'?",
+  o:["Surviving testing proves a theory correct until better evidence appears.","Surviving testing establishes only that a theory has not yet been disproved.","Theories that survive testing are usually true but cannot be proved so.","A theory can be neither proved nor disproved by testing."],c:1,
+  e:"The sentence carefully denies that survival confers truth, asserting only the negative and provisional status of not having been refuted so far."},
+ {k:"EXCEPT",q:"The passage mentions all of the following as things a failed prediction might implicate EXCEPT",
+  o:["the theory under test","an auxiliary assumption","the experimental apparatus","the funding of the research"],c:3,
+  e:"Paragraph 4 lists the theory, an auxiliary assumption, the apparatus and the experimenter's competence. Funding is never mentioned."},
+ {k:"Inference",q:"The author's attitude towards Popper's solution is best described as",
+  o:["wholly dismissive","sympathetic but sceptical of its decisiveness","enthusiastically supportive","indifferent to the debate"],c:1,
+  e:"Popper's response is called 'radical' and presented seriously, but the final paragraph raises substantial objections and concludes it 'looks less decisive than Popper supposed' — measured scepticism rather than dismissal or endorsement."}
+ ]
+},
+{
+ title:"Salt Marshes and Coastal Defence", topic:"Environmental Science",
+ paras:[
+"For much of the twentieth century, coastal engineering proceeded on a simple assumption: that the sea is an adversary and the appropriate response is a wall. Concrete sea defences were built along thousands of kilometres of vulnerable coastline, and for a time they appeared to work. The limitations of the approach have become apparent only gradually.",
+"A hard sea wall reflects wave energy rather than absorbing it. The reflected energy scours the seabed at the base of the structure, deepening the water immediately offshore. Deeper water allows larger waves to reach the wall, which accelerates further scouring. The defence therefore undermines the conditions on which its own stability depends, and requires progressively more expensive maintenance.",
+"Salt marshes behave differently. Vegetation dissipates wave energy through friction, and the marsh surface accretes sediment, gaining elevation over time. A marsh of sufficient width can reduce wave height substantially before the water reaches any structure behind it, and — crucially — it can build upwards in response to rising sea levels, provided sediment supply is adequate and it has somewhere to migrate.",
+"That last condition is where the difficulty lies. Where a marsh is backed by a hard defence, rising seas compress it against the structure until it drowns, a process termed coastal squeeze. This has prompted managed realignment: deliberately breaching a defence to allow the sea to flood land behind it, so that marsh can re-establish further inland. The engineering is straightforward; the politics are not. Land taken out of agricultural use is rarely surrendered without objection, and the benefits accrue over decades while the costs fall immediately on identifiable people."
+ ],
+ qs:[
+ {k:"Main idea",q:"The passage is primarily concerned with",
+  o:["the engineering techniques used to construct sea walls","why hard defences are self-defeating and why natural alternatives face obstacles","the rate at which sea levels are currently rising","the ecological value of salt marshes as wildlife habitat"],c:1,
+  e:"The passage explains the self-undermining physics of sea walls, contrasts this with how marshes work, and ends on the political obstacles to realignment. Habitat value and sea-level rates are not its focus."},
+ {k:"Inference",q:"The phrase 'undermines the conditions on which its own stability depends' refers to the fact that a sea wall",
+  o:["is built from materials that degrade in salt water","causes the scouring that exposes it to larger waves","prevents sediment from reaching the marsh behind it","requires maintenance that is rarely funded"],c:1,
+  e:"Paragraph 2 describes reflected energy scouring the seabed, deepening the water, admitting larger waves, and accelerating further scouring — a feedback loop the wall itself initiates."},
+ {k:"Vocabulary",q:"As used in paragraph 3, 'accretes' most nearly means",
+  o:["gradually accumulates","slowly erodes","chemically alters","periodically floods"],c:0,
+  e:"The marsh surface accretes sediment and thereby gains elevation — it builds up by accumulation. The following clause about building upwards confirms the direction."},
+ {k:"Detail",q:"According to the passage, a salt marsh can keep pace with rising sea levels only if",
+  o:["it is protected by a wall on its seaward side","sediment supply is adequate and it can migrate","wave energy is artificially reduced","it is periodically dredged"],c:1,
+  e:"Paragraph 3 states the marsh can build upwards 'provided sediment supply is adequate and it has somewhere to migrate' — both conditions are required."},
+ {k:"Purpose",q:"Why does the author state that 'the engineering is straightforward; the politics are not'?",
+  o:["To argue that managed realignment is technically impossible","To locate the real obstacle in social rather than technical difficulty","To criticise engineers for ignoring political factors","To suggest that breaching defences is unusually complex"],c:1,
+  e:"The contrast isolates where the difficulty actually lies: breaching a defence is technically simple, but surrendering farmland provokes objection. The sentence redirects the reader from technical to social barriers."},
+ {k:"Inference",q:"'Coastal squeeze' occurs when",
+  o:["marshes are compressed between rising seas and fixed defences","sea walls are built too close to one another","sediment supply exceeds the rate of sea-level rise","marshes migrate inland faster than expected"],c:0,
+  e:"The passage defines it as rising seas compressing a marsh against a hard defence behind it until the marsh drowns, having nowhere to retreat."},
+ {k:"EXCEPT",q:"The passage attributes all of the following to salt marshes EXCEPT",
+  o:["reducing wave height","gaining elevation over time","dissipating energy through friction","reflecting wave energy offshore"],c:3,
+  e:"Reflection is the defining behaviour of the hard sea wall and is precisely what marshes do not do; they dissipate energy instead. The other three are stated in paragraph 3."}
+ ]
+},
+{
+ title:"The Standardisation of Time", topic:"History of Technology",
+ paras:[
+"Before the railways, time was a local matter. Each town set its clocks by the sun, and noon in Bristol fell some ten minutes after noon in London. The discrepancy was of no practical consequence when the fastest communication travelled at the speed of a horse. A traveller who arrived with a watch showing the wrong time simply adjusted it.",
+"The railway destroyed this arrangement, not because it valued precision for its own sake but because it could not function without it. A timetable coordinating trains across a network requires a single reference; two trains approaching on one line with clocks differing by ten minutes is not an inconvenience but a collision. British railway companies adopted London time internally from the 1840s, and the practice spread outward from the network to the towns it served.",
+"Resistance was neither uniform nor trivial. Local time was bound up with local authority: the church clock, the market bell, and the municipal corporation that maintained them. To accept railway time was to accept that a schedule set elsewhere now governed the rhythm of the town. Some towns compromised with two-handed clocks showing both times, a solution that was visibly transitional.",
+"Legal recognition lagged well behind practice. Britain did not formally define Greenwich Mean Time as the legal standard until 1880, by which point it had been the effective standard for decades. This sequence — practice first, law afterwards — is characteristic of technological standardisation more generally. Standards are seldom imposed on a resistant population by statute; more often they are established by the entities that cannot operate without them, and codified once the argument is already over."
+ ],
+ qs:[
+ {k:"Main idea",q:"The passage argues that time standardisation in Britain",
+  o:["was imposed by Parliament against widespread opposition","was driven by railway necessity and only later codified in law","occurred simultaneously across Europe","had little effect on local civic institutions"],c:1,
+  e:"The passage traces standardisation from railway operational need, through local resistance, to legal recognition in 1880 — explicitly 'practice first, law afterwards'."},
+ {k:"Inference",q:"Why was local time variation tolerable before the railways?",
+  o:["Clocks were too inaccurate to reveal the differences.","Communication was slow enough that the discrepancy had no practical effect.","Most people had no access to clocks at all.","Church authorities forbade any comparison of times."],c:1,
+  e:"The passage states the discrepancy 'was of no practical consequence when the fastest communication travelled at the speed of a horse' — slow movement made the difference invisible in practice."},
+ {k:"Purpose",q:"Why does the author write that two trains with clocks differing by ten minutes is 'not an inconvenience but a collision'?",
+  o:["To emphasise that the need for standard time was a safety necessity","To criticise early railway companies for poor scheduling","To show that ten minutes was an unusually large discrepancy","To explain why timetables were eventually abandoned"],c:0,
+  e:"The sharp substitution of 'collision' for 'inconvenience' converts an administrative annoyance into a physical danger, establishing that standardisation was compelled rather than merely convenient."},
+ {k:"Inference",q:"The two-handed clocks are described as 'visibly transitional' because they",
+  o:["were mechanically unreliable and soon broke down","displayed a compromise that could not last indefinitely","were installed only in railway stations","showed the time in two different countries"],c:1,
+  e:"Displaying both local and railway time made the unresolved conflict literally visible; such a compromise holds only until one standard prevails, which is what the following paragraph describes."},
+ {k:"Vocabulary",q:"As used in the final paragraph, 'codified' most nearly means",
+  o:["encrypted for security","set down in formal law","measured with precision","publicly debated"],c:1,
+  e:"The contrast with practice and the reference to Britain formally defining GMT in 1880 make clear that codified means given formal legal expression."},
+ {k:"Detail",q:"According to the passage, what did accepting railway time symbolically involve?",
+  o:["Rejecting the accuracy of the church clock","Accepting that a schedule set elsewhere governed local life","Abandoning the market bell entirely","Adopting a foreign system of measurement"],c:1,
+  e:"Paragraph 3 states that to accept railway time 'was to accept that a schedule set elsewhere now governed the rhythm of the town' — a transfer of authority, not merely of numbers."},
+ {k:"Inference",q:"The author's closing generalisation suggests that technical standards typically originate with",
+  o:["governments seeking administrative efficiency","organisations whose operations depend on them","international treaty negotiations","consumers demanding consistency"],c:1,
+  e:"The final sentence states standards are 'established by the entities that cannot operate without them, and codified once the argument is already over' — operational necessity precedes and drives legal adoption."}
+ ]
+},
+{
+ title:"Why Some Species Become Invasive", topic:"Ecology",
+ paras:[
+"Most species introduced beyond their native range do not establish, and most that establish do not spread. The rough rule of thumb — that roughly one in ten introductions establishes, and one in ten of those becomes invasive — is crude, but it captures something important: invasion is the exception, not the rule. This makes the successful invaders genuinely puzzling.",
+"One long-standing explanation is the enemy release hypothesis. A species transported to a new continent leaves behind the specialist predators, parasites and pathogens that constrained it at home. Freed from these pressures, it can allocate resources to growth and reproduction that would otherwise go into defence. Evidence is mixed. Some invaders do carry markedly reduced parasite loads; others are as heavily parasitised as native competitors yet spread regardless.",
+"A second explanation concerns the recipient community rather than the invader. Communities with unoccupied niches, or with disturbance regimes that repeatedly clear space, offer opportunities that a well-established, saturated community does not. This helps explain why invasions cluster in disturbed habitats — roadsides, ports, farmland margins — and why islands, with their smaller species pools, have proved so vulnerable.",
+"Neither explanation is sufficient alone, and the two interact in ways that resist prediction. A species may fail repeatedly in one region and then, after decades of apparent quiescence, expand rapidly following a change in land use or climate. Such lag phases are common and their causes are often identified only in retrospect. The practical consequence is uncomfortable: the absence of invasive behaviour over a long period is weak evidence that a species is safe."
+ ],
+ qs:[
+ {k:"Main idea",q:"The passage is primarily concerned with",
+  o:["proving that the enemy release hypothesis is correct","examining competing explanations for invasion success and their limits","cataloguing the damage caused by invasive species","arguing that most introductions should be prohibited"],c:1,
+  e:"The passage sets up invasion as puzzling, presents two explanations, notes that evidence for each is mixed or partial, and concludes neither suffices alone. It is an assessment of explanations, not an advocacy piece."},
+ {k:"Detail",q:"According to the enemy release hypothesis, an introduced species benefits because it",
+  o:["encounters fewer competitors for food","escapes the specialist enemies that limited it at home","adapts more quickly to new climates","reproduces earlier in the season"],c:1,
+  e:"Paragraph 2 describes leaving behind specialist predators, parasites and pathogens, freeing resources previously spent on defence."},
+ {k:"Inference",q:"The observation that some invaders are 'as heavily parasitised as native competitors yet spread regardless' functions in the passage as",
+  o:["confirmation of the enemy release hypothesis","evidence that the hypothesis cannot be the whole explanation","proof that parasites promote invasion","an argument that native species are poorly adapted"],c:1,
+  e:"It is offered immediately after 'Evidence is mixed' as a counter-case: if a species can invade while heavily parasitised, enemy release cannot be a necessary condition."},
+ {k:"Vocabulary",q:"As used in the final paragraph, 'quiescence' most nearly means",
+  o:["rapid expansion","a period of inactivity","genetic change","seasonal migration"],c:1,
+  e:"The phrase 'decades of apparent quiescence' precedes 'expand rapidly', so quiescence names the dormant, inactive period before that expansion."},
+ {k:"Purpose",q:"Why does the author mention roadsides, ports and farmland margins?",
+  o:["To identify where control measures are cheapest","To give concrete examples of the disturbed habitats where invasions cluster","To argue that transport infrastructure should be reduced","To contrast agricultural with natural ecosystems"],c:1,
+  e:"They are supplied as instances of the disturbance-prone habitats the second hypothesis predicts will be most invadeable, grounding the abstract claim."},
+ {k:"Simplify",q:"Which best captures: 'the absence of invasive behaviour over a long period is weak evidence that a species is safe'?",
+  o:["Species that have not spread are certainly harmless.","A long quiet period does not reliably indicate a species will stay harmless.","Invasive species always reveal themselves immediately.","Long-term monitoring is not worth the expense."],c:1,
+  e:"The sentence warns that a track record of not invading provides little assurance, precisely because lag phases can precede sudden expansion."},
+ {k:"EXCEPT",q:"The passage suggests all of the following make a community more invadeable EXCEPT",
+  o:["unoccupied niches","frequent disturbance","a small native species pool","a saturated, well-established community"],c:3,
+  e:"A saturated community is offered as the contrast case that does NOT provide opportunity. The other three are given as conditions favouring invasion."}
+ ]
+},
+{
+ title:"The Economics of Congestion", topic:"Economics",
+ paras:[
+"A driver entering a busy road makes a calculation that is rational for the individual and costly for everyone else. She weighs her own time, fuel and stress against the value of the journey. What she does not weigh is the delay her presence imposes on every other driver already on the road. That delay is real, but it is borne by others, and so does not enter her decision.",
+"Economists call this an externality: a cost generated by a transaction but not paid by the parties to it. Where externalities are present, individually rational choices aggregate into collectively poor outcomes. Roads are congested not because drivers are foolish but because each is responding sensibly to a price that omits a substantial part of the true cost.",
+"The textbook remedy is to make the omitted cost visible by charging for it. A congestion charge set at the marginal external cost would, in principle, deter exactly those journeys whose value to the traveller is less than the delay they impose on others. Journeys of high value continue; low-value journeys shift to other times, other modes, or do not occur. Traffic falls not because driving is banned but because its price now reflects what it actually costs.",
+"In practice the difficulty is rarely economic. Congestion charging is unpopular before introduction and considerably less so afterwards — a pattern observed in Stockholm, where a scheme rejected by a majority in advance was endorsed by a majority in a referendum held after a trial period. The obstacle is that the costs of the scheme are immediate, concentrated and visible, while its benefits are diffuse, gradual and easily attributed to something else."
+ ],
+ qs:[
+ {k:"Main idea",q:"The passage argues that road congestion is best understood as",
+  o:["a failure of road engineering","a consequence of an externality that pricing could correct","evidence that drivers behave irrationally","a problem that no policy has ever addressed"],c:1,
+  e:"The passage defines congestion as an externality problem, explains why individual rationality produces a poor collective outcome, and presents pricing as the remedy — while noting the political obstacle."},
+ {k:"Detail",q:"According to the passage, what does the individual driver fail to take into account?",
+  o:["The cost of fuel for the journey","The delay she imposes on other road users","The value of the journey to herself","The wear caused to the road surface"],c:1,
+  e:"Paragraph 1 is explicit: she weighs her own time, fuel and stress, but not the delay her presence imposes on others."},
+ {k:"Vocabulary",q:"As used in paragraph 2, 'aggregate' most nearly means",
+  o:["combine to produce","cancel each other out","are measured against","are divided among"],c:0,
+  e:"Individually rational choices 'aggregate into collectively poor outcomes' — they add up or combine to produce a bad result overall."},
+ {k:"Inference",q:"A congestion charge set correctly would be expected to eliminate",
+  o:["all journeys into the charged zone","journeys worth less to the traveller than the delay they cause","journeys made by low-income drivers only","journeys made outside peak hours"],c:1,
+  e:"Paragraph 3 states the charge would 'deter exactly those journeys whose value to the traveller is less than the delay they impose on others' — the filter is journey value against external cost, not income or timing."},
+ {k:"Purpose",q:"Why does the author cite the Stockholm referendum?",
+  o:["To show that congestion charging always fails politically","To provide evidence that opposition tends to fall once a scheme is experienced","To argue that referendums are unsuitable for transport policy","To demonstrate that Stockholm's traffic was unusually severe"],c:1,
+  e:"Stockholm illustrates the stated pattern: unpopular beforehand, considerably less so afterwards, with a majority endorsing it after a trial."},
+ {k:"Simplify",q:"Which best captures: 'the costs of the scheme are immediate, concentrated and visible, while its benefits are diffuse, gradual and easily attributed to something else'?",
+  o:["The scheme costs more than it delivers in benefits.","Losses are obvious and fall on identifiable people; gains are spread thin and hard to notice.","The benefits arrive first and the costs follow later.","Only a small group benefits while everyone pays."],c:1,
+  e:"The sentence contrasts the visibility and timing of costs and benefits, not their magnitude — a political asymmetry rather than an economic deficit."},
+ {k:"Inference",q:"The author's final paragraph implies that the main barrier to congestion charging is",
+  o:["the technical difficulty of collecting the charge","doubt among economists about its effectiveness","the political visibility of costs relative to benefits","legal restrictions on charging for road use"],c:2,
+  e:"The paragraph opens by saying the difficulty 'is rarely economic' and closes by identifying the asymmetry in how costs and benefits are perceived — a political problem, not a technical or theoretical one."}
+ ]
+},
+{
+ title:"Reading the Fossil Record", topic:"Palaeontology",
+ paras:[
+"The fossil record is often described as incomplete, which is true but insufficiently precise. It is not incomplete at random. Fossilisation requires rapid burial in sediment, and the conditions that permit it are unevenly distributed across environments, body types and geological periods. What survives is therefore a systematically biased sample, and the direction of the bias is largely predictable.",
+"Organisms with hard parts — shells, bones, teeth — are vastly over-represented relative to soft-bodied ones. Marine environments, where sediment accumulates steadily, preserve far better than upland forests, where erosion dominates. Large animals are more likely to be noticed by collectors than small ones. Each of these biases operates in a consistent direction, and each can distort the apparent history of life if taken at face value.",
+"A striking illustration is the Cambrian explosion. The abrupt appearance of diverse animal body plans around 540 million years ago was long read as evidence of an extraordinarily rapid burst of evolutionary innovation. Molecular clock estimates, which infer divergence times from accumulated genetic differences, suggest that many of these lineages had in fact separated substantially earlier. On this reading, what appears in the rock is not the origin of the groups but the moment at which they acquired mineralised skeletons and thus became visible.",
+"This does not dissolve the puzzle so much as relocate it. If the lineages were already ancient, the question becomes why so many independently acquired hard parts within a comparatively narrow window. Explanations invoking rising oxygen levels, the emergence of predation, or shifts in ocean chemistry each have supporters, and none commands consensus. The debate is a useful reminder that a pattern in the data may record the process of preservation rather than the process being studied."
+ ],
+ qs:[
+ {k:"Main idea",q:"The passage is chiefly concerned with",
+  o:["proving that the Cambrian explosion never occurred","explaining how systematic preservation bias can distort inferences about evolution","describing the chemistry of fossilisation","comparing molecular and geological dating methods"],c:1,
+  e:"The passage establishes that fossil bias is systematic rather than random, illustrates the consequences using the Cambrian explosion, and closes with the general lesson about patterns recording preservation rather than the phenomenon studied."},
+ {k:"Inference",q:"Why does the author insist the record is 'not incomplete at random'?",
+  o:["Because random gaps would be easier to correct statistically","Because the biases run in consistent, predictable directions","Because collectors have deliberately concealed some finds","Because incompleteness varies from one museum to another"],c:1,
+  e:"Paragraph 1 states the bias is systematic and 'largely predictable'; paragraph 2 shows each bias operating 'in a consistent direction'. Random gaps would not systematically mislead in the way described."},
+ {k:"Detail",q:"According to the passage, which environment preserves fossils best?",
+  o:["Upland forests","Marine environments","Desert plateaus","River deltas subject to erosion"],c:1,
+  e:"Paragraph 2 contrasts marine environments, where sediment accumulates steadily, with upland forests, where erosion dominates."},
+ {k:"Inference",q:"On the molecular clock reading, the Cambrian explosion primarily marks",
+  o:["the origin of the major animal lineages","the point at which existing lineages became preservable","a mass extinction of soft-bodied organisms","the first appearance of multicellular life"],c:1,
+  e:"Paragraph 3 concludes that what appears in the rock is 'not the origin of the groups but the moment at which they acquired mineralised skeletons and thus became visible'."},
+ {k:"Purpose",q:"Why does the author write that the molecular evidence 'does not dissolve the puzzle so much as relocate it'?",
+  o:["Because the molecular estimates have since been retracted","Because a new question replaces the old one rather than settling it","Because the fossil and molecular dates in fact agree","Because the puzzle was never scientifically serious"],c:1,
+  e:"The explanation shifts the question from why the lineages appeared suddenly to why so many independently acquired hard parts in a narrow window — the difficulty moves rather than disappears."},
+ {k:"Vocabulary",q:"As used in the final paragraph, 'commands' most nearly means",
+  o:["orders","attracts and holds","opposes","predicts"],c:1,
+  e:"To say that no explanation 'commands consensus' is to say none has secured or won general agreement among researchers."},
+ {k:"EXCEPT",q:"The passage identifies all of the following as sources of bias EXCEPT",
+  o:["the presence or absence of hard parts","the depositional environment","the body size of the organism","the geographical latitude of the site"],c:3,
+  e:"Hard parts, environment and size (via collector attention) are all named in paragraph 2. Latitude is never mentioned."}
+ ]
+},
+{
+ title:"Bilingualism and Cognitive Control", topic:"Psycholinguistics",
+ paras:[
+"For much of the twentieth century, bilingualism in children was regarded with suspicion. Early studies reported that bilingual children performed worse than monolinguals on verbal tests, and this was taken to show that two languages competed for finite cognitive resources. Those studies were, in retrospect, badly confounded: bilingual participants were frequently recent immigrants, tested in their weaker language, and differing from the comparison group in socioeconomic status.",
+"When these confounds were addressed, a different picture emerged. Bilinguals do show a modest disadvantage on some verbal measures — slightly smaller vocabularies in each language taken separately, and marginally slower word retrieval. But they appeared to show an advantage on tasks requiring the suppression of irrelevant information, and it was proposed that the constant management of two active language systems trains a general executive control capacity.",
+"The proposal was attractive and widely reported. It has since been substantially complicated. Several large replication attempts have failed to find the executive advantage, and analyses of the published literature indicate that studies reporting a bilingual advantage have been markedly more likely to reach publication than those reporting no effect. This is publication bias, and where it operates the apparent weight of evidence is not a reliable guide to the underlying reality.",
+"The current position is genuinely unresolved. It remains plausible that bilingualism confers some executive benefit under particular conditions — perhaps depending on how often a speaker switches languages, or at which point in life the second language was acquired. What is no longer defensible is the confident general claim. The episode is instructive less for what it tells us about bilingualism than for what it reveals about how a congenial finding can propagate through a literature faster than the evidence warrants."
+ ],
+ qs:[
+ {k:"Main idea",q:"The passage traces",
+  o:["the steady accumulation of evidence for a bilingual advantage","the rise and subsequent qualification of a claim about bilingualism","the methods used to teach second languages to children","the reasons bilingual children have smaller vocabularies"],c:1,
+  e:"The passage moves from early hostility, to the executive-advantage proposal, to replication failure and publication bias, ending with an unresolved position — a rise-and-qualification arc."},
+ {k:"Detail",q:"What flaw does the passage identify in the early twentieth-century studies?",
+  o:["They used tasks that were too difficult for children.","Their bilingual participants differed from comparison groups in several uncontrolled ways.","They tested too few participants to reach significance.","They relied on parental report rather than direct testing."],c:1,
+  e:"Paragraph 1 lists the confounds: recent immigration, testing in the weaker language, and socioeconomic differences from the comparison group."},
+ {k:"Vocabulary",q:"As used in paragraph 1, 'confounded' most nearly means",
+  o:["contradicted by later work","distorted by uncontrolled variables","conducted without ethical approval","misreported by journalists"],c:1,
+  e:"A confound is a variable that varies alongside the one of interest, making the results uninterpretable. The examples that follow are precisely such variables."},
+ {k:"Inference",q:"Why does publication bias make the literature misleading?",
+  o:["Because published studies are usually poorly conducted","Because positive findings enter the record more readily than null ones","Because journals rarely publish research on bilingualism","Because replication studies are never attempted"],c:1,
+  e:"Paragraph 3 explains that studies reporting an advantage were 'markedly more likely to reach publication', so the visible balance of evidence overstates the effect relative to what was actually found."},
+ {k:"Simplify",q:"Which best captures: 'What is no longer defensible is the confident general claim'?",
+  o:["Bilingualism has been shown to have no cognitive effects.","A broad, unqualified assertion of bilingual advantage can no longer be sustained.","Researchers should stop investigating bilingualism.","The early negative findings have now been vindicated."],c:1,
+  e:"The sentence withdraws only the sweeping version of the claim; the preceding sentence explicitly leaves open that a benefit may exist under particular conditions."},
+ {k:"Purpose",q:"Why does the author describe the finding as 'congenial'?",
+  o:["To suggest it was fabricated","To indicate it was appealing, which helps explain its rapid spread","To note that it was easy to test experimentally","To imply it originated outside academic research"],c:1,
+  e:"Congenial means agreeable or welcome. The word explains the mechanism the final sentence identifies: a pleasing result propagates faster than the evidence justifies."},
+ {k:"EXCEPT",q:"The passage mentions all of the following as possible moderating factors EXCEPT",
+  o:["frequency of language switching","age of second-language acquisition","the specific languages spoken","conditions under which a benefit might appear"],c:2,
+  e:"Paragraph 4 raises switching frequency and age of acquisition as possible conditions. The identity of the particular languages is never mentioned."}
+ ]
+},
+{
+ title:"The Architecture of Memory Palaces", topic:"Cognitive Psychology",
+ paras:[
+"The method of loci, described in Roman rhetorical treatises and still used by competitive memorisers, exploits a discrepancy in human memory. Recall for arbitrary sequences — digits, unfamiliar names, unconnected words — is poor. Recall for places is remarkably good. Most people can mentally walk through a house they have not visited in twenty years and describe the arrangement of its rooms with reasonable accuracy.",
+"The technique converts material of the first kind into material of the second. The memoriser selects a familiar route, identifies distinct locations along it, and places a vivid image representing each item at successive points. Retrieval consists of walking the route mentally and observing what was left there. The sequence is preserved automatically, because the route has an inherent order that the raw material lacked.",
+"Why this works is only partly understood. One account emphasises that spatial memory recruits neural machinery that evolved for navigation and is therefore unusually robust; the method essentially borrows a well-developed system for a task it was not designed to perform. A second account stresses the elaboration involved: constructing a bizarre image and situating it somewhere demands more processing than rehearsal does, and deeper processing reliably improves retention. These accounts are not incompatible.",
+"What is clear is that the advantage does not generalise. Trained memorisers show extraordinary performance on the material they have practised and unremarkable performance on everything else. The skill is a technique rather than an enhancement of memory capacity — a distinction that is easily lost in popular accounts, which frequently present competitive memorisers as possessing better memories rather than better methods."
+ ],
+ qs:[
+ {k:"Main idea",q:"The passage primarily aims to",
+  o:["teach the reader to use the method of loci","explain how the technique works and clarify what it does and does not achieve","argue that memory competitions should be discontinued","compare Roman and modern memory training"],c:1,
+  e:"The passage describes the discrepancy the method exploits, how it operates, two explanations for its effectiveness, and finally the important limitation that it does not generalise."},
+ {k:"Detail",q:"According to the passage, the method converts",
+  o:["visual material into verbal material","arbitrary sequences into spatial information","short-term memories into long-term ones","individual items into abstract categories"],c:1,
+  e:"Paragraph 2 states the technique 'converts material of the first kind into material of the second' — arbitrary sequences, poorly recalled, into places, which are recalled well."},
+ {k:"Inference",q:"Why does the sequence require no separate effort to remember?",
+  o:["Items are memorised in alphabetical order.","The route itself supplies an order the material lacked.","The memoriser repeats the list many times.","Each image contains a number."],c:1,
+  e:"Paragraph 2 explains the sequence is preserved automatically 'because the route has an inherent order that the raw material lacked' — order comes free with the spatial structure."},
+ {k:"Vocabulary",q:"As used in paragraph 3, 'recruits' most nearly means",
+  o:["draws upon","trains from scratch","competes with","replaces"],c:0,
+  e:"Spatial memory 'recruits neural machinery that evolved for navigation' — it draws on or enlists existing systems, as the following clause about borrowing confirms."},
+ {k:"Purpose",q:"Why does the author note that the two accounts 'are not incompatible'?",
+  o:["To indicate that both may contribute rather than one being correct","To show that neither has any empirical support","To suggest that the question cannot be investigated","To criticise researchers for proposing rival theories"],c:0,
+  e:"The remark forestalls the assumption that the explanations compete: robust spatial machinery and deeper elaborative processing could both be operating at once."},
+ {k:"Simplify",q:"Which best captures: 'The skill is a technique rather than an enhancement of memory capacity'?",
+  o:["Memorisers have naturally superior memories.","Memorisers use a method well; their underlying memory is ordinary.","The method works only for people with good memories already.","Memory capacity can be increased through training."],c:1,
+  e:"The sentence draws a sharp line between possessing a better method and possessing a better memory, and the preceding sentence — unremarkable performance on unpractised material — supports the former."},
+ {k:"Inference",q:"The author's remark about popular accounts suggests they",
+  o:["exaggerate the difficulty of learning the method","misattribute a methodological skill to natural ability","understate how effective the technique can be","confuse the method of loci with unrelated techniques"],c:1,
+  e:"Popular accounts are said to present memorisers 'as possessing better memories rather than better methods' — attributing to innate capacity what is in fact acquired technique."}
+ ]
+},
+{
+ title:"The Value of Redundancy in Engineering", topic:"Engineering",
+ paras:[
+"Efficiency and reliability are frequently assumed to point in the same direction. In engineered systems they often do not. A system stripped of every component that is not strictly necessary under normal operation is, by construction, a system with no margin when conditions cease to be normal. Redundancy is the deliberate retention of capacity that is unused most of the time, and its value is realised precisely when the assumptions behind the design fail.",
+"The simplest form is duplication: two pumps where one would suffice, three flight-control computers voting on each output. But naive duplication offers less protection than it appears to. If two identical components share a design flaw, or draw power from the same supply, or are maintained by the same procedure, a single cause can disable both. Such common-mode failures are the reason serious redundancy is usually diverse: not two of the same thing, but two different things doing the same job.",
+"Diversity carries its own costs. Two independently designed systems must be separately verified, separately maintained and separately understood by operators who may need to switch between them under pressure. Complexity is itself a source of failure, and there is a real point beyond which additional redundancy reduces overall reliability rather than improving it. Locating that point is a matter of judgement rather than calculation.",
+"There is also a subtler difficulty. Redundancy that works invisibly generates no evidence of its own value. A backup that has never been needed looks indistinguishable from a backup that was never necessary, and under budgetary pressure the two are easily confused. Organisations therefore tend to erode their margins gradually, each individual reduction appearing reasonable, until a failure occurs that the original design would have absorbed."
+ ],
+ qs:[
+ {k:"Main idea",q:"The central argument of the passage is that redundancy",
+  o:["should always be maximised regardless of cost","is valuable but subject to real limits and to organisational erosion","is an outdated concept in modern engineering","matters only in aviation and nuclear power"],c:1,
+  e:"The passage defends redundancy against pure efficiency, then qualifies it — naive duplication is weak, excess complexity harms reliability, and invisible success invites cuts."},
+ {k:"Detail",q:"A common-mode failure is one in which",
+  o:["two components fail for unrelated reasons","a single cause disables supposedly independent components","a backup is activated unnecessarily","an operator selects the wrong system"],c:1,
+  e:"Paragraph 2 gives shared design flaws, shared power supplies and shared maintenance procedures as causes that can disable both duplicates at once."},
+ {k:"Inference",q:"Why is diverse redundancy preferred to simple duplication?",
+  o:["Diverse systems are cheaper to build.","Different designs are less likely to fail from the same cause.","Duplication is prohibited by most safety standards.","Diverse systems require less maintenance."],c:1,
+  e:"Since identical components share vulnerabilities, using two different implementations reduces the chance that one cause takes out both — the passage defines serious redundancy as 'two different things doing the same job'."},
+ {k:"Vocabulary",q:"As used in the final paragraph, 'erode' most nearly means",
+  o:["gradually reduce","suddenly abandon","carefully test","publicly defend"],c:0,
+  e:"Organisations 'erode their margins gradually, each individual reduction appearing reasonable' — a slow wearing away through successive small cuts."},
+ {k:"Simplify",q:"Which best captures: 'A backup that has never been needed looks indistinguishable from a backup that was never necessary'?",
+  o:["Backups should be tested regularly to prove their worth.","Successful protection leaves no visible trace, so essential and superfluous backups appear alike.","Most backups are in fact unnecessary.","Backups fail more often than they are used."],c:1,
+  e:"The sentence identifies an epistemic problem: absence of incidents provides no evidence about whether the backup was doing anything, so a valuable one and a pointless one look the same."},
+ {k:"Purpose",q:"Why does the author state that locating the optimal point 'is a matter of judgement rather than calculation'?",
+  o:["To argue that engineering should abandon quantitative methods","To acknowledge that the trade-off cannot be resolved by formula alone","To suggest that experienced engineers are rarely consulted","To claim that reliability cannot be measured"],c:1,
+  e:"Because added complexity is itself a failure source, the point at which redundancy stops helping cannot be derived mechanically and depends on informed judgement."},
+ {k:"EXCEPT",q:"The passage identifies all of the following as costs of diverse redundancy EXCEPT",
+  o:["separate verification","separate maintenance","increased operator burden","reduced processing speed"],c:3,
+  e:"Paragraph 3 names separate verification, separate maintenance and operators needing to understand and switch between systems. Processing speed is never mentioned."}
+ ]
+},
+{
+ title:"Oral Tradition and Historical Evidence", topic:"Historiography",
+ paras:[
+"Historians trained on written archives have often treated oral tradition as a degraded source: testimony that has passed through many mouths and been corrupted at each transfer. The comparison implied is with a document, which sits unchanged in a repository. But the comparison flatters the document. Written sources are also selected, copied, edited and preserved by interested parties, and their apparent fixity can conceal as much as it records.",
+"Research on oral transmission has substantially revised the picture. Traditions transmitted within formal institutions — trained specialists, fixed occasions for performance, established procedures for correcting a speaker who errs — can be remarkably stable across generations. Traditions transmitted informally, without such controls, drift far more. Stability is therefore not a property of orality as such but of the social arrangements surrounding it.",
+"This does not license credulity. Oral traditions serve present purposes, and genealogies in particular are prone to adjustment where a current claim to land or office depends on them. But the same is true of written genealogies, which were frequently produced for precisely those purposes and enjoy no automatic advantage in reliability. The relevant question in both cases concerns the conditions of production, not the medium.",
+"The practical difficulty is that the two source types record different things. Oral tradition tends to preserve what a community judged significant enough to keep repeating: origins, migrations, conflicts, the establishment of institutions. Written administrative records preserve what an authority needed to count — taxes, land, people. Where the two survive together they are frequently complementary rather than corroborative, and a historian who expects them to confirm one another may conclude wrongly that one of them must be false."
+ ],
+ qs:[
+ {k:"Main idea",q:"The passage argues that oral tradition",
+  o:["is generally more reliable than written evidence","should be assessed by the same criteria as written sources rather than dismissed","preserves information that written sources always duplicate","is useful only where no documents survive"],c:1,
+  e:"The passage rejects the assumed inferiority of oral sources, shows the same weaknesses affect documents, and concludes the relevant question is the conditions of production in both cases."},
+ {k:"Inference",q:"Why does the author say the usual comparison 'flatters the document'?",
+  o:["Documents are more attractive to researchers than oral accounts.","It attributes to documents a neutrality they do not possess.","Documents survive longer than oral traditions.","Documents are more expensive to produce."],c:1,
+  e:"The following sentence notes that written sources are 'selected, copied, edited and preserved by interested parties', so treating them as an unchanged benchmark grants them an objectivity they lack."},
+ {k:"Detail",q:"According to the passage, what makes an oral tradition stable?",
+  o:["The age of the tradition","Formal institutions governing its transmission","The absence of any written version","The number of people who know it"],c:1,
+  e:"Paragraph 2 attributes stability to trained specialists, fixed performance occasions and correction procedures — 'the social arrangements surrounding it' rather than orality itself."},
+ {k:"Vocabulary",q:"As used in paragraph 3, 'credulity' most nearly means",
+  o:["excessive willingness to believe","careful scepticism","detailed record-keeping","reliance on translation"],c:0,
+  e:"The warning that the revised picture 'does not license credulity' introduces the caution that oral traditions serve present purposes — the word denotes uncritical acceptance."},
+ {k:"Inference",q:"Why are genealogies singled out as especially prone to adjustment?",
+  o:["They are the longest form of oral tradition.","Present claims to land or office may depend on them.","They are rarely performed in public.","They contain the most names to remember."],c:1,
+  e:"Paragraph 3 explains genealogies are adjusted 'where a current claim to land or office depends on them' — a live interest in the content creates pressure to alter it."},
+ {k:"Simplify",q:"Which best captures: 'they are frequently complementary rather than corroborative'?",
+  o:["They usually contradict one another outright.","They cover different ground rather than confirming the same facts.","They must both be verified before either can be used.","They record identical events from different perspectives."],c:1,
+  e:"Complementary means filling different gaps; corroborative means confirming the same thing. The passage explains oral tradition and administrative records preserve different categories of information."},
+ {k:"Purpose",q:"Why does the author warn about a historian who expects the two sources to confirm one another?",
+  o:["Because such confirmation is impossible to verify","Because absence of overlap may be wrongly read as evidence of falsehood","Because oral sources should always take precedence","Because administrative records are usually incomplete"],c:1,
+  e:"The final sentence states such a historian 'may conclude wrongly that one of them must be false' — mistaking a difference in coverage for a contradiction."}
+ ]
+},
+{
+ title:"Antibiotic Resistance as an Evolutionary Process", topic:"Microbiology",
+ paras:[
+"Antibiotic resistance is often described as though bacteria were learning to defeat our drugs. The metaphor is misleading in a way that matters for policy. Bacteria do not acquire resistance in response to being attacked; resistant variants arise through mutation and horizontal gene transfer whether or not any antibiotic is present. What the antibiotic does is not create resistance but select for it, killing susceptible cells and leaving the resistant minority to multiply in the space vacated.",
+"This distinction has practical consequences. If resistance were induced by exposure, minimising the dose would reduce it. Because resistance is instead selected, the relevant variable is the selective pressure applied and the size of the population exposed to it. A course of treatment that is too short, or a dose too low to clear the infection, can be worse than none: it removes the susceptible competitors while leaving enough resistant cells to establish themselves.",
+"Resistance genes also carry costs. Maintaining an efflux pump or an altered ribosome consumes resources that could support growth, and in an environment free of antibiotics a resistant strain is frequently outcompeted by susceptible relatives. This is the rationale for antibiotic cycling — withdrawing a drug from use so that the fitness cost causes resistance to decline. Results have been inconsistent, in part because compensatory mutations can reduce the cost without eliminating the resistance, so susceptibility does not always return.",
+"The deeper problem is structural. Antibiotic effectiveness is a shared resource that any individual user has an incentive to draw upon and no individual incentive to conserve. A physician facing an uncertain diagnosis and an anxious patient bears the cost of undertreatment immediately and personally, while the cost of contributing marginally to resistance is spread across everyone and arrives later."
+ ],
+ qs:[
+ {k:"Main idea",q:"The passage is primarily concerned with",
+  o:["describing the chemical mechanisms of specific antibiotics","correcting a common misunderstanding of resistance and drawing out its implications","arguing that antibiotics should no longer be prescribed","comparing bacterial and viral infections"],c:1,
+  e:"The passage opens by rejecting the 'learning' metaphor, replaces it with selection, and then derives consequences for dosing, cycling and the structural incentive problem."},
+ {k:"Detail",q:"According to the passage, an antibiotic",
+  o:["causes bacteria to develop resistance genes","selects for resistant variants that already exist","prevents horizontal gene transfer","eliminates both resistant and susceptible cells equally"],c:1,
+  e:"Paragraph 1 is explicit: the antibiotic does 'not create resistance but select for it', killing susceptible cells and leaving resistant ones to multiply."},
+ {k:"Inference",q:"Why can an under-dosed course be worse than no treatment at all?",
+  o:["It causes the bacteria to mutate more rapidly.","It removes susceptible competitors while allowing resistant cells to survive.","It prevents the immune system from responding.","It increases the rate of horizontal gene transfer."],c:1,
+  e:"Paragraph 2 explains that insufficient treatment 'removes the susceptible competitors while leaving enough resistant cells to establish themselves' — clearing the field for the resistant minority."},
+ {k:"Vocabulary",q:"As used in paragraph 3, 'compensatory' most nearly means",
+  o:["offsetting a disadvantage","occurring at random","reversing a previous mutation","transferred between species"],c:0,
+  e:"Compensatory mutations 'reduce the cost without eliminating the resistance' — they offset the fitness penalty that would otherwise cause resistant strains to decline."},
+ {k:"Inference",q:"Why has antibiotic cycling produced inconsistent results?",
+  o:["Physicians have refused to participate in trials.","Resistance genes can lose their fitness cost while remaining present.","Bacteria migrate between hospitals too rapidly.","The withdrawal periods have been too long."],c:1,
+  e:"The passage attributes inconsistency partly to compensatory mutations reducing the cost of resistance, so the expected competitive disadvantage — and hence the return of susceptibility — does not reliably materialise."},
+ {k:"Simplify",q:"Which best captures: 'Antibiotic effectiveness is a shared resource that any individual user has an incentive to draw upon and no individual incentive to conserve'?",
+  o:["Antibiotics are too cheap and should be priced higher.","Everyone benefits from using antibiotics but no one personally benefits from restraint.","Only hospitals should be permitted to prescribe antibiotics.","Antibiotic effectiveness cannot be preserved by any means."],c:1,
+  e:"The sentence describes a common-resource problem: the gain from use is private and immediate, while the gain from restraint is shared and therefore not felt individually."},
+ {k:"Purpose",q:"Why does the author describe the physician facing an anxious patient?",
+  o:["To criticise physicians for overprescribing","To make the asymmetry of incentives concrete","To argue that patients should be better educated","To show that diagnosis is usually straightforward"],c:1,
+  e:"The example illustrates the structural point in human terms: the cost of undertreating is immediate and personal, while the resistance cost is diffuse and delayed — which is why restraint is hard."}
+ ]
+},
+{
+ title:"Perspective and the Painted Surface", topic:"Art History",
+ paras:[
+"Linear perspective, formalised in fifteenth-century Florence, is often presented as a discovery: a technique for rendering space as the eye actually receives it. There is something to this. The construction does produce images that a viewer standing at the correct point finds convincingly spatial. But describing it as the correct method of representation understates how peculiar its assumptions are.",
+"Perspective construction presupposes a single, stationary, monocular viewer. Human vision involves two eyes in a moving head, and the visual field has no sharp frame. The perspective image is calculated for one privileged position, and only from that position is the illusion geometrically exact — a condition rarely met in galleries, where visitors move freely and stand where they like.",
+"Nor is it true that other traditions failed to achieve perspective for want of the technique. Chinese landscape painting employs a shifting viewpoint that allows the eye to travel through a scroll, which a fixed station point would make impossible. Byzantine icons deliberately reverse convergence so that lines widen towards the viewer, situating the sacred figure in a space that does not recede from us. These are not failed attempts at Renaissance perspective; they are solutions to different problems.",
+"The historical question is therefore why the technique was adopted so rapidly and held so long. Part of the answer is institutional — perspective was teachable, could be assessed, and lent itself to workshop training. Part is ideological: a system placing a single observer at the origin of visible space suited a culture increasingly interested in individual viewpoint. The technique spread because it was useful and because it flattered assumptions its users already held."
+ ],
+ qs:[
+ {k:"Main idea",q:"The passage argues that linear perspective is best understood as",
+  o:["the only accurate method of representing space","one culturally situated convention among several possible solutions","a technique that failed to convince contemporary viewers","an accidental by-product of workshop training"],c:1,
+  e:"The passage grants perspective's effectiveness, exposes its peculiar assumptions, presents other traditions as alternative solutions rather than failures, and explains its adoption in institutional and ideological terms."},
+ {k:"Detail",q:"What does perspective construction assume about the viewer?",
+  o:["That the viewer is moving through the space","That the viewer is single, stationary and using one eye","That the viewer has been trained in geometry","That the viewer stands very close to the surface"],c:1,
+  e:"Paragraph 2 states it 'presupposes a single, stationary, monocular viewer' and contrasts this with two eyes in a moving head."},
+ {k:"Inference",q:"Why does the author mention that visitors in galleries 'move freely and stand where they like'?",
+  o:["To argue that galleries should restrict visitor movement","To show that the condition for geometric exactness is rarely satisfied","To explain why paintings are hung at eye level","To suggest that perspective is unnecessary in modern art"],c:1,
+  e:"Since the illusion is exact only from one privileged point, ordinary gallery behaviour means viewers almost never occupy that point — undercutting the claim that perspective simply shows things as they are."},
+ {k:"Vocabulary",q:"As used in paragraph 3, 'convergence' refers to",
+  o:["the meeting of lines at a distant point","the blending of pigments on the surface","the agreement between artists on technique","the overlap of two figures in a composition"],c:0,
+  e:"In perspective, parallel lines converge towards a vanishing point. Byzantine icons are said to reverse this so lines widen towards the viewer instead."},
+ {k:"Purpose",q:"Why does the author discuss Chinese landscape painting and Byzantine icons?",
+  o:["To show that both traditions eventually adopted perspective","To demonstrate that other systems solved different representational problems","To argue that Renaissance perspective was derived from them","To illustrate techniques that proved unpopular with viewers"],c:1,
+  e:"Both are offered explicitly as 'solutions to different problems' rather than failed attempts, supporting the claim that perspective is one convention among several."},
+ {k:"Simplify",q:"Which best captures: 'The technique spread because it was useful and because it flattered assumptions its users already held'?",
+  o:["Perspective succeeded through practical value and cultural fit.","Perspective was imposed on artists by their patrons.","Perspective was adopted despite being difficult to teach.","Perspective was valued chiefly for its mathematical elegance."],c:0,
+  e:"The sentence names two causes: practical utility (teachable, assessable) and ideological congeniality (suiting a culture interested in individual viewpoint)."},
+ {k:"EXCEPT",q:"The passage offers all of the following as reasons for perspective's adoption EXCEPT",
+  o:["it could be taught in workshops","its results could be assessed","it suited an interest in individual viewpoint","it required less pigment than earlier methods"],c:3,
+  e:"Teachability, assessability and ideological fit are all given in the final paragraph. Material cost is never mentioned."}
+ ]
+}
+];
+
+/* ═══════════════════════ NO-REPEAT POOL ENGINE ═══════════════════════ */
+const CFG = { daily:{data:DAILY, n:4, key:'sr_hard_daily'}, ac:{data:AC, n:3, key:'sr_hard_ac'} };
+const seen = { daily:[], ac:[] };
+const state = { daily:[], ac:[] };
+const done  = { daily:{}, ac:{} };
+
+function loadSeen(p){
+  try{ const v = localStorage.getItem(CFG[p].key); if(v) seen[p] = JSON.parse(v) || []; }catch(e){}
+  if(!Array.isArray(seen[p])) seen[p] = [];
+}
+function saveSeen(p){ try{ localStorage.setItem(CFG[p].key, JSON.stringify(seen[p])); }catch(e){} }
+
+function meter(p){
+  const tot = CFG[p].data.length, s = seen[p].length;
+  const el = document.getElementById(p+'-meter'), tx = document.getElementById(p+'-meter-txt');
+  if(el) el.style.width = (s/tot*100)+'%';
+  if(tx) tx.textContent = s+' / '+tot+' seen';
+}
+function resetPool(p){ seen[p]=[]; saveSeen(p); meter(p); toast('Pool reset — all '+CFG[p].data.length+' items available again.'); }
+
+function pick(p){
+  const tot = CFG[p].data.length, n = CFG[p].n;
+  let avail = [];
+  for(let i=0;i<tot;i++) if(seen[p].indexOf(i)===-1) avail.push(i);
+  if(avail.length < n){                       // cycle complete
+    seen[p] = [];
+    avail = []; for(let i=0;i<tot;i++) avail.push(i);
+    toast('All '+tot+' items completed — starting a fresh cycle.');
+  }
+  for(let i=avail.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [avail[i],avail[j]]=[avail[j],avail[i]]; }
+  const chosen = avail.slice(0,n);
+  chosen.forEach(i=>seen[p].push(i));
+  saveSeen(p); meter(p);
+  return chosen;
+}
+
+/* Shuffle each question's options and remap the correct index so the answer is
+   not always in the same position. Returns a copy; the source pool is never mutated. */
+function shuffleOpts(item){
+  const copy = Object.assign({}, item);
+  copy.qs = item.qs.map(q=>{
+    const idx = q.o.map((_,i)=>i);
+    for(let i=idx.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [idx[i],idx[j]]=[idx[j],idx[i]]; }
+    return Object.assign({}, q, { o: idx.map(i=>q.o[i]), c: idx.indexOf(q.c) });
+  });
+  return copy;
+}
+
+/* ═══════ RENDER ═══════ */
+function switchTab(t){
+  document.querySelectorAll('.tab-panel').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
+  document.getElementById('panel-'+t).classList.add('active');
+  document.getElementById('tb-'+(t==='daily'?'daily':'ac')).classList.add('active');
+}
+
+function gen(p){
+  const idxs = pick(p);
+  state[p] = idxs.map(i=>({i, d:shuffleOpts(CFG[p].data[i])}));
+  done[p] = {};
+  document.getElementById(p+'-ph').style.display='none';
+  document.getElementById(p+'-sum').classList.remove('visible');
+  document.getElementById(p+'-val').textContent='—';
+  const box = document.getElementById(p+'-ex');
+  box.innerHTML='';
+  state[p].forEach((item,k)=>{
+    const d=item.d;
+    const el=document.createElement('div'); el.className='exercise';
+    const isAc = (p==='ac');
+    const left = isAc
+      ? '<div class="passage-title">'+esc(d.title)+'</div><div class="passage-meta">'+esc(d.topic)+' &middot; '+d.paras.length+' paragraphs</div>'
+        +'<div class="passage-text">'+d.paras.map((t,pi)=>'<p><span class="pnum">'+(pi+1)+'</span>'+esc(t)+'</p>').join('')+'</div>'
+      : '<div class="text-type-label">Read the '+esc(d.type)+'.</div>'+d.doc;
+    el.innerHTML =
+      '<div class="ex-header">'
+       +'<span class="ex-num">'+(isAc?'Passage ':'Exercise ')+(k+1)+'</span>'
+       +'<span class="ex-title">'+esc(d.title)+'</span>'
+       +'<span class="ex-type">'+esc(isAc?d.topic:d.type)+'</span>'
+       +'<span class="ex-score" id="'+p+'-sc-'+k+'"></span>'
+      +'</div>'
+      +'<div class="split'+(isAc?' wide-left':'')+'">'
+       +'<div class="text-col">'+left+'</div>'
+       +'<div class="q-col">'+qHTML(d.qs,p+'-'+k)
+         +'<button class="check-btn" id="'+p+'-cb-'+k+'" onclick="check(\''+p+'\','+k+')">Check answers</button>'
+         +'<div class="q-score" id="'+p+'-qs-'+k+'"></div>'
+       +'</div>'
+      +'</div>';
+    box.appendChild(el);
+  });
+}
+
+function qHTML(qs,pre){
+  return qs.map((q,qi)=>{
+    const opts=q.o.map((o,oi)=>'<label class="q-option" id="'+pre+'-'+qi+'-'+oi+'">'
+      +'<input type="radio" name="'+pre+'-'+qi+'" value="'+oi+'">'+esc(o)+'</label>').join('');
+    return '<div class="q-block">'
+      +'<span class="q-kind">'+esc(q.k)+'</span>'
+      +'<div class="q-text">'+(qi+1)+'. '+esc(q.q)+'</div>'
+      +'<div class="q-options">'+opts+'</div>'
+      +'<div class="q-exp" id="'+pre+'-'+qi+'-e"><b>Why:</b> '+esc(q.e)+'</div>'
+    +'</div>';
+  }).join('');
+}
+
+function check(p,k){
+  const d=state[p][k].d, pre=p+'-'+k;
+  let right=0;
+  d.qs.forEach((q,qi)=>{
+    const sel=document.querySelector('input[name="'+pre+'-'+qi+'"]:checked');
+    for(let oi=0;oi<q.o.length;oi++){
+      const lb=document.getElementById(pre+'-'+qi+'-'+oi);
+      if(!lb) continue;
+      lb.querySelector('input').disabled=true;
+      if(oi===q.c) lb.classList.add('reveal');
+    }
+    if(sel){
+      const v=parseInt(sel.value), lb=document.getElementById(pre+'-'+qi+'-'+v);
+      if(v===q.c){ right++; lb.classList.remove('reveal'); lb.classList.add('correct'); }
+      else lb.classList.add('wrong');
+    }
+    document.getElementById(pre+'-'+qi+'-e').classList.add('visible');
+  });
+  document.getElementById(p+'-cb-'+k).disabled=true;
+  document.getElementById(p+'-sc-'+k).textContent=right+'/'+d.qs.length;
+  const qs=document.getElementById(p+'-qs-'+k);
+  qs.classList.add('visible'); qs.textContent='Score: '+right+' out of '+d.qs.length;
+  done[p][k]=[right,d.qs.length];
+  let r=0,t=0; Object.keys(done[p]).forEach(kk=>{ r+=done[p][kk][0]; t+=done[p][kk][1]; });
+  if(t){ document.getElementById(p+'-sum').classList.add('visible');
+         document.getElementById(p+'-val').textContent=r+' / '+t; }
+}
+
+function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+loadSeen('daily'); loadSeen('ac'); meter('daily'); meter('ac');
+</script>
+</body>
+</html>

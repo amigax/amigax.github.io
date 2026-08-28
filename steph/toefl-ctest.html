@@ -196,10 +196,7 @@
     .nav-link { margin: 0 16px; }
   }
 
-  /* ── unified site nav ── */
-  .sn-bar{background:#ede8df;border-bottom:1px solid #ccc0a8;padding:0 34px;
-    display:flex;flex-wrap:wrap;align-items:center;gap:0;}
-  .sn-bar a{display:inline-block;padding:11px 11px;font-family:'Lora',Georgia,serif;
+    .sn-bar a{display:inline-block;padding:11px 11px;font-family:'Lora',Georgia,serif;
     font-style:italic;font-size:.84rem;color:var(--sn-accent,#8b6914);text-decoration:none;
     border-bottom:2px solid transparent;transition:border-color .15s,background .15s,color .15s;white-space:nowrap;}
   .sn-bar a:hover{border-bottom-color:var(--sn-accent,#8b6914);background:rgba(0,0,0,.035);}
@@ -208,8 +205,24 @@
     font-size:.8rem;color:#1a1510;margin-right:8px;padding-right:15px;
     border-right:1px solid #ccc0a8;border-bottom:none;}
   .sn-bar a.sn-home:hover{color:var(--sn-accent,#8b6914);background:none;border-bottom:none;}
-  @media(max-width:640px){.sn-bar{padding:0 10px;} .sn-bar a{padding:9px 7px;font-size:.77rem;}
-    .sn-bar a.sn-home{margin-right:5px;padding-right:9px;}}
+  @media(max-width:640px){    .sn-bar a.sn-home{margin-right:5px;padding-right:9px;}}
+
+  /* ── unified site nav ── */
+  .sn-bar{background:#ede8df;border-bottom:1px solid #ccc0a8;padding:0 34px;
+    display:flex;flex-wrap:wrap;align-items:center;}
+  .sn-bar a{display:inline-block;padding:11px 10px;font-family:'Lora',Georgia,serif;
+    font-style:italic;font-size:.83rem;color:var(--sn-accent,#8b6914);text-decoration:none;
+    border-bottom:2px solid transparent;transition:border-color .15s,background .15s,color .15s;white-space:nowrap;}
+  .sn-bar a:hover{border-bottom-color:var(--sn-accent,#8b6914);background:rgba(0,0,0,.035);}
+  .sn-bar a.sn-active{border-bottom-color:var(--sn-accent,#8b6914);font-weight:600;font-style:normal;}
+  .sn-bar a.sn-home{font-family:'Playfair Display',Georgia,serif;font-style:normal;font-weight:700;
+    font-size:.8rem;color:#1a1510;margin-right:8px;padding-right:14px;
+    border-right:1px solid #ccc0a8;border-bottom:none;}
+  .sn-bar a.sn-home:hover{color:var(--sn-accent,#8b6914);background:none;border-bottom:none;}
+  .sn-bar a.sn-plus{color:#5d3a6b;}
+  .sn-bar a.sn-plus:hover{border-bottom-color:#5d3a6b;}
+  @media(max-width:640px){.sn-bar{padding:0 10px;} .sn-bar a{padding:9px 6px;font-size:.75rem;}
+    .sn-bar a.sn-home{margin-right:4px;padding-right:8px;}}
 </style>
 </head>
 <body>
@@ -227,11 +240,13 @@
   <a href="toefl-blanks.html">Gap Fill</a>
   <a href="#" class="sn-active">C-Test</a>
   <a href="toefl-reading.html">Reading</a>
+  <a href="toefl-reading-hard.html" class="sn-plus">Reading+</a>
   <a href="toefl-discussion.html">Academic Discussion</a>
   <a href="toefl-email.html">Write an Email</a>
   <a href="toefl-build-sentence.html">Build a Sentence</a>
-  <a href="toefl-build-sentence-hard.html">Hard</a>
+  <a href="toefl-build-sentence-hard.html" class="sn-plus">Sentence+</a>
 </nav>
+
 
 <div class="controls">
   <button class="btn btn-generate" onclick="generate()">&#8635; Generate 5 Passages</button>
