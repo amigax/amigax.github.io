@@ -5745,12 +5745,14 @@ FX.push({ name:'BIG WAVE', persist:0.14, draw(c, s){
   if (spin){ const cs = Math.cos(spin), sn = Math.sin(spin), f2 = v3add(v3mul(f, cs), v3mul(sd, sn)); sd = v3add(v3mul(sd, cs), v3mul(f, -sn)); f = f2; }
   const Wl = (a, bb, cc) => v3add(P0, v3add(v3add(v3mul(f, a), v3mul(N, bb)), v3mul(sd, cc)));
   // --- camera
+  // cameras pulled in closer 2026-09-22 (was 41e85dd: follow [-4.8,1,0]+n*2, tube [-2.8,1,0]+n*1.3, front [x+7,1.3,21],
+  // drone [x-26,H+11,-22], side [p0x+6,H*0.6,24]); targets now aim at the surfer rather than the middle of the wave
   let eT, tT; const up = [0, 1, 0];
-  if (mode === 'follow'){ eT = v3add(P0, v3add([-4.8, 1.0, 0], v3mul(fp.n, 2.0))); tT = v3add(P0, v3add([9, 0.2, 0], v3mul(fp.n, 1.0))); }
-  else if (mode === 'tube'){ eT = v3add(P0, v3add([-2.8, 1.0, 0], v3mul(fp.n, 1.3))); tT = v3add(P0, v3add([12, 0.6, 0], v3mul(fp.n, 1.1))); }
-  else if (mode === 'front'){ eT = [P0[0] + 7, 1.3, 21]; tT = [P0[0] - 4, H*0.55, 0]; }
-  else if (mode === 'drone'){ eT = [P0[0] - 26, H + 11, -22]; tT = [P0[0] + 10, H*0.3, 8]; }
-  else { eT = [s.air.p0[0] + 6, H*0.6, 24]; tT = P0; }
+  if (mode === 'follow'){ eT = v3add(P0, v3add([-3.0, 0.8, 0], v3mul(fp.n, 1.3))); tT = v3add(P0, v3add([7, 0.4, 0], v3mul(fp.n, 0.6))); }
+  else if (mode === 'tube'){ eT = v3add(P0, v3add([-1.9, 0.9, 0], v3mul(fp.n, 0.9))); tT = v3add(P0, v3add([10, 0.5, 0], v3mul(fp.n, 0.9))); }
+  else if (mode === 'front'){ eT = [P0[0] + 4, 1.2, P0[2] + 11]; tT = [P0[0] - 1.5, P0[1] + 2.5, P0[2]]; }
+  else if (mode === 'drone'){ eT = [P0[0] - 11, P0[1] + 7, P0[2] - 7]; tT = [P0[0] + 4, P0[1], P0[2] + 2]; }
+  else { eT = [s.air.p0[0] + 4, s.air.p0[1] + 1, s.air.p0[2] + 11]; tT = P0; }
   if (!s.cE){ s.cE = eT; s.cT = tT; } const kc = 1 - Math.exp(-dt*(mode === 'tube' || mode === 'follow' ? 4 : 2)); s.cE = v3add(s.cE, v3mul(v3sub(eT, s.cE), kc)); s.cT = v3add(s.cT, v3mul(v3sub(tT, s.cT), kc));
   const V = lookCam(s.cE, s.cT, mode === 'tube' ? -0.12 : 0), Pf = fogDraw(o, V, F, 170), P = (pts, i) => Pf(pts, i, true), PF0 = fogDraw(o, V, F, 3000), PF = (pts, i) => PF0(pts, i, true);
   const scr = p => { const q = V(p); return q[2] > 0.1 ? [proj(q, 0, F), q[2]] : null; };
