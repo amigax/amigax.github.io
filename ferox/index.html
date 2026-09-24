@@ -23,6 +23,26 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 .d{color:var(--dim)}
 .dim{opacity:.6}
 #typing{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);font-size:28px;letter-spacing:.3em;color:#fff;display:none;white-space:pre}
+/* Pop-up guide (added 2026-09-25) so anyone sent a link can get sound in without being told how. ? button, H key. */
+#gbtn{position:fixed;right:14px;bottom:14px;z-index:5;font:13px/1 ui-monospace,Consolas,"Courier New",monospace;color:var(--hud);background:rgba(0,0,0,.45);
+  border:1px solid rgba(141,255,190,.35);border-radius:3px;padding:7px 10px;cursor:pointer;letter-spacing:.12em;text-shadow:0 0 6px rgba(141,255,190,.55)}
+#gbtn:hover{color:#fff;border-color:rgba(141,255,190,.8)}
+#guide{position:fixed;inset:0;z-index:6;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.72)}
+#guide.on{display:flex}
+#gbox{max-width:760px;width:calc(100% - 40px);max-height:82vh;overflow:auto;background:rgba(0,0,0,.92);border:1px solid rgba(141,255,190,.35);border-radius:4px;
+  padding:22px 26px 26px;font:13px/1.65 ui-monospace,Consolas,"Courier New",monospace;color:var(--hud);text-shadow:0 0 6px rgba(141,255,190,.4);letter-spacing:.03em}
+#gbox h1{font-size:15px;letter-spacing:.3em;margin:0 0 4px;color:#fff}
+#gbox h2{font-size:13px;letter-spacing:.22em;margin:22px 0 6px;color:#ffe28a;font-weight:normal}
+#gbox p,#gbox li{margin:4px 0}
+#gbox ul{margin:4px 0;padding-left:18px}
+#gbox b{color:#fff;font-weight:normal}
+#gbox .sub{color:var(--dim)}
+#gbox table{border-collapse:collapse;margin-top:4px}
+#gbox td{padding:1px 18px 1px 0;vertical-align:top}
+#gbox td:first-child{color:#fff;white-space:nowrap}
+#gclose{float:right;cursor:pointer;color:var(--dim);border:1px solid rgba(141,255,190,.3);border-radius:3px;padding:2px 9px;margin:-4px -6px 0 12px}
+#gclose:hover{color:#fff}
+#gbox a{color:#ffe28a}
 </style>
 </head>
 <body>
@@ -39,6 +59,49 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
   <div id="msg"></div>
   <div id="typing"></div>
 </div>
+<div id="gbtn">? GUIDE</div>
+<div id="guide"><div id="gbox">
+  <span id="gclose">CLOSE</span>
+  <h1>FEROX WIRE</h1>
+  <p class="sub">A vector VJ screen. Give it music and it does the rest &mdash; autopilot is already on.</p>
+
+  <h2>1 &middot; GET THE MUSIC IN</h2>
+  <p>Any one of these three:</p>
+  <ul>
+    <li><b>Drag an audio file</b> onto this page. It plays on a loop.</li>
+    <li><b>Press L</b> to use the sound of another tab or of the whole computer. Pick the source in the box the browser opens and <b>tick &ldquo;Also share tab audio&rdquo;</b> (or &ldquo;share system audio&rdquo;). Good for YouTube, Spotify, a DJ set, a DAW. Nothing is recorded or sent anywhere. <span class="sub">Chrome or Edge. On a Mac only tab audio works.</span></li>
+    <li><b>Press M</b> for a mic, line in, mixer or audio interface, then <b>SHIFT+M</b> to step through the inputs until the name you want flashes up.</li>
+  </ul>
+  <p class="sub">Playing live through Ableton on an ASIO driver? L will not hear it. Use your interface's loopback, or a virtual cable, and pick it with SHIFT+M.</p>
+
+  <h2>2 &middot; WATCH IT</h2>
+  <ul>
+    <li>It picks the effects and finds the tempo by itself. Press <b>.</b> if you would rather choose.</li>
+    <li><b>Double-click</b> for full screen. <b>TAB</b> hides these readouts.</li>
+    <li><b>/</b> types your own words into the visuals &mdash; a name, a venue, a track title.</li>
+  </ul>
+
+  <h2>3 &middot; PLAY WITH IT</h2>
+  <table>
+    <tr><td>1 &ndash; 0</td><td>pick an effect &middot; <b>`</b> for the next bank of ten</td></tr>
+    <tr><td>SHIFT + 1-0</td><td>cut to it instantly instead of a fade</td></tr>
+    <tr><td>.</td><td>autopilot: full / effects only / off</td></tr>
+    <tr><td>SPACE</td><td>tap the tempo &middot; <b>SHIFT+SPACE</b> back to automatic</td></tr>
+    <tr><td>Z X</td><td>morph or mix between effects &middot; fade length</td></tr>
+    <tr><td>C</td><td>colour &middot; <b>SHIFT+C</b> kaleidoscope</td></tr>
+    <tr><td>V N</td><td>strobe &middot; blackout</td></tr>
+    <tr><td>; &rsquo; - =</td><td>fold and crush the picture</td></tr>
+    <tr><td>ESC ESC</td><td>back to normal</td></tr>
+  </table>
+
+  <h2>NOTHING IS MOVING?</h2>
+  <ul>
+    <li>Check the top left: it shows the tempo and whether it is hearing anything.</li>
+    <li>With <b>L</b>, the audio tick box is easy to miss &mdash; press L again and make sure it is ticked.</li>
+    <li>With <b>M</b>, tap <b>SHIFT+M</b> a few times; the first input is often the wrong one.</li>
+  </ul>
+  <p class="sub" style="margin-top:18px">Press <b>?</b> or click ? GUIDE at the bottom right to read this again.</p>
+</div></div>
 <script>
 'use strict';
 // ============================================================ GL setup
@@ -6510,6 +6573,7 @@ SHIFT+SPACE  auto BPM from the music
 ENTER    hit           V  strobe
 N        blackout      C  overlay
 /        type text for VECTOR TEXT
+?        guide / help
 M        audio in   SHIFT+M  next input
 L        share a tab / system audio
 \`        switch effect bank
@@ -6550,6 +6614,8 @@ addEventListener('keydown', e => {
   const m = code.match(/^(Digit|Numpad)(\d)$/);
   if (m){ const n = +m[2], i = S.bank*10 + (n === 0 ? 9 : n - 1); if (i < FX.length) cue(i, e.shiftKey); return; }
   if (code === 'Backquote'){ S.bank = (S.bank + 1) % Math.ceil(FX.length/10); flash('BANK ' + (S.bank + 1)); drawHud(); return; }
+  if (code === 'F1' || (code === 'Slash' && e.shiftKey)){ e.preventDefault(); showGuide(!guideEl.classList.contains('on')); return; }
+  if (guideEl.classList.contains('on') && (code === 'Escape' || code === 'Enter' || code === 'Space')){ e.preventDefault(); showGuide(false); return; }
   switch (code){
     case 'Space': e.preventDefault();
       if (e.shiftKey){ BD.on = !BD.on; bpmReset(); flash(BD.on ? 'AUTO BPM ON' : 'AUTO BPM OFF'); }
@@ -6573,6 +6639,13 @@ addEventListener('keydown', e => {
     case 'Backslash': S.scopeGate = (S.scopeGate + 1) % GATES.length; flash('SCOPE GATE ' + GATES[S.scopeGate].name); break;
   }
 });
+const guideEl = $('guide');
+const showGuide = on => { guideEl.classList.toggle('on', on); try { localStorage.setItem('feroxSeen', '1'); } catch(e){} };
+$('gbtn').addEventListener('click', () => showGuide(!guideEl.classList.contains('on')));
+$('gclose').addEventListener('click', () => showGuide(false));
+guideEl.addEventListener('click', e => { if (e.target === guideEl) showGuide(false); });
+{ let seen = '1'; try { seen = localStorage.getItem('feroxSeen'); } catch(e){}
+  if (!seen) setTimeout(() => showGuide(true), 900); }
 addEventListener('keyup', e => held.delete(e.code));
 addEventListener('blur', () => held.clear());
 cv.addEventListener('dblclick', () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); });
