@@ -5877,7 +5877,7 @@ FX.push({ name:'BIG WAVE', persist:0.14, draw(c, s){
 // 1/2n of the picture, so the line count stays about the same whatever n is. The source slowly turns underneath.
 const KALEIDO = [0, 4, 6, 8];
 const HUD_BANKS = 16;   // bank slots shown in the HUD list (empty ones wait for new effects); ` only cycles banks that have effects
-const VERSION = 'v1.4 · 2026-10-08';   // bump on every publish so a venue can tell whether it is on the latest
+const VERSION = 'v1.4.1 · 2026-10-08';   // bump on every publish so a venue can tell whether it is on the latest
 function clipHalf(pts, f){ const res = []; let cur = [];
   for (let k = 0; k < pts.length; k++){ const p = pts[k], d = f(p);
     if (k > 0){ const q = pts[k-1], dq = f(q);
@@ -6542,6 +6542,7 @@ const bar = (v, n = 10) => { const k = Math.round(clamp(v, 0, 1)*n); return '█
 let msgTimer = 0;
 // (2026-09-22: no on-screen text at all while the HUD is hidden; before, the effect name still flashed up)
 function flash(t){ const m = $('msg'); if (S.hud === 2){ m.style.opacity = 0; return; } m.textContent = t; m.style.opacity = 1; clearTimeout(msgTimer); msgTimer = setTimeout(() => m.style.opacity = 0, 1400); }
+let hudFxHtml = '', hudBankShown = -1;
 function drawHud(){
   const show = S.hud < 2, full = S.hud === 0;
   for (const id of ['top', 'fxrow', 'knobs', 'help']) $(id).style.display = show && (full || id === 'top') ? 'block' : 'none';
@@ -6563,7 +6564,7 @@ function drawHud(){
     `<span class="d">DRUMS </span>${SEQ.drums ? `<span class="on">${PAT_NAMES[SEQ.pat]} · ${KIT_NAMES[SEQ.kit]}</span>` : '<span class="d">OFF</span>'}` +
     `<span class="d">  MUSIC </span>${SEQ.music ? `<span class="on">${PROG_NAMES[SEQ.prog]} · ${LEAD_NAMES[SEQ.lead]}</span>` : '<span class="d">OFF</span>'}` +
     `${S.auto ? `  AUTO ${AUTO_MODES[S.auto]} ${Math.max(0, Math.ceil(S.autoNext - S.beatPos))}` : ''}${S.kal ? `  <span class="cue">KALEIDO ${KALEIDO[S.kal]}</span>` : '  <span class="d">KALEIDO OFF</span>'}${S.strobe ? '  <span class="cue">STROBE</span>' : ''}${S.blackout ? '  <span class="cue">BLACKOUT</span>' : ''}`;
-  if (!full) return;
+  if (!full){ hudFxHtml = ''; return; }
   // Banks two to a row (1 2 / 3 4 ...) so the list stays narrow; the active bank (the one the number keys play)
   // is lit and marked.
   // HUD_BANKS slots are always shown; empty slots show a dot and fill in as effects are added.
@@ -6580,12 +6581,12 @@ function drawHud(){
       line += `<span class="${cls}">${txt.padEnd(COLW)}</span>`; }
     rows.push(line); }
   rows.push('</span>'); }
-  const fxEl = $('fxrow'), wasTop = fxEl.scrollTop;
-  fxEl.innerHTML = rows.join('\n') + '\n<span class="d">` switches bank · scroll for more</span>';
-  fxEl.scrollTop = wasTop;
-  const blk = fxEl.querySelector(`.bkblk[data-b="${S.bank - (S.bank % 2)}"]`);   // keep the active bank in view
-  if (blk){ const top = blk.offsetTop - fxEl.offsetTop;
-    if (top < fxEl.scrollTop || top + blk.offsetHeight > fxEl.scrollTop + fxEl.clientHeight) fxEl.scrollTop = Math.max(0, top - 4); }
+  const fxEl = $('fxrow'), html = rows.join('\n') + '\n<span class="d">` switches bank · scroll for more</span>';
+  if (html !== hudFxHtml){ const wasTop = fxEl.scrollTop; hudFxHtml = html; fxEl.innerHTML = html; fxEl.scrollTop = wasTop; }
+  if (S.bank !== hudBankShown){ hudBankShown = S.bank;   // only chase the active bank when it changes; otherwise leave the scroll alone
+    const blk = fxEl.querySelector(`.bkblk[data-b="${S.bank - (S.bank % 2)}"]`);
+    if (blk){ const top = blk.offsetTop - fxEl.offsetTop;
+      if (top < fxEl.scrollTop || top + blk.offsetHeight > fxEl.scrollTop + fxEl.clientHeight) fxEl.scrollTop = Math.max(0, top - 4); } }
   $('knobs').innerHTML = KNOBS.map(k => `<span class="d">${k.keys.padEnd(7)}</span>${AP.moves.some(m => m.id === k.id) ? '<span class="cue">~</span>' : ' '}${k.label.padEnd(12)} ${bar(k.v)}${k.id === 'pitch' ? ' ' + scopeHz().toFixed(0) + 'Hz' : k.id === 'react' ? ' x' + (3*Math.pow(k.v, 1.5)).toFixed(1) : ''}`).join('\n');
   $('help').innerHTML =
 `1-0      cue effect → fades on beat
