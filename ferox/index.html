@@ -7106,6 +7106,85 @@ FX.push({ name:'FRY UP', persist:0.17, draw(c, s){
     ring(mx, HOB + 0.085, pz + 0.02, 0.038, 0.9, 12); }
   return o; } });
 
+// PUPPET SHOW: a felt-puppet variety band in the style of the old TV shows, with our own characters. Three of them
+// play on a little stage - a wide-mouthed singer whose jaw flaps to the music, a drummer with rod arms whipping on
+// every kick, and a long-nosed one on a horn - all with ping-pong eyes that wobble and shaggy fringes that shake.
+// Two old hecklers lean out of a side box and natter between numbers. Footlights, a swagged curtain and a banner
+// with the VECTOR TEXT. A drop blows the number wide open: confetti, the curtain lifts and all three leap.
+FX.push({ name:'PUPPET SHOW', persist:0.17, draw(c, s){
+  const o = [], F = 1.5, dt = Math.min(c.dt, 0.05), t = c.t, b = c.beat, rnd = (a, b2) => a + Math.random()*(b2 - a);
+  if (s.conf === undefined){ s.conf = []; s.lastK = 0; s.big = 0; s.shot = 0; s.shotB = -1; }
+  const kickEdge = c.kick > 0.85 && s.lastK <= 0.85; s.lastK = c.kick;
+  const drop = c.audio && kickEdge && AU.surge > 3;
+  if (drop){ s.big = 2; for (let k = 0; k < 60; k++) s.conf.push({p:[rnd(-3, 3), 4.2, rnd(-1.5, 0.5)], v:[rnd(-0.6, 0.6), rnd(-0.1, 0.5), rnd(-0.2, 0.4)], a:0, r:rnd(0, TAU), sp:rnd(-6, 6)}); }
+  s.big = Math.max(0, s.big - dt);
+  if (Math.floor(b/16) !== s.shotB){ s.shotB = Math.floor(b/16); s.shot = (s.shot + 1) % 3; }
+  const eT = s.shot === 0 ? [0, 1.9, 5.4] : s.shot === 1 ? [-1.1, 1.75, 2.6] : [1.9, 2.3, 3.4];
+  const tT = s.shot === 1 ? [-0.9, 1.5, 0] : s.shot === 2 ? [1.4, 1.5, -0.2] : [0, 1.5, -0.4];
+  if (!s.cE){ s.cE = eT; s.cT = tT; }
+  const kc = 1 - Math.exp(-dt*1.8); s.cE = v3add(s.cE, v3mul(v3sub(eT, s.cE), kc)); s.cT = v3add(s.cT, v3mul(v3sub(tT, s.cT), kc));
+  const V = lookCam(s.cE, s.cT, Math.sin(t*0.3)*0.02), Pf = fogDraw(o, V, F, 20), P = (pts, i) => Pf(pts, i, true);
+  const scr = p => { const q = V(p); return q[2] > 0.1 ? [proj(q, 0, F), q[2]] : null; };
+  // --- stage, curtain, footlights, banner
+  P([[-3.4, 0.9, -2.2], [3.4, 0.9, -2.2], [3.4, 0.9, 1.1], [-3.4, 0.9, 1.1], [-3.4, 0.9, -2.2]], 0.6);
+  for (let x = -3.4; x <= 3.4; x += 0.42) P([[x, 0.9, 1.1], [x, 0, 1.1]], 0.2);
+  for (let k = 0; k < 9; k++){ const lx = -3 + k*0.75, q = scr([lx, 0.97, 1.05]);
+    if (q && q[0]) o.push({p:ring2(q[0][0], q[0][1], 0.1*F/q[1], 7), i:1.1 + c.pulse*0.4, q:1});
+    P([[lx - 0.1, 0.92, 1.0], [lx + 0.1, 0.92, 1.0], [lx + 0.1, 1.02, 1.02], [lx - 0.1, 1.02, 1.02], [lx - 0.1, 0.92, 1.0]], 0.4); }
+  { const lift = s.big*0.45; for (const sd of [-1, 1]){ const x0 = sd*3.4, x1 = sd*(1.5 + lift*0.9);
+      const pts = []; for (let k = 0; k <= 10; k++){ const v = k/10; pts.push([x0 + (x1 - x0)*v, 4.4 - v*v*2.0 - lift*0.5, -2.0]); } P(pts, 0.6);
+      for (let k = 0; k < 7; k++){ const v = k/7, x = x0 + (x1 - x0)*v, top = 4.4 - v*v*2.0 - lift*0.5;
+        P([[x, top, -2.0], [x + sd*0.12, top - 1.6 + Math.sin(k*1.7)*0.2, -2.05], [x, 0.9, -2.1]], 0.3); } }
+    P([[-3.4, 4.45, -2.0], [3.4, 4.45, -2.0]], 0.5); }
+  { const nm = vtxt(12), sc = Math.min(0.26, 3.6/(nm.length*6));
+    P([[-2.2, 3.5, -1.9], [2.2, 3.5, -1.9], [2.2, 4.25, -1.9], [-2.2, 4.25, -1.9], [-2.2, 3.5, -1.9]], 0.6);
+    // the banner faces the audience at +z, so mirror it
+    [...nm].forEach((ch, k) => { const g = GLY[ch]; if (!g) return; for (const line of g) P(line.map(([gx, gy]) => [nm.length*6*sc/2 - (gx + k*6)*sc, 3.72 + gy*sc, -1.92]), 1.3 + c.pulse*0.3); }); }
+  // --- a puppet: felt head with a hinged jaw, ping-pong eyes, shaggy fringe, rod arms
+  const pup = (x, z, scl, kind, yaw) => { const W = q => [x + q[0]*Math.cos(yaw)*scl - q[2]*Math.sin(yaw)*scl, 0.9 + q[1]*scl, z + q[0]*Math.sin(yaw)*scl + q[2]*Math.cos(yaw)*scl];
+    const bounce = Math.abs(Math.sin(b*Math.PI + kind))*0.09 + s.big*0.1*Math.abs(Math.sin(t*9));
+    const jaw = kind === 0 ? clamp(0.12 + c.mid*0.9 + c.high*0.5, 0.1, 1) : kind === 2 ? clamp(0.1 + c.high*1.2, 0.08, 0.8) : 0.15 + Math.abs(Math.sin(b*Math.PI))*0.2;
+    const hy = 1.25 + bounce, hr = 0.42;
+    for (let r = 0; r <= 4; r++){ const v = r/4, yy = hy + hr*0.9 - v*hr*1.5, rr = Math.sqrt(Math.max(0.02, 1 - Math.pow((yy - hy)/ (hr*1.05), 2)))*hr;
+      P([...Array(15)].map((_, k) => { const a = k/14*Math.PI*2; return W([Math.cos(a)*rr, yy, Math.sin(a)*rr*0.8]); }), 0.45); }
+    { const jy = hy - hr*0.25; P([...Array(13)].map((_, k) => { const a = -Math.PI*0.9 + k/12*Math.PI*1.8; return W([Math.cos(a)*hr*0.95, jy + 0.02, Math.sin(a)*hr*0.78]); }), 0.9);
+      const dj = jaw*0.5; P([...Array(13)].map((_, k) => { const a = -Math.PI*0.9 + k/12*Math.PI*1.8; return W([Math.cos(a)*hr*0.95, jy - dj, Math.sin(a)*hr*0.78 - dj*0.3]); }), 1.0);
+      for (let k = 0; k < 12; k += 2){ const a = -Math.PI*0.9 + k/12*Math.PI*1.8; P([W([Math.cos(a)*hr*0.95, jy + 0.02, Math.sin(a)*hr*0.78]), W([Math.cos(a)*hr*0.95, jy - dj, Math.sin(a)*hr*0.78 - dj*0.3])], 0.5); }
+      P([W([0, jy + 0.02, hr*0.78]), W([0, jy - dj, hr*0.78 - dj*0.3])], 0.6); }
+    for (const sd of [-1, 1]){ const ex = sd*hr*0.42, ey = hy + hr*0.62 + Math.sin(t*5 + sd)*0.012, ez = hr*0.42;
+      P([...Array(11)].map((_, k) => { const a = k/10*TAU; return W([ex + Math.cos(a)*0.17, ey + Math.sin(a)*0.17, ez]); }), 0.9);
+      const px = Math.sin(t*1.3 + kind)*0.05, py = Math.cos(t*1.7 + kind)*0.04;
+      P([...Array(9)].map((_, k) => { const a = k/8*TAU; return W([ex + px + Math.cos(a)*0.06, ey + py + Math.sin(a)*0.06, ez + 0.02]); }), 1.6); }
+    if (kind === 2) P([W([0, hy + hr*0.2, hr*0.7]), W([0, hy + hr*0.05, hr*1.5]), W([0, hy - hr*0.1, hr*0.7])], 0.8);
+    for (let k = 0; k < 9; k++){ const a = -0.9 + k/8*1.8, sh = 0.2 + 0.12*Math.sin(k*2.1 + t*6);
+      P([W([Math.sin(a)*hr*0.8, hy + hr*0.8, Math.cos(a)*hr*0.5]), W([Math.sin(a)*hr*(1 + sh), hy + hr*(0.8 + sh*1.4), Math.cos(a)*hr*0.6])], 0.5); }
+    const sy = hy - hr*0.95;
+    P([...Array(13)].map((_, k) => { const a = k/12*TAU; return W([Math.cos(a)*0.3, sy - 0.15, Math.sin(a)*0.26]); }), 0.5);
+    P([...Array(13)].map((_, k) => { const a = k/12*TAU; return W([Math.cos(a)*0.38, sy - 0.75, Math.sin(a)*0.3]); }), 0.4);
+    for (let k = 0; k < 12; k += 2){ const a = k/12*TAU; P([W([Math.cos(a)*0.3, sy - 0.15, Math.sin(a)*0.26]), W([Math.cos(a)*0.38, sy - 0.75, Math.sin(a)*0.3])], 0.3); }
+    for (const sd of [-1, 1]){ const swing = kind === 1 ? (sd > 0 ? Math.max(0, c.kick)*1.1 : Math.abs(Math.sin(b*Math.PI*2))*0.9) : Math.sin(b*Math.PI + sd)*0.5;
+      const sh2 = [sd*0.3, sy - 0.22, 0.05], el = [sd*(0.55 + swing*0.2), sy - 0.35 + swing*0.35, 0.22], hn = [sd*(0.72 + swing*0.3), sy - 0.3 + swing*0.8, 0.4];
+      P([W(sh2), W(el), W(hn)], 0.7); P([W(hn), W([hn[0] + sd*0.1, hn[1] + 0.12, hn[2] + 0.05])], 0.4);
+      if (kind === 1 && sd > 0) P([W(hn), W([hn[0] + 0.18, hn[1] - 0.45, hn[2] + 0.18])], 0.9); }
+    if (kind === 1){ for (const [dx, dz, rr] of [[0.55, 0.45, 0.3], [-0.5, 0.5, 0.26], [0.1, 0.75, 0.34]]){
+        const hit = Math.max(0, c.kick - 0.4)*0.04; P([...Array(13)].map((_, k) => { const a = k/12*TAU; return W([dx + Math.cos(a)*rr, sy - 0.62 + hit, dz + Math.sin(a)*rr*0.8]); }), 0.8);
+        P([...Array(13)].map((_, k) => { const a = k/12*TAU; return W([dx + Math.cos(a)*rr, sy - 0.95, dz + Math.sin(a)*rr*0.8]); }), 0.4); } }
+    if (kind === 2){ const hn = W([0.8, sy - 0.1, 0.5]); P([W([0.3, sy - 0.2, 0.3]), hn], 0.6);
+      P([...Array(11)].map((_, k) => { const a = k/10*TAU; return [hn[0] + Math.cos(a)*0.16*scl, hn[1] + 0.2*scl + Math.sin(a)*0.16*scl, hn[2]]; }), 0.9); } };
+  pup(-1.1, -0.3, 1, 0, 0.12); pup(1.35, -0.75, 0.92, 1, -0.3); pup(0.3, 0.1, 0.78, 2, 0.05);
+  // --- two hecklers leaning out of a side box
+  { const bx = 3.3, by = 2.3, bz = 0.9; P([[bx - 0.5, by, bz - 0.6], [bx + 1.2, by, bz - 0.6], [bx + 1.2, by, bz + 0.6], [bx - 0.5, by, bz + 0.6], [bx - 0.5, by, bz - 0.6]], 0.5);
+    P([[bx - 0.5, by - 0.5, bz - 0.6], [bx + 1.2, by - 0.5, bz - 0.6], [bx + 1.2, by, bz - 0.6]], 0.4);
+    for (let k = 0; k < 2; k++){ const hx = bx + 0.1 + k*0.55, lean = Math.sin(t*0.7 + k*2)*0.08, jaw2 = Math.max(0, Math.sin(t*3 + k*2.5))*0.1;
+      P([...Array(13)].map((_, m) => { const a = m/12*TAU; return [hx + Math.cos(a)*0.2 + lean, by + 0.5 + Math.sin(a)*0.22, bz - 0.3]; }), 0.6);
+      P([[hx - 0.12 + lean, by + 0.42, bz - 0.28], [hx + 0.12 + lean, by + 0.42, bz - 0.28]], 0.5);
+      P([[hx - 0.12 + lean, by + 0.42 - jaw2, bz - 0.28], [hx + 0.12 + lean, by + 0.42 - jaw2, bz - 0.28]], 0.7);
+      for (const sd of [-1, 1]) P([...Array(9)].map((_, m) => { const a = m/8*TAU; return [hx + sd*0.08 + lean + Math.cos(a)*0.055, by + 0.58 + Math.sin(a)*0.055, bz - 0.3]; }), 0.8);
+      P([[hx + lean, by + 0.28, bz - 0.3], [hx + lean*1.5, by, bz - 0.2]], 0.5); } }
+  s.conf = s.conf.filter(p => { p.a += dt; if (p.a > 3) return false; p.v[1] -= 1.1*dt; p.p = v3add(p.p, v3mul(p.v, dt)); p.r += p.sp*dt;
+    const q = scr(p.p); if (q && q[0]){ const r = 0.05*F/q[1]; o.push({p:[[q[0][0] - Math.cos(p.r)*r, q[0][1] - Math.sin(p.r)*r], [q[0][0] + Math.cos(p.r)*r, q[0][1] + Math.sin(p.r)*r]], i:1.0, q:1}); } return true; });
+  return o; } });
+
 // ============================================================ kaleidoscope (global, Shift+C)
 // Clip every polyline to one wedge of angle PI/n, then mirror and rotate that wedge round the circle: 2n copies of
 // 1/2n of the picture, so the line count stays about the same whatever n is. The source slowly turns underneath.
