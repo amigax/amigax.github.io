@@ -6558,12 +6558,78 @@ FX.push({ name:'ARCADE', persist:0.18, draw(c, s){
     for (let k = 0; k < 2; k++){ const fx = px + (k ? 0.5 : -0.52); chunkyPerson(o, V, F, P, [fx, 0, pz + 0.55], -Math.PI/2 + (k ? -0.3 : 0.3), {}); } }
   return o; } });
 
+// CLIMB: a free climber working up a sheer face, shot from out in the air. The wall is a field of ledges, cracks and
+// overhangs scrolling down past them; they reach hand over hand on the beat, feet smearing and swapping, and heave
+// through an overhang when one arrives. Chalk puffs off the holds, a rope trails from the harness, birds turn far
+// below and the valley floor sits a long way down with a river and a road. Now and then the camera swings out to a
+// huge wide with the whole face, or in tight on the hands. On a drop they dyno: both hands off, a lunge, and a catch.
+FX.push({ name:'CLIMB', persist:0.17, draw(c, s){
+  const o = [], F = 1.5, dt = Math.min(c.dt, 0.05), t = c.t, b = c.beat, rnd = (a, b2) => a + Math.random()*(b2 - a);
+  if (s.y === undefined){ s.y = 120; s.lastK = 0; s.dyno = 0; s.chalk = []; s.nb = -1; s.shot = 0; s.shotB = -1; s.limb = 0; }
+  const kickEdge = c.kick > 0.85 && s.lastK <= 0.85; s.lastK = c.kick;
+  const drop = c.audio && kickEdge && AU.surge > 3;
+  if (drop && s.dyno <= 0) s.dyno = 1.3; s.dyno = Math.max(0, s.dyno - dt);
+  // --- the wall: hold positions come from a hash, so the same wall scrolls past every time
+  const hold = (i, j) => { const h1 = hash2(i*3.3, j*1.7); return [(-2.4 + ((i % 5) + h1*0.9)*1.05), j*0.62 + (h1 - 0.5)*0.3, 0.1 + Math.sin(i*2.1 + j)*0.12]; };
+  const climbRate = 0.62*(1 + Math.min(c.bass, 1)*0.4);
+  if (Math.floor(b*2) !== s.nb){ s.nb = Math.floor(b*2); s.limb = (s.limb + 1) % 4;
+    for (let k = 0; k < 4; k++) s.chalk.push({p:[rnd(-1.5, 1.5), s.y + rnd(0.6, 1.4), rnd(0, 0.3)], v:[rnd(-0.3, 0.3), rnd(-0.1, 0.3), rnd(0.1, 0.5)], a:0}); }
+  s.y += climbRate*dt*(s.dyno > 0 ? 3 : 1);
+  const Y = s.y, lunge = s.dyno > 0 ? Math.sin(clamp((1.3 - s.dyno)/0.6, 0, 1)*Math.PI)*0.75 : 0;
+  // --- camera: out in the air beside them, sometimes wide, sometimes in tight on the hands
+  if (Math.floor(b/16) !== s.shotB){ s.shotB = Math.floor(b/16); s.shot = (s.shot + 1) % 3; }
+  const sw = Math.sin(t*0.2)*1.4;
+  const eT = s.shot === 0 ? [2.4 + sw*0.4, Y + 0.9, 3.6] : s.shot === 1 ? [1.5, Y + 3.0, 2.8] : [1.0, Y + 1.4, 1.9];
+  const tT = s.shot === 1 ? [0.2, Y - 8, 1.0] : s.shot === 2 ? [0, Y + 1.7, 0.2] : [0, Y + 0.7, 0.2];
+  if (!s.cE){ s.cE = eT; s.cT = tT; }
+  const kc = 1 - Math.exp(-dt*1.3); s.cE = v3add(s.cE, v3mul(v3sub(eT, s.cE), kc)); s.cT = v3add(s.cT, v3mul(v3sub(tT, s.cT), kc));
+  const V = lookCam(s.cE, s.cT, Math.sin(t*0.3)*0.04), Pf = fogDraw(o, V, F, 190), P = (pts, i) => Pf(pts, i, true);
+  const scr = p => { const q = V(p); return q[2] > 0.1 ? [proj(q, 0, F), q[2]] : null; };
+  // --- the face: a few strong cracks and ledges rather than a mesh, with holds only near the climber so the
+  // figure stays the brightest thing on the wall (the first pass drew 300+ holds and buried it)
+  const yLo = Y - 20, yHi = Y + 14;
+  for (let i = -3; i <= 3; i++){ const x = i*3.1, pts = [];
+    for (let yy = Math.floor(yLo); yy < yHi; yy += 2) pts.push([x + Math.sin(yy*0.21 + i)*0.7, yy, 0.1 + Math.sin(yy*0.17 + i*2)*0.5]);
+    P(pts, i === 0 ? 0.42 : 0.2); }
+  for (let j = Math.floor(yLo/4); j < yHi/4; j++){ const yy = j*4, big = hash2(j, 2) > 0.55, pts = [];
+    for (let i = -6; i <= 6; i++) pts.push([i*1.9, yy + Math.sin(i*0.7 + j)*0.5, (big ? 0.5 : 0.1) + Math.sin(i*0.9 + j*1.7)*0.4]);
+    P(pts, big ? 0.5 : 0.16);
+    if (big) for (let i = -6; i <= 6; i += 3) P([[i*1.9, yy + Math.sin(i*0.7 + j)*0.5, 0.5], [i*1.9, yy - 1.1, 0.05]], 0.22); }
+  for (let j = Math.floor((Y - 5)/0.62); j < (Y + 9)/0.62; j++) for (let i = 0; i < 5; i++){ if (hash2(i, j) < 0.6) continue; const hp = hold(i, j);
+    P([...Array(8)].map((_, k) => { const a = k/7*TAU; return [hp[0] + Math.cos(a)*0.2, hp[1] + Math.sin(a)*0.1, hp[2] + 0.08]; }), 0.45); }
+  { const oy = Math.floor(Y/22)*22 + 14; if (oy > yLo && oy < yHi){ const pts = [];
+      for (let i = -6; i <= 6; i++) pts.push([i*1.9, oy + Math.sin(i*0.8)*0.4, 1.4 + Math.sin(i*1.1)*0.4]);
+      P(pts, 0.8); for (let i = -6; i <= 6; i += 2) P([[i*1.9, oy + Math.sin(i*0.8)*0.4, 1.4 + Math.sin(i*1.1)*0.4], [i*1.9, oy - 1.8, 0.1]], 0.35); } }
+  // --- the climber
+  { const HY = Y + 0.95, body = [0, HY, 0.28], reachUp = (s.limb % 2 === 0 ? 1 : -1);
+    const hands = [[-0.42, HY + 0.95 + (reachUp > 0 ? 0.35 + lunge : 0), 0.18], [0.42, HY + 0.95 + (reachUp < 0 ? 0.35 + lunge : 0), 0.18]];
+    const feet = [[-0.36, HY - 0.95 + (reachUp < 0 ? 0.25 : 0), 0.12], [0.36, HY - 0.95 + (reachUp > 0 ? 0.25 : 0), 0.12]];
+    ellMesh(o, V, F, body, 0.2, 0.34, 0.16, q => q, 4, 9, 0.95, 0.2);
+    ellMesh(o, V, F, [0.02, HY + 0.52, 0.3], 0.14, 0.15, 0.14, q => q, 3, 8, 1.1, 0.2);
+    for (let k = 0; k < 2; k++){ const sd = k ? 1 : -1, sh = [sd*0.2, HY + 0.3, 0.26], el = [sd*0.42, HY + 0.6 + lunge*0.3, 0.3];
+      P([sh, el, hands[k]], 1.1); P(ringW(0, 0, 0, 0.08, 6).map(q => v3add(hands[k], [q[0], q[2], 0])), 1.2);
+      const hp = [sd*0.16, HY - 0.3, 0.24], kn = [sd*0.5, HY - 0.62, 0.42];
+      P([hp, kn, feet[k]], 1.1); P([v3add(feet[k], [-0.1, -0.04, 0]), v3add(feet[k], [0.1, -0.04, 0]), v3add(feet[k], [0.1, -0.04, 0.14]), v3add(feet[k], [-0.1, -0.04, 0.14]), v3add(feet[k], [-0.1, -0.04, 0])], 0.7); }
+    { const hz = [0, HY - 0.35, 0.3]; P([...Array(11)].map((_, k) => { const a = -0.5 + k/10*(Math.PI + 1); return [Math.cos(a)*0.26, hz[1] + Math.sin(a)*0.12, hz[2] + 0.04]; }), 0.7);
+      const rp = []; for (let k = 0; k <= 10; k++){ const v = k/10; rp.push([Math.sin(v*4 + t)*0.5*v, hz[1] - v*7, hz[2] + 0.4 + Math.sin(v*3 + t*0.7)*0.5*v]); } P(rp, 0.45); }
+    if (lunge > 0.05){ const q = scr(hands[reachUp > 0 ? 0 : 1]); if (q && q[0]) o.push({p:ring2(q[0][0], q[0][1], 0.5*lunge*F/q[1], 10), i:1.2*lunge, q:1}); } }
+  s.chalk = s.chalk.filter(p => { p.a += dt; if (p.a > 1.2) return false; p.v[1] -= 0.6*dt; p.p = v3add(p.p, v3mul(p.v, dt));
+    const q = scr(p.p); if (q && q[0]) o.push({p:ring2(q[0][0], q[0][1], (0.04 + p.a*0.18)*F/q[1], 7), i:0.7*(1 - p.a/1.2), q:1}); return true; });
+  // --- the drop below: the valley floor, a river, a road, birds turning
+  { const GY = 0; for (let i = -9; i <= 9; i++){ P([[i*22, GY, -200], [i*22 + 60, GY, 60]], 0.09); }
+    { const pts = []; for (let k = -10; k <= 10; k++) pts.push([k*26 + Math.sin(k*0.9)*18, GY + 1, 40 + Math.sin(k*0.6)*60]); P(pts, 0.35); P(pts.map(q => [q[0] + 6, q[1], q[2] + 10]), 0.25); }
+    { const pts = []; for (let k = -10; k <= 10; k++) pts.push([k*24, GY + 0.5, 110 + Math.sin(k*1.3)*30]); P(pts, 0.3); }
+    for (let k = 0; k < 5; k++){ const a = t*0.25 + k*1.3, R = 14 + k*6, by = GY + 24 + k*9 + Math.sin(t*0.7 + k)*2, bx = Math.cos(a)*R + 10, bz = 30 + Math.sin(a)*R;
+      const fl = Math.sin(t*6 + k)*0.5; P([[bx - 0.9, by + fl*0.6, bz], [bx, by, bz], [bx + 0.9, by + fl*0.6, bz]], 0.5); }
+    for (let i = -3; i <= 3; i++){ const pts = []; for (let k = 0; k <= 8; k++) pts.push([i*70 + k*9 - 36, GY + 30 + Math.sin(k*1.1 + i)*22 + Math.abs(Math.sin(k*0.5))*18, 150 + i*20]); P(pts, 0.25); } }
+  return o; } });
+
 // ============================================================ kaleidoscope (global, Shift+C)
 // Clip every polyline to one wedge of angle PI/n, then mirror and rotate that wedge round the circle: 2n copies of
 // 1/2n of the picture, so the line count stays about the same whatever n is. The source slowly turns underneath.
 const KALEIDO = [0, 4, 6, 8];
 const HUD_BANKS = 16;   // bank slots shown in the HUD list (empty ones wait for new effects); ` only cycles banks that have effects
-const VERSION = 'v1.14 · 2026-10-08';   // bump on every publish so a venue can tell whether it is on the latest
+const VERSION = 'v1.15 · 2026-10-08';   // bump on every publish so a venue can tell whether it is on the latest
 function clipHalf(pts, f){ const res = []; let cur = [];
   for (let k = 0; k < pts.length; k++){ const p = pts[k], d = f(p);
     if (k > 0){ const q = pts[k-1], dq = f(q);
