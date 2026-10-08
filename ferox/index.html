@@ -6185,12 +6185,90 @@ FX.push({ name:'SKYDIVE', persist:0.18, draw(c, s){
     o.push({p:[[c.asp*0.95 - w - 0.14, 0.86 - 0.5*(1 - hpv)], [c.asp*0.95 - w - 0.1, 0.86 - 0.5*(1 - hpv)]], i:1.2, q:1}); void bw; }
   return o; } });
 
+// PIZZA RUN: a shift in a pizzeria from the server's own eyes, in a 32-beat loop. You slide the long peel into the
+// mouth of the wood oven - flames licking round the dome, logs glowing at the side - lift a bubbling pizza out,
+// land it on the pass, roll the cutter through it in six strokes on the beat, then carry it out between the tables
+// to a couple waiting, who lean in as it lands. Chequered floor, hanging bulbs swinging, bottles and a counter;
+// the oven arch and the menu board carry the VECTOR TEXT. A drop gets a dough spin flung up and caught.
+FX.push({ name:'PIZZA RUN', persist:0.17, draw(c, s){
+  const o = [], F = 1.5, dt = Math.min(c.dt, 0.05), t = c.t, b = c.beat, rnd = (a, b2) => a + Math.random()*(b2 - a);
+  if (s.cyc === undefined){ s.cyc = -1; s.lastK = 0; s.spin = 0; s.sl = 0; }
+  const kickEdge = c.kick > 0.85 && s.lastK <= 0.85; s.lastK = c.kick;
+  if (c.audio && kickEdge && AU.surge > 3 && s.spin <= 0) s.spin = 1;
+  s.spin = Math.max(0, s.spin - dt*0.5);
+  const cyc = Math.floor(b/32), u = b - cyc*32; if (cyc !== s.cyc){ s.cyc = cyc; s.sl = 0; }
+  // --- the oven at the back of the room, the pass in front of it, tables out in the room
+  const OV = [0, 0, -3.2], PASS = 0.95;
+  // where the pizza is through the loop: in the oven, on the peel, on the pass, carried, on the table
+  const cut = u >= 10 && u < 17, carry = u >= 17 && u < 27, served = u >= 27;
+  const peelOut = u < 10 ? smooth01(clamp((u - 2)/5, 0, 1)) : 1;
+  const tbl = [1.9, 0.76, 2.6];
+  const pizPos = u < 2 ? [OV[0], 1.05, OV[2] + 0.2] : u < 10 ? v3add([OV[0], 1.04, OV[2] + 0.2], v3mul([0, 0, 1], peelOut*2.0)) :
+    !carry && !served ? [0, PASS + 0.03, -1.15] : carry ? v3add([0, PASS + 0.03, -1.15], v3mul(v3sub([tbl[0], tbl[1] + 0.05, tbl[2]], [0, PASS + 0.03, -1.15]), smooth01((u - 17)/9.5))) : [tbl[0], tbl[1] + 0.05, tbl[2]];
+  if (cut) s.sl = Math.min(6, Math.floor((u - 10)/1.1) + 1);
+  // --- camera: at the server's eye height, looking where the work is
+  const eT = u < 10 ? [0.1, 1.55, -0.65] : u < 17 ? [0.05, 1.5, -0.55] : u < 27 ? v3add(pizPos, [0.05, 0.62, 0.72]) : v3add(tbl, [0.8, 0.95, 1.5]);
+  const tT = u < 10 ? [OV[0], 1.1, OV[2] + 0.3] : u < 17 ? [0, PASS, -1.15] : u < 27 ? v3add(pizPos, [0, -0.02, -0.1]) : [tbl[0], tbl[1] + 0.04, tbl[2]];
+  if (!s.cE){ s.cE = eT; s.cT = tT; }
+  const kc = 1 - Math.exp(-dt*2.4); s.cE = v3add(s.cE, v3mul(v3sub(eT, s.cE), kc)); s.cT = v3add(s.cT, v3mul(v3sub(tT, s.cT), kc));
+  const V = lookCam(s.cE, s.cT, Math.sin(t*1.7)*0.012), Pf = fogDraw(o, V, F, 22), P = (pts, i) => Pf(pts, i, true);
+  const scr = p => { const q = V(p); return q[2] > 0.08 ? [proj(q, 0, F), q[2]] : null; };
+  // --- room: chequered floor, walls, hanging bulbs, counter, menu board
+  for (let x = -5; x <= 5; x += 0.55) P([[x, 0, -4], [x, 0, 7]], 0.1);
+  for (let z = -4; z <= 7; z += 0.55) P([[-5, 0, z], [5, 0, z]], 0.1);
+  for (let x = -4.5; x < 5; x += 1.1) for (let z = -3.5; z < 7; z += 1.1) if ((Math.round(x*2) + Math.round(z*2)) % 2 === 0) P([[x - 0.27, 0.004, z - 0.27], [x + 0.28, 0.004, z + 0.28]], 0.08);
+  for (const xw of [-5, 5]){ P([[xw, 0, -4], [xw, 3, -4], [xw, 3, 7], [xw, 0, 7]], 0.3); for (let z = -3; z < 7; z += 1.5) P([[xw, 0.1, z], [xw, 2.9, z]], 0.12); }
+  P([[-5, 3, -4], [5, 3, -4], [5, 3, 7], [-5, 3, 7], [-5, 3, -4]], 0.2);
+  for (let k = 0; k < 5; k++){ const bx = -3 + k*1.5, sw = Math.sin(t*1.1 + k)*0.06, bp = [bx + sw, 2.25, 1 + k*0.9];
+    P([[bx, 3, 1 + k*0.9], bp], 0.3); P([...Array(9)].map((_, m) => { const a = m/8*TAU; return [bp[0] + Math.cos(a)*0.09, bp[1] - 0.06 + Math.sin(a)*0.07, bp[2]]; }), 0.9);
+    const q = scr(bp); if (q && q[0]) o.push({p:ring2(q[0][0], q[0][1], 0.12*F/q[1], 8), i:1.0, q:1}); }
+  { const nm = vtxt(12), sc = Math.min(0.16, 1.9/(nm.length*6));
+    P([[-4.9, 1.6, -0.4], [-4.9, 2.6, -0.4], [-4.9, 2.6, 1.6], [-4.9, 1.6, 1.6], [-4.9, 1.6, -0.4]], 0.5);
+    [...nm].forEach((ch, k) => { const g = GLY[ch]; if (!g) return; for (const line of g) P(line.map(([gx, gy]) => [-4.88, 2.3 + gy*sc, 1.4 - (gx + k*6)*sc]), 1.1); });
+    for (let r = 0; r < 4; r++) for (let k = 0; k < 9; k++) P([[-4.88, 2.0 - r*0.12, -0.2 + k*0.19], [-4.88, 2.0 - r*0.12, -0.08 + k*0.19]], 0.25); }
+  // --- the wood oven: dome, arch mouth, flames inside, logs, chimney
+  { const [ox, oy, oz] = OV, R = 1.5;
+    for (let k = 0; k <= 10; k++){ const a = k/10*Math.PI; P([...Array(13)].map((_, m) => { const th = m/12*Math.PI; return [ox + Math.sin(th)*Math.cos(a)*R, oy + 0.75 + Math.cos(th)*R*0.75, oz + Math.sin(th)*Math.sin(a)*R]; }), 0.3); }
+    for (const yy of [0.4, 0.95, 1.45]) P(ringW(ox, oy + yy, oz, Math.sqrt(Math.max(0.05, R*R - Math.pow((yy - 0.75)/0.75*R, 2))), 16), 0.35);
+    boxW(P, ox - 1.5, ox + 1.5, 0, 0.75, oz - 1.4, oz + 1.5, 0.4);
+    { const nm = vtxt(10), sc = Math.min(0.13, 1.4/(nm.length*6));
+      [...nm].forEach((ch, k) => { const g = GLY[ch]; if (!g) return; for (const line of g) P(line.map(([gx, gy]) => [ox + nm.length*6*sc/2 - (gx + k*6)*sc, oy + 1.62 + gy*sc, oz + 1.2]), 1.2); }); }
+    const mz = oz + 1.45; P([[ox - 0.62, 0, mz], [ox - 0.62, 0.62, mz], ...[...Array(9)].map((_, m) => { const a = Math.PI - m/8*Math.PI; return [ox + Math.cos(a)*0.62, 0.62 + Math.sin(a)*0.62, mz]; }), [ox + 0.62, 0, mz]], 0.9);
+    P([[ox - 0.78, 0, mz + 0.06], [ox - 0.78, 0.68, mz + 0.06], ...[...Array(9)].map((_, m) => { const a = Math.PI - m/8*Math.PI; return [ox + Math.cos(a)*0.78, 0.68 + Math.sin(a)*0.78, mz + 0.06]; }), [ox + 0.78, 0, mz + 0.06]], 0.5);
+    for (let k = 0; k < 7; k++){ const fx = ox - 0.5 + k*0.17, h = 0.3 + 0.45*vnoise(t*3.5 + k*5, k) + c.bass*0.2;
+      P([[fx, 0.78, oz + 0.9], [fx + Math.sin(t*9 + k)*0.06, 0.78 + h*0.55, oz + 0.8], [fx + Math.sin(t*7 + k*2)*0.08, 0.78 + h, oz + 0.75], [fx + 0.07, 0.78 + h*0.5, oz + 0.85], [fx + 0.1, 0.78, oz + 0.92]], 1.3); }
+    for (let k = 0; k < 4; k++) boxW(P, ox + 0.75 + (k % 2)*0.1, ox + 1.3 + (k % 2)*0.1, 0.78 + Math.floor(k/2)*0.14, 0.9 + Math.floor(k/2)*0.14, oz + 0.3 + (k % 2)*0.2, oz + 0.42 + (k % 2)*0.2, 0.5);
+    P([[ox - 0.25, oy + 1.5, oz - 0.2], [ox - 0.25, oy + 3, oz - 0.2], [ox + 0.25, oy + 3, oz - 0.2], [ox + 0.25, oy + 1.5, oz - 0.2]], 0.4); }
+  // --- the pass, the counter and the tables
+  boxW(P, -1.5, 1.5, PASS - 0.06, PASS, -1.7, -0.6, 0.6); for (const x of [-1.4, 1.4]) P([[x, 0, -1.6], [x, PASS - 0.06, -1.6]], 0.4);
+  for (const [tx, tz] of [[1.9, 2.6], [-2.2, 1.8], [-1.6, 4.6], [2.4, 5.2]]){ P(ringW(tx, 0.76, tz, 0.62, 16), 0.55); P(ringW(tx, 0.72, tz, 0.6, 16), 0.3); P([[tx, 0, tz], [tx, 0.72, tz]], 0.45); P([[tx - 0.3, 0.02, tz], [tx + 0.3, 0.02, tz]], 0.3);
+    for (const sd of [-1, 1]){ const cx = tx + sd*1.0; P([[cx - 0.2, 0.44, tz - 0.2], [cx + 0.2, 0.44, tz - 0.2], [cx + 0.2, 0.44, tz + 0.2], [cx - 0.2, 0.44, tz + 0.2], [cx - 0.2, 0.44, tz - 0.2]], 0.4);
+      P([[cx - sd*0.2, 0.44, tz - 0.2], [cx - sd*0.22, 0.95, tz - 0.2], [cx - sd*0.22, 0.95, tz + 0.2], [cx - sd*0.2, 0.44, tz + 0.2]], 0.4);
+      for (const [lx, lz] of [[-0.18, -0.18], [0.18, -0.18], [0.18, 0.18], [-0.18, 0.18]]) P([[cx + lx, 0, tz + lz], [cx + lx, 0.44, tz + lz]], 0.25); } }
+  for (const [px, pz, yaw] of [[tbl[0] - 1.0, tbl[2], 0], [tbl[0] + 1.0, tbl[2], Math.PI]]) chunkyPerson(o, V, F, P, [px, 0, pz], yaw, {sit:true, reachR:served ? [tbl[0] - 0.2, tbl[1] + 0.12, tbl[2]] : undefined});
+  // --- the peel going in and out, and the pizza itself
+  { const R2 = 0.33, lean = carry ? 0.12 : 0;
+    if (u < 10){ const hz = pizPos[2] + 1.35; P([[pizPos[0] - 0.02, pizPos[1] - 0.03, pizPos[2]], [pizPos[0] - 0.02, pizPos[1] - 0.03, hz]], 0.8);
+      P([[pizPos[0] - 0.36, pizPos[1] - 0.03, pizPos[2] - 0.3], [pizPos[0] + 0.36, pizPos[1] - 0.03, pizPos[2] - 0.3], [pizPos[0] + 0.36, pizPos[1] - 0.03, pizPos[2] + 0.36], [pizPos[0] - 0.36, pizPos[1] - 0.03, pizPos[2] + 0.36], [pizPos[0] - 0.36, pizPos[1] - 0.03, pizPos[2] - 0.3]], 0.6);
+      P(ringW(pizPos[0], pizPos[1] - 0.03, hz, 0.05, 6), 0.6); }
+    const sp = s.spin > 0 ? (1 - s.spin)*1.2 : 0, cy = pizPos[1] + Math.sin(s.spin*Math.PI)*0.9;
+    P(ringW(pizPos[0], cy, pizPos[2], R2, 18).map(q => v3add(rot(v3sub(q, [pizPos[0], cy, pizPos[2]]), lean, sp*TAU, 0), [pizPos[0], cy, pizPos[2]])), 1.0);
+    P(ringW(pizPos[0], cy + 0.012, pizPos[2], R2*0.86, 16), 0.7);
+    for (let k = 0; k < 9; k++){ const a = hash2(k, cyc)*TAU, r = 0.08 + hash2(k, cyc + 7)*0.18, px = pizPos[0] + Math.cos(a)*r, pz2 = pizPos[2] + Math.sin(a)*r;
+      P(ringW(px, cy + 0.02, pz2, 0.045, 7), 0.9); }
+    for (let k = 0; k < s.sl; k++){ const a = k/6*Math.PI; P([[pizPos[0] - Math.cos(a)*R2, cy + 0.025, pizPos[2] - Math.sin(a)*R2], [pizPos[0] + Math.cos(a)*R2, cy + 0.025, pizPos[2] + Math.sin(a)*R2]], 1.2); }
+    if (cut){ const a = (s.sl - 1)/6*Math.PI, ph = (u - 10) % 1.1, cx = pizPos[0] + Math.cos(a + Math.PI/2)*(0.45 - ph*0.9), cz2 = pizPos[2] + Math.sin(a + Math.PI/2)*(0.45 - ph*0.9);
+      P(ringW(cx, cy + 0.05, cz2, 0.07, 10).map(q => v3add(rot(v3sub(q, [cx, cy + 0.05, cz2]), Math.PI/2, a, 0), [cx, cy + 0.05, cz2])), 1.1);
+      P([[cx, cy + 0.05, cz2], [cx + 0.05, cy + 0.3, cz2 + 0.12]], 0.7); }
+    if (u >= 2 && u < 10){ for (let k = 0; k < 4; k++){ const q = scr([pizPos[0] + rnd(-0.3, 0.3), cy + 0.08 + rnd(0, 0.3), pizPos[2] + rnd(-0.3, 0.3)]); if (q && q[0]) o.push({p:ring2(q[0][0], q[0][1], 0.03*F/q[1], 6), i:0.5, q:1}); } } }
+  return o; } });
+
 // ============================================================ kaleidoscope (global, Shift+C)
 // Clip every polyline to one wedge of angle PI/n, then mirror and rotate that wedge round the circle: 2n copies of
 // 1/2n of the picture, so the line count stays about the same whatever n is. The source slowly turns underneath.
 const KALEIDO = [0, 4, 6, 8];
 const HUD_BANKS = 16;   // bank slots shown in the HUD list (empty ones wait for new effects); ` only cycles banks that have effects
-const VERSION = 'v1.8 · 2026-10-08';   // bump on every publish so a venue can tell whether it is on the latest
+const VERSION = 'v1.9 · 2026-10-08';   // bump on every publish so a venue can tell whether it is on the latest
 function clipHalf(pts, f){ const res = []; let cur = [];
   for (let k = 0; k < pts.length; k++){ const p = pts[k], d = f(p);
     if (k > 0){ const q = pts[k-1], dq = f(q);
