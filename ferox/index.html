@@ -6114,12 +6114,83 @@ FX.push({ name:'FLUME', persist:0.2, draw(c, s){
   if (drop) for (let k = 0; k < 16; k++) s.sp.push({p:v3add(here, v3mul(fwd, rnd(0, 5))), v:[rnd(-5, 5), rnd(2, 9), rnd(-5, 5)], a:0, L:rnd(0.3, 0.8)});
   return o; } });
 
+// SKYDIVE: the whole jump in one loop. A jumper steps off the ramp of a plane, the camera falls with them while they
+// flatten into the arch, arms out, suit rippling, the patchwork ground turning far below and other jumpers closing in
+// to link hands in a ring. The altimeter winds down; at pull height the canopy streams out of the pack, snaps into a
+// rectangle of cells with its lines fanning down, the fall jerks to a stop and everything slows. Then a long steady
+// glide, spiralling down over fields, a river and a drop zone with the VECTOR TEXT laid out in the grass, until the
+// flare and the landing. On a drop the jumper tracks hard and the camera whips around them.
+FX.push({ name:'SKYDIVE', persist:0.18, draw(c, s){
+  const o = [], F = 1.45, dt = Math.min(c.dt, 0.05), t = c.t, b = c.beat, rnd = (a, b2) => a + Math.random()*(b2 - a);
+  if (s.alt === undefined){ s.alt = 3600; s.phase = 0; s.canopy = 0; s.lastK = 0; s.spin = 0; s.track = 0; s.ground = 0; s.cloud = [...Array(16)].map(() => ({x:rnd(-900, 900), y:rnd(300, 3200), z:rnd(-900, 900), r:rnd(60, 180)})); }
+  const kickEdge = c.kick > 0.85 && s.lastK <= 0.85; s.lastK = c.kick;
+  const drop = c.audio && kickEdge && AU.surge > 3;
+  if (drop) s.track = 1; s.track = Math.max(0, s.track - dt*0.5);
+  // --- the jump: freefall, the canopy opening, then the glide down to the ground
+  const free = s.alt > 1500, open = s.alt <= 1500 && s.alt > 1300;
+  s.canopy += ((free ? 0 : 1) - s.canopy)*dt*(open ? 2.2 : 1.2);
+  s.alt -= (free ? 52 : 5.2 + 3*s.canopy*0)*dt*(1 + c.bass*0.2);
+  if (s.alt < 0){ s.alt = 3600; s.canopy = 0; }
+  s.spin += dt*(free ? 0.25 : 0.55)*(1 + s.track);
+  s.ground = clamp((2200 - s.alt)/2200, 0, 1);
+  // --- camera: beside and slightly above the jumper, whipping round on a hard track
+  const jum = [0, s.alt, 0], ca = s.spin*(free ? 1 : 1.6) + s.track*t*3, R = free ? 4.2 - s.track*1.6 : 7.5;
+  const eye = [jum[0] + Math.cos(ca)*R, jum[1] + (free ? 1.6 : 5.5) + Math.sin(t*0.4)*0.6, jum[2] + Math.sin(ca)*R];
+  const tgt = [jum[0], jum[1] + (free ? 0 : 1.2), jum[2]];
+  const V = lookCam(eye, tgt, Math.sin(t*0.35)*0.12 + s.track*0.3), Pf = fogDraw(o, V, F, 4200), P = (pts, i) => Pf(pts, i, true);
+  const scr = p => { const q = V(p); return q[2] > 0.1 ? [proj(q, 0, F), q[2]] : null; };
+  // --- the ground far below: fields, a river, the drop zone with its name mown into the grass
+  { const GS = 420, gy = 0, n = 7;
+    for (let i = -n; i <= n; i++){ P([[i*GS, gy, -n*GS], [i*GS, gy, n*GS]], 0.16); P([[-n*GS, gy, i*GS], [n*GS, gy, i*GS]], 0.16); }
+    for (let i = -n; i < n; i++) for (let j = -n; j < n; j++){ const h = hash2(i, j); if (h > 0.72){ const x = i*GS, z = j*GS;
+      for (let k = 1; k < 5; k++) P([[x + k*GS/5, gy + 1, z + 10], [x + k*GS/5, gy + 1, z + GS - 10]], 0.09); } }
+    { const pts = []; for (let k = -12; k <= 12; k++) pts.push([k*180, gy + 2, Math.sin(k*0.6)*420 + Math.sin(k*1.7)*140]); P(pts, 0.4); P(pts.map(q => [q[0], q[1], q[2] + 46]), 0.3); }
+    { const nm = vtxt(10), sc = Math.min(70, 760/(nm.length*6)), gx = -nm.length*6*sc/2;
+      P([[-520, gy + 1, -520], [520, gy + 1, -520], [520, gy + 1, 520], [-520, gy + 1, 520], [-520, gy + 1, -520]], 0.5);
+      [...nm].forEach((ch, k) => { const g = GLY[ch]; if (!g) return; for (const line of g) P(line.map(([gxx, gyy]) => [gx + (gxx + k*6)*sc, gy + 3, -gyy*sc + 180]), 0.9); });
+      for (const [ax, az] of [[0, 0]]) P([[ax - 60, gy + 4, az - 60], [ax + 60, gy + 4, az + 60]], 0.6); } }
+  for (const cl of s.cloud){ const dy = cl.y - s.alt; if (Math.abs(dy) > 2600) continue;
+    const pts = []; for (let k = 0; k <= 12; k++){ const a = k/12*TAU; pts.push([cl.x + Math.cos(a)*cl.r*(1 + 0.25*Math.sin(a*3 + cl.x)), cl.y + Math.sin(a)*cl.r*0.25, cl.z + Math.sin(a)*cl.r]); }
+    P(pts, 0.22); }
+  // --- a skydiver: arched body, arms and legs out, suit ripples, helmet, pack; the canopy grows out of the pack
+  const diver = (p, yaw, arch, canopy, self) => { const W = q => v3add(p, rot(q, 0, yaw, 0)), rip = k => Math.sin(t*14 + k)*0.03*(1 - canopy);
+    const up = canopy > 0.5 ? 1 : 0, bodyA = up ? -1.45 : 0;   // upright under canopy, flat in freefall
+    const R2 = q => W(rot(q, bodyA, 0, 0));
+    ellMesh(o, V, F, R2([0, 0, 0]), 0.3, 0.2, 0.18, q => rot(rot(q, bodyA, 0, 0), 0, yaw, 0), 4, 9, 0.6, 0.12);
+    ellMesh(o, V, F, R2([0.42, 0.06, 0]), 0.14, 0.14, 0.14, q => rot(rot(q, bodyA, 0, 0), 0, yaw, 0), 3, 8, 0.7, 0.12);
+    P([R2([0.5, 0.1, -0.1]), R2([0.56, 0.04, 0]), R2([0.5, 0.1, 0.1])], 0.8);
+    boxW(P, -0.2, 0.18, -0.12, 0.12, -0.16, 0.16, 0.5);
+    for (const sd of [-1, 1]){ const sh = [0.2, 0.02, sd*0.2], el = [0.1 + arch*0.1, 0.12 + rip(sd), sd*(0.45 + arch*0.1)], hn = [-0.05, 0.2 + rip(sd + 2), sd*(0.6 + arch*0.12)];
+      P([R2(sh), R2(el), R2(hn)], 0.7);
+      const hp = [-0.22, 0, sd*0.14], kn = [-0.55 - arch*0.05, 0.06 + rip(sd + 4), sd*(0.3 + arch*0.06)], ft = [-0.85, 0.22 + arch*0.1 + rip(sd + 6), sd*(0.34)];
+      P([R2(hp), R2(kn), R2(ft)], 0.7); P([R2(v3add(ft, [-0.02, 0, -0.06])), R2(v3add(ft, [-0.14, 0.04, 0])), R2(v3add(ft, [-0.02, 0, 0.06]))], 0.6); }
+    if (canopy > 0.02){ const sp = 1.6 + canopy*6.4, hgt = 1.0 + canopy*6.0, cells = 7;
+      const cpos = W([0, hgt, 0]), half = sp/2, dep = sp*0.42;
+      for (let k = 0; k <= cells; k++){ const x = -half + k*sp/cells, sag = Math.cos((k/cells - 0.5)*2.4)*0.5*canopy;
+        P([v3add(cpos, rot([-dep/2, sag*0.6 - 0.1, x], 0, yaw, 0)), v3add(cpos, rot([dep/2, sag*0.6, x], 0, yaw, 0))], 0.75);
+        if (canopy > 0.4) P([v3add(cpos, rot([dep/2, sag*0.6, x], 0, yaw, 0)), W([0, 0.25, x*0.55])], 0.3); }
+      for (const dx of [-dep/2, 0, dep/2]){ const pts = []; for (let k = 0; k <= cells; k++){ const x = -half + k*sp/cells, sag = Math.cos((k/cells - 0.5)*2.4)*0.5*canopy; pts.push(v3add(cpos, rot([dx, sag*0.6 + (dx === 0 ? 0.12 : 0), x], 0, yaw, 0))); } P(pts, dx === 0 ? 0.5 : 0.9); }
+      if (canopy < 0.45){ const pts = []; for (let k = 0; k <= 7; k++) pts.push(W([Math.sin(k*1.7 + t*9)*0.25*(1 - canopy), 0.3 + k*hgt/7, Math.cos(k*2.1 + t*7)*0.25*(1 - canopy)])); P(pts, 1.1); } }
+    // speed streaks: fixed seats around the body, sliding upward, so the phosphor does not smear them into a curtain
+    if (self && free) for (let k = 0; k < 7; k++){ const a = k/7*TAU + t*0.3, r = 0.8 + (k % 3)*0.3, y0 = ((t*9 + k*1.7) % 3) - 1.5;
+      P([W([Math.cos(a)*r, y0, Math.sin(a)*r]), W([Math.cos(a)*r, y0 + 0.55, Math.sin(a)*r])], 0.3); } };
+  diver(jum, s.spin*0.4 + Math.sin(t*0.5)*0.3, free ? 1 : 0.2, s.canopy, true);
+  // --- the rest of the group closing into a ring while still in freefall
+  if (free) for (let k = 0; k < 5; k++){ const a = k/5*TAU + s.spin*0.8, R3 = 2.6 + Math.sin(t*0.4 + k)*0.5 + (s.alt - 1500)/900;
+    diver([Math.cos(a)*R3, s.alt + Math.sin(t*0.6 + k*2)*0.8, Math.sin(a)*R3], a + Math.PI/2, 1, 0, false); }
+  // --- altimeter, and the horizon haze band
+  { const al = Math.round(s.alt/10)*10, txt = String(al).padStart(4, '0'), sc = 0.016, w = txt.length*6*sc;
+    text2(o, txt, c.asp*0.95 - w, 0.86, sc, 1.1); text2(o, 'M', c.asp*0.95 - w - 0.05, 0.86, sc*0.7, 0.6);
+    const bw = 0.012, hpv = clamp(s.alt/3600, 0, 1); o.push({p:[[c.asp*0.95 - w - 0.12, 0.86], [c.asp*0.95 - w - 0.12, 0.86 - 0.5]], i:0.4, q:1});
+    o.push({p:[[c.asp*0.95 - w - 0.14, 0.86 - 0.5*(1 - hpv)], [c.asp*0.95 - w - 0.1, 0.86 - 0.5*(1 - hpv)]], i:1.2, q:1}); void bw; }
+  return o; } });
+
 // ============================================================ kaleidoscope (global, Shift+C)
 // Clip every polyline to one wedge of angle PI/n, then mirror and rotate that wedge round the circle: 2n copies of
 // 1/2n of the picture, so the line count stays about the same whatever n is. The source slowly turns underneath.
 const KALEIDO = [0, 4, 6, 8];
 const HUD_BANKS = 16;   // bank slots shown in the HUD list (empty ones wait for new effects); ` only cycles banks that have effects
-const VERSION = 'v1.7 · 2026-10-08';   // bump on every publish so a venue can tell whether it is on the latest
+const VERSION = 'v1.8 · 2026-10-08';   // bump on every publish so a venue can tell whether it is on the latest
 function clipHalf(pts, f){ const res = []; let cur = [];
   for (let k = 0; k < pts.length; k++){ const p = pts[k], d = f(p);
     if (k > 0){ const q = pts[k-1], dq = f(q);
