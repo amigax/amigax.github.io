@@ -6708,6 +6708,83 @@ FX.push({ name:'SLAM', persist:0.17, draw(c, s){
     P([[ball[0] - r, ball[1], ball[2]], [ball[0] + r, ball[1], ball[2]]], 0.8); P([[ball[0], ball[1] - r, ball[2]], [ball[0], ball[1] + r, ball[2]]], 0.8); }
   return o; } });
 
+// RODA: a capoeira circle at night. Two players swap the ginga step in time, then trade moves on the beat - a
+// cartwheel, a sweeping meia lua kick that the other ducks under, a handstand, a backflip escape - never quite
+// touching. Round them stands the roda: a ring of people clapping, one working a berimbau whose gourd bobs and
+// whose string shivers, one on a drum hit on the kick. Firelight pools on the sand, the camera orbits low and
+// swings up when someone goes inverted. A drop launches a high spinning kick that passes right over the lens.
+FX.push({ name:'RODA', persist:0.17, draw(c, s){
+  const o = [], F = 1.5, dt = Math.min(c.dt, 0.05), t = c.t, b = c.beat, rnd = (a, b2) => a + Math.random()*(b2 - a);
+  if (s.mv === undefined){ s.mv = 0; s.nb = -1; s.lastK = 0; s.big = 0; s.sand = []; }
+  const kickEdge = c.kick > 0.85 && s.lastK <= 0.85; s.lastK = c.kick;
+  const drop = c.audio && kickEdge && AU.surge > 3;
+  if (drop) s.big = 1.6; s.big = Math.max(0, s.big - dt);
+  // --- one exchange every four beats, the lead swapping each time
+  const ex = Math.floor(b/4), u = b - ex*4, lead = ex % 2 ? 1 : -1;
+  if (ex !== s.nb){ s.nb = ex; s.mv = Math.floor(hash2(ex, 7)*4); }
+  const MV = s.big > 0 ? 4 : s.mv;   // 0 cartwheel, 1 meia lua, 2 handstand, 3 backflip, 4 big spinning kick
+  const ph = clamp((u - 0.4)/2.4, 0, 1);
+  // --- a player: local +x forward, inverted poses come from tipping the whole frame
+  const play = (side, attacker) => { const base = side*1.15, yaw = side > 0 ? Math.PI : 0;
+    let tip = 0, roll = 0, lift = 0, legs = 0, pos = [base + (attacker ? Math.sin(ph*Math.PI)*side*-0.55 : 0), 0, 0], spin = 0;
+    const g = Math.sin(b*Math.PI);   // the ginga rocking underneath everything
+    if (attacker){ if (MV === 0){ roll = ph*TAU; lift = Math.sin(ph*Math.PI)*0.75; legs = 1; }
+      else if (MV === 1){ legs = 2; lift = Math.sin(ph*Math.PI)*0.25; }
+      else if (MV === 2){ tip = smooth01(clamp(ph*1.6, 0, 1))*Math.PI; lift = smooth01(clamp(ph*1.6, 0, 1))*0.1; legs = 3; }
+      else if (MV === 3){ tip = -ph*TAU; lift = Math.sin(ph*Math.PI)*1.15; pos = [base + side*ph*0.9, 0, 0]; }
+      else { spin = ph*TAU*1.2; legs = 4; lift = Math.sin(ph*Math.PI)*0.55; } }
+    else { lift = (MV === 1 && ph > 0.3 && ph < 0.8) ? -0.42 : 0; legs = (MV === 1 && ph > 0.3 && ph < 0.8) ? 5 : 0; }
+    const W = q => v3add(v3add(pos, [0, lift, 0]), rot(rot(v3mul(q, 1), tip, 0, roll), 0, yaw + spin, 0));
+    const hipY = 0.86 + (legs === 5 ? -0.45 : 0), ch = [0.02, hipY + 0.42, 0], hd = [0.05, hipY + 0.8, 0];
+    ellMesh(o, V2, F, W(ch), 0.19, 0.27, 0.17, q => rot(rot(q, tip, 0, roll), 0, yaw + spin, 0), 4, 8, 1.0, 0.2);
+    ellMesh(o, V2, F, W(hd), 0.14, 0.15, 0.14, q => rot(rot(q, tip, 0, roll), 0, yaw + spin, 0), 3, 8, 1.15, 0.2);
+    P([W([0, hipY, 0]), W(ch)], 0.6);
+    for (const sd of [-1, 1]){ const sh = [0, hipY + 0.5, sd*0.22];
+      let el = [0.25, hipY + 0.3, sd*0.3], hn = [0.45, hipY + 0.1, sd*0.34];
+      if (legs === 1 || legs === 3){ el = [0.2, hipY - 0.35, sd*0.26]; hn = [0.3, hipY - 0.78, sd*0.3]; }
+      if (legs === 2){ el = [-0.25, hipY + 0.45, sd*0.3]; hn = [-0.5, hipY + 0.6, sd*0.32]; }
+      P([W(sh), W(el), W(hn)], 1.15);
+      const hip = [0, hipY - 0.05, sd*0.13];
+      let kn = [0.2 + g*sd*0.2, hipY - 0.45, sd*0.18], ft = [0.35 + g*sd*0.45, hipY - 0.88, sd*0.2];
+      if (legs === 1){ kn = [0.1, hipY - 0.5 + sd*0.2, sd*0.2]; ft = [0.2 + sd*0.3, hipY - 0.95 + sd*0.35, sd*0.22]; }
+      if (legs === 2 && sd > 0){ const k2 = ph*Math.PI; kn = [Math.cos(k2 - 0.6)*0.5, hipY - 0.1 + Math.sin(k2)*0.45, 0.2]; ft = [Math.cos(k2 - 0.3)*1.0, hipY + 0.15 + Math.sin(k2)*0.85, 0.22]; }
+      if (legs === 3){ kn = [0.05, hipY - 0.5, sd*0.18]; ft = [sd*0.25, hipY - 1.0, sd*0.2]; }
+      if (legs === 4 && sd > 0){ kn = [0.45, hipY + 0.1, 0.15]; ft = [0.95, hipY + 0.35, 0.18]; }
+      P([W(hip), W(kn), W(ft)], 1.15);
+      P([W(v3add(ft, [-0.05, -0.03, -0.05])), W(v3add(ft, [0.14, -0.03, -0.05])), W(v3add(ft, [0.14, -0.03, 0.05])), W(v3add(ft, [-0.05, -0.03, 0.05]))], 0.6); }
+    return W; };
+  // --- camera: low round the ring, swinging up when somebody is upside down, ducking for the big kick
+  const inv = (MV === 2 || MV === 3 || MV === 0) && ph > 0.2 && ph < 0.9;
+  const ca = t*0.3 + Math.sin(t*0.12)*0.9, R = s.big > 0 ? 1.8 : inv ? 2.9 : 3.3, hy = s.big > 0 ? 1.4 : inv ? 2.0 : 1.0;
+  const eye = [Math.cos(ca)*R, hy, Math.sin(ca)*R], tgt = [0, inv ? 1.5 : 1.0, 0];
+  const V2 = lookCam(eye, tgt, Math.sin(t*0.35)*0.06 + s.big*0.25), Pf = fogDraw(o, V2, F, 30), P = (pts, i) => Pf(pts, i, true);
+  const scr = p => { const q = V2(p); return q[2] > 0.1 ? [proj(q, 0, F), q[2]] : null; };
+  // --- sand, firelight, the ring of people
+  for (let r = 1; r <= 7; r++) P([...Array(33)].map((_, k) => { const a = k/32*TAU; return [Math.cos(a)*r*0.72, 0.004, Math.sin(a)*r*0.72]; }), r === 4 ? 0.3 : 0.1);
+  for (let k = 0; k < 40; k++){ const a = hash2(k, 1)*TAU, r = 0.5 + hash2(k, 2)*4.2; P([[Math.cos(a)*r, 0.005, Math.sin(a)*r], [Math.cos(a)*r + 0.1, 0.005, Math.sin(a)*r + 0.06]], 0.12); }
+  for (const [fx, fz] of [[-3.9, -2.4], [3.6, 2.9]]){ for (let k = 0; k < 5; k++){ const h = 0.3 + 0.35*vnoise(t*3 + k*4, k) + c.bass*0.15;
+      P([[fx - 0.12 + k*0.06, 0.02, fz], [fx - 0.08 + k*0.06 + Math.sin(t*8 + k)*0.05, 0.02 + h*0.6, fz + Math.sin(t*6 + k)*0.04], [fx + k*0.06, 0.02 + h, fz]], 1.3); }
+    P([...Array(13)].map((_, k) => { const a = k/12*TAU; return [fx + Math.cos(a)*0.3, 0.01, fz + Math.sin(a)*0.3]; }), 0.4);
+    P([...Array(17)].map((_, k) => { const a = k/16*TAU; return [fx + Math.cos(a)*2.4, 0.006, fz + Math.sin(a)*2.4]; }), 0.12); }
+  const PD = (pts, i) => P(pts, i*0.5);   // the circle is background, the players are the subject
+  for (let k = 0; k < 9; k++){ const a = k/9*TAU + 0.25, R2 = 4.7, px = Math.cos(a)*R2, pz = Math.sin(a)*R2, yaw2 = Math.atan2(pz, -px);
+    const clap = Math.max(0, Math.sin(b*Math.PI*2 + k*0.4)), bob = Math.abs(Math.sin(b*Math.PI + k*0.3))*0.05;
+    if (k === 0){ chunkyPerson(o, V2, F, PD, [px, bob, pz], yaw2, {reachR:[px*0.72, 1.55, pz*0.72], reachL:[px*0.8, 0.95, pz*0.8]});
+      const bx = px*0.78, bz = pz*0.78, gb = 0.35 + Math.abs(Math.sin(b*Math.PI))*0.08;
+      P([[bx, 0.1, bz], [bx + 0.08, 1.85, bz + 0.05]], 0.9);
+      P([...Array(11)].map((_, m) => { const an = m/10*TAU; return [bx + 0.02 + Math.cos(an)*0.17, gb + Math.sin(an)*0.17, bz]; }), 0.7);
+      { const pts = []; for (let m = 0; m <= 8; m++){ const v = m/8; pts.push([bx + v*0.08 + Math.sin(t*30 + m)*0.012*c.high, 0.1 + v*1.75, bz + v*0.05]); } P(pts, 1.1); } }
+    else if (k === 4){ chunkyPerson(o, V2, F, PD, [px, bob, pz], yaw2, {reachR:[px*0.78 + 0.1, 1.0 - clap*0.12, pz*0.78], reachL:[px*0.78 - 0.1, 1.0 - clap*0.12, pz*0.78]});
+      const dx = px*0.72, dz = pz*0.72; for (const yy of [0.55, 0.95]) P([...Array(13)].map((_, m) => { const an = m/12*TAU; return [dx + Math.cos(an)*0.3, yy + (yy > 0.8 ? Math.max(0, c.kick - 0.5)*0.02 : 0), dz + Math.sin(an)*0.3]; }), 0.7);
+      for (let m = 0; m < 6; m++){ const an = m/6*TAU; P([[dx + Math.cos(an)*0.3, 0.55, dz + Math.sin(an)*0.3], [dx + Math.cos(an)*0.3, 0.95, dz + Math.sin(an)*0.3]], 0.4); } }
+    else chunkyPerson(o, V2, F, PD, [px, bob, pz], yaw2, {reachR:[px*0.78 + 0.12, 1.18 + clap*0.06, pz*0.78 + 0.05], reachL:[px*0.78 - 0.12, 1.18 + clap*0.06, pz*0.78 - 0.05]}); }
+  // --- the two players, and a puff of sand where a hand or foot lands
+  play(lead, true); play(-lead, false);
+  if (Math.random() < dt*22) s.sand.push({p:[rnd(-1.6, 1.6), 0.02, rnd(-0.6, 0.6)], v:[rnd(-0.4, 0.4), rnd(0.2, 0.8), rnd(-0.4, 0.4)], a:0});
+  s.sand = s.sand.filter(p => { p.a += dt; if (p.a > 0.7) return false; p.v[1] -= 1.6*dt; p.p = v3add(p.p, v3mul(p.v, dt));
+    const q = scr(p.p); if (q && q[0]) o.push({p:ring2(q[0][0], q[0][1], 0.02*F/q[1], 5), i:0.7*(1 - p.a/0.7), q:1}); return true; });
+  return o; } });
+
 // ============================================================ kaleidoscope (global, Shift+C)
 // Clip every polyline to one wedge of angle PI/n, then mirror and rotate that wedge round the circle: 2n copies of
 // 1/2n of the picture, so the line count stays about the same whatever n is. The source slowly turns underneath.
