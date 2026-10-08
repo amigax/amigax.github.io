@@ -7260,6 +7260,69 @@ FX.push({ name:'ODYSSEY', persist:0.2, draw(c, s){
       P(beam, 2.0*clamp(s.lance, 0, 1)); } }
   return o; } });
 
+// DEEP SPACE MINER: a vast derelict mining ship, miles of rusting hull crawling past, with a stubby green shuttle
+// buzzing out of its bay and running the length of it. The hull is a slab of girders, tanks, pipework and lit
+// portholes with the VECTOR TEXT stencilled down the side in letters the size of houses. The shuttle wobbles about,
+// burns hard on the beat and finally turns in to dock; inside its window sits a boxy service droid, head panel
+// nodding. Shots: wide on the hull, alongside the shuttle, and a close pass through the girders. A drop blows a
+// cargo hatch and sends junk tumbling past the lens.
+FX.push({ name:'DEEP MINER', persist:0.19, draw(c, s){
+  const o = [], F = 1.45, dt = Math.min(c.dt, 0.05), t = c.t, b = c.beat, rnd = (a, b2) => a + Math.random()*(b2 - a);
+  if (s.z === undefined){ s.z = 0; s.lastK = 0; s.junk = []; s.shot = 0; s.shotB = -1; s.burn = 0; }
+  const kickEdge = c.kick > 0.85 && s.lastK <= 0.85; s.lastK = c.kick;
+  const drop = c.audio && kickEdge && AU.surge > 3;
+  if (kickEdge) s.burn = 1; s.burn = Math.max(0, s.burn - dt*2.5);
+  if (drop) for (let k = 0; k < 22; k++) s.junk.push({p:[rnd(-9, 9), rnd(-6, 10), s.z + rnd(40, 90)], v:[rnd(-3, 3), rnd(-2, 2), rnd(-16, -6)], r:rnd(0, TAU), sp:rnd(-3, 3), a:0, sz:rnd(0.3, 1.2)});
+  s.z += (22 + Math.min(c.bass, 1.2)*9)*dt;
+  // --- the shuttle flies a loose path alongside the hull
+  const sh = [12 + Math.sin(t*0.5)*3.5, 2 + Math.sin(t*0.37)*4, s.z + 26 + Math.sin(t*0.23)*10];
+  const shA = [12 + Math.sin(t*0.5 + 0.2)*3.5, 2 + Math.sin(t*0.37 + 0.2)*4, s.z + 28 + Math.sin(t*0.23 + 0.2)*10];
+  const sf = v3norm(v3sub(shA, sh));
+  if (Math.floor(b/16) !== s.shotB){ s.shotB = Math.floor(b/16); s.shot = (s.shot + 1) % 3; }
+  const eT = s.shot === 0 ? [62, 9, s.z - 6] : s.shot === 1 ? v3add(sh, [5.5, 1.6, -7]) : [4.5, -1, s.z - 6];
+  const tT = s.shot === 0 ? [0, 0, s.z + 70] : s.shot === 1 ? sh : [3, 1, s.z + 60];
+  if (!s.cE){ s.cE = eT; s.cT = tT; }
+  const kc = 1 - Math.exp(-dt*1.1); s.cE = v3add(s.cE, v3mul(v3sub(eT, s.cE), kc)); s.cT = v3add(s.cT, v3mul(v3sub(tT, s.cT), kc));
+  const V = lookCam(s.cE, s.cT, Math.sin(t*0.2)*0.05), Pf = fogDraw(o, V, F, 300), P = (pts, i) => Pf(pts, i, true);
+  const scr = p => { const q = V(p); return q[2] > 0.3 ? [proj(q, 0, F), q[2]] : null; };
+  for (let k = 0; k < 70; k++){ const q = scr([(hash2(k, 1) - 0.5)*700, (hash2(k, 2) - 0.5)*400, s.z + 150 + ((k*41) % 420)]);
+    if (q && q[0]) o.push({p:[[q[0][0], q[0][1]], [q[0][0] + 0.003, q[0][1]]], i:0.4, q:1}); }
+  // --- the hull: a long slab of girders, tanks and pipework, with lit portholes and huge stencilled letters
+  const HW = 9, HH = 7;
+  for (const sd of [-1, 1]){ P([[sd*HW, -HH, s.z - 60], [sd*HW, -HH, s.z + 320]], 0.7); P([[sd*HW, HH, s.z - 60], [sd*HW, HH, s.z + 320]], 0.7);
+    for (const yy of [-HH*0.45, 0, HH*0.45]) P([[sd*HW, yy, s.z - 60], [sd*HW, yy, s.z + 320]], 0.16); }
+  for (let j = Math.floor((s.z - 60)/14); j < (s.z + 320)/14; j++){ const zz = j*14, h = k => hash2(j, k);
+    if (j % 3 === 0) P([[-HW, -HH, zz], [HW, -HH, zz], [HW, HH, zz], [-HW, HH, zz], [-HW, -HH, zz]], h(1) > 0.75 ? 0.35 : 0.12);
+    for (const sd of [-1, 1]){ if (h(sd + 2) > 0.6){ const ty = -HH + h(3)*2*HH*0.7, tr = 1.2 + h(4)*1.8;
+        for (const dz of [0, 5]) P([...Array(11)].map((_, k) => { const a = k/10*TAU; return [sd*(HW + tr*0.6), ty + Math.sin(a)*tr, zz + dz + Math.cos(a)*tr]; }), 0.4);
+        P([[sd*(HW + tr*0.6), ty + tr, zz], [sd*(HW + tr*0.6), ty + tr, zz + 5]], 0.35); }
+      if (h(sd + 5) > 0.5) P([[sd*HW, -HH + h(6)*12, zz], [sd*(HW + 2.5), -HH + h(6)*12, zz + 2], [sd*(HW + 2.5), -HH + h(6)*12 + 3, zz + 7]], 0.3);
+      for (let k = 0; k < 4; k++){ if (hash2(j*4 + k, sd) < 0.55) continue; const py = -HH + 1.5 + k*3.4, lit = hash2(j*4 + k, sd + 9) > 0.45 ? 1 : 0.25;
+        const q = scr([sd*HW, py, zz + 7]); if (q && q[0]) o.push({p:ring2(q[0][0], q[0][1], 0.34*F/q[1], 7), i:1.1*lit, q:1}); } } }
+  { const nm = vtxt(9), sc = 2.6, z0 = Math.floor(s.z/420)*420 + 60;
+    for (const sd of [-1, 1]) [...nm].forEach((ch, k) => { const g = GLY[ch]; if (!g) return;
+      for (const line of g) P(line.map(([gx, gy]) => [sd*(HW + 0.05), -2 + gy*sc, z0 + (sd > 0 ? (gx + k*6)*sc : -(gx + k*6)*sc + nm.length*6*sc)]), 0.9); }); }
+  { const bz = Math.floor(s.z/260)*260 + 120; P([[HW, -3.5, bz], [HW, 3.5, bz], [HW, 3.5, bz + 16], [HW, -3.5, bz + 16], [HW, -3.5, bz]], 0.7);
+    for (let k = 1; k < 5; k++) P([[HW, -3.5, bz + k*3.2], [HW, 3.5, bz + k*3.2]], 0.2);
+    P([[HW, -3.5, bz], [HW + 4, -4.5, bz - 1], [HW + 4, -4.5, bz + 17], [HW, -3.5, bz + 16]], 0.3); }
+  // --- the green shuttle: stubby body, bug-eye windows, stub wings, four burners, a droid at the glass
+  { const W = q => v3add(sh, rot(q, Math.asin(clamp(-sf[1], -1, 1)), Math.atan2(sf[0], sf[2]), Math.sin(t*0.7)*0.12));
+    P([W([-1.5, -0.9, 2.6]), W([1.5, -0.9, 2.6]), W([2.0, 0.6, 1.6]), W([2.0, 0.9, -2.2]), W([-2.0, 0.9, -2.2]), W([-2.0, 0.6, 1.6]), W([-1.5, -0.9, 2.6])], 0.95);
+    P([W([-1.5, -0.9, 2.6]), W([-1.6, -1.1, -2.2]), W([1.6, -1.1, -2.2]), W([1.5, -0.9, 2.6])], 0.6);
+    for (const sd of [-1, 1]) P([W([sd*1.4, 0.3, 1.9]), W([sd*1.9, 0.5, 0.9]), W([sd*1.9, -0.6, 0.9]), W([sd*1.4, -0.7, 1.9]), W([sd*1.4, 0.3, 1.9])], 0.8);
+    for (const sd of [-1, 1]) P([W([sd*2.0, 0.4, -0.4]), W([sd*3.6, 0.1, -1.4]), W([sd*3.4, -0.3, -2.2]), W([sd*2.0, 0.2, -2.0])], 0.7);
+    for (const sd of [-1, 1]) for (const dy of [0.2, -0.5]){ const ep = W([sd*1.1, dy, -2.3]);
+      const q = scr(ep); if (q && q[0]) o.push({p:ring2(q[0][0], q[0][1], (0.3 + s.burn*0.25)*F/q[1], 7), i:1.2 + s.burn, q:1});
+      P([ep, v3add(ep, v3mul(sf, -(3 + s.burn*5)))], 0.5 + s.burn*0.5); }
+    { const dz = 1.5; P([...Array(11)].map((_, k) => { const a = k/10*TAU; return W([Math.cos(a)*0.42, 0.1 + Math.sin(a)*0.42, dz]); }), 0.8);
+      const nod = Math.sin(b*Math.PI)*0.1; P([W([-0.3, -0.2 + nod, dz - 0.1]), W([0.3, -0.2 + nod, dz - 0.1]), W([0.3, 0.38 + nod, dz - 0.1]), W([-0.3, 0.38 + nod, dz - 0.1]), W([-0.3, -0.2 + nod, dz - 0.1])], 1.0);
+      for (const ex of [-0.14, 0.14]) P([...Array(7)].map((_, k) => { const a = k/6*TAU; return W([ex + Math.cos(a)*0.06, 0.2 + nod + Math.sin(a)*0.06, dz - 0.12]); }), 1.4);
+      P([W([-0.18, -0.05 + nod, dz - 0.12]), W([0.18, -0.05 + nod, dz - 0.12])], 0.8); } }
+  s.junk = s.junk.filter(j => { j.a += dt; if (j.a > 6) return false; j.p = v3add(j.p, v3mul(j.v, dt)); j.r += j.sp*dt;
+    const W = q => v3add(j.p, rot(q, j.r, j.r*0.7, 0)); P([W([-j.sz, -j.sz, 0]), W([j.sz, -j.sz, 0]), W([j.sz, j.sz, 0]), W([-j.sz, j.sz, 0]), W([-j.sz, -j.sz, 0])], 0.7);
+    P([W([-j.sz, 0, -j.sz]), W([j.sz, 0, j.sz])], 0.5); return j.p[2] > s.z - 30; });
+  return o; } });
+
 // ============================================================ kaleidoscope (global, Shift+C)
 // Clip every polyline to one wedge of angle PI/n, then mirror and rotate that wedge round the circle: 2n copies of
 // 1/2n of the picture, so the line count stays about the same whatever n is. The source slowly turns underneath.
