@@ -6039,12 +6039,87 @@ FX.push({ name:'KENDO', persist:0.16, draw(c, s){
     P([v3sub(D.p, v3mul(dir, 0.6)), v3add(D.p, v3mul(dir, 0.6))], 1.2); }
   return o; } });
 
+// FLUME: riding a water slide from the rider's own eyes. The tube is a half-pipe that rolls, dives and corkscrews,
+// built from ribs that whip past; water sheets along the floor of it, spray flies off the walls and the whole view
+// banks as you ride up the wall on every bend. Open stretches let the lido in: palms, sun loungers, the pool below,
+// other flumes looping overhead, a tower with the VECTOR TEXT on its sign. Enclosed stretches go dark with light
+// rings flashing past. It ends in a plunge into the splash pool - a wall of spray - then you climb back to the top.
+FX.push({ name:'FLUME', persist:0.2, draw(c, s){
+  const o = [], F = 1.5, dt = Math.min(c.dt, 0.05), t = c.t, b = c.beat, rnd = (a, b2) => a + Math.random()*(b2 - a), LEN = 420;
+  if (s.z === undefined){ s.z = 0; s.sp = []; s.lastK = 0; s.splash = 0; s.roll = 0; }
+  const kickEdge = c.kick > 0.85 && s.lastK <= 0.85; s.lastK = c.kick;
+  const drop = c.audio && kickEdge && AU.surge > 3;
+  // --- the flume as a curve: it swings side to side, dives, and the dark tunnel sections are hashed along it
+  const PX = z => 7*Math.sin(z*0.035) + 3.5*Math.sin(z*0.077 + 1), PY = z => 26 - z*0.055 - 2.4*Math.sin(z*0.045 + 0.5) + 1.2*Math.sin(z*0.1);
+  const path = z => [PX(z), PY(z), z], enclosed = z => { const m = ((z % 150) + 150) % 150; return m > 96 && m < 140; };
+  const RAD = 1.5;
+  s.z += (15 + Math.min(c.bass, 1.2)*7 + (s.splash > 0 ? -8 : 0))*dt;
+  if (s.z > LEN){ s.z = 0; s.splash = 0; }
+  if (s.z > LEN - 22 && s.splash <= 0) s.splash = 1;
+  const z0 = s.z, here = path(z0), ahead = path(z0 + 6);
+  // frame along the flume: forward, a right vector and an up that follows the banking
+  const fwd = v3norm(v3sub(path(z0 + 1), path(z0 - 1))), rt = v3norm(v3cross([0, 1, 0], fwd)), upv = v3cross(fwd, rt);
+  const curve = (PX(z0 + 8) - 2*PX(z0) + PX(z0 - 8))*0.5, bank = clamp(-curve*2.6, -1.1, 1.1);
+  s.roll += (bank - s.roll)*dt*3;
+  const sideShift = clamp(-curve*9, -1, 1);
+  const eye = v3add(v3add(here, v3mul(upv, 0.72 + Math.abs(sideShift)*0.3)), v3add(v3mul(rt, sideShift*RAD*0.55), v3mul(fwd, 0.2)));
+  const tgt = v3add(v3add(ahead, v3mul(upv, 0.5)), v3mul(rt, sideShift*RAD*0.3));
+  const V = lookCam(eye, tgt, s.roll*0.8 + Math.sin(t*3)*0.02), Pf = fogDraw(o, V, F, enclosed(z0) ? 34 : 85), P = (pts, i) => Pf(pts, i, true);
+  const scr = p => { const q = V(p); return q[2] > 0.1 ? [proj(q, 0, F), q[2]] : null; };
+  // --- the trough: ribs whipping past, rails along the lip, water sheeting down the floor
+  const ribAt = (z, a0, a1, n) => { const cz = path(z), f2 = v3norm(v3sub(path(z + 1), path(z - 1))), r2 = v3norm(v3cross([0, 1, 0], f2)), u2 = v3cross(f2, r2);
+    return [...Array(n + 1)].map((_, k) => { const a = a0 + (a1 - a0)*k/n; return v3add(cz, v3add(v3mul(r2, Math.cos(a)*RAD), v3mul(u2, Math.sin(a)*RAD))); }); };
+  const zEnd = z0 + (enclosed(z0) ? 32 : 52);
+  for (let z = Math.floor(z0/3)*3; z < zEnd; z += 3){ const en = enclosed(z), lit = en && Math.floor(z/5) % 3 === 0;
+    P(ribAt(z, Math.PI, TAU + (en ? Math.PI : 0.35), en ? 16 : 11), lit ? 1.3 : (en ? 0.3 : 0.45)); }
+  for (const a of [Math.PI + 0.05, -0.05, Math.PI*1.25, -Math.PI*0.25, Math.PI*1.5, Math.PI*1.75, 0.25*Math.PI - Math.PI]){
+    const pts = []; for (let z = Math.floor(z0/4)*4; z < zEnd; z += 4){ const cz = path(z), f2 = v3norm(v3sub(path(z + 1), path(z - 1))), r2 = v3norm(v3cross([0, 1, 0], f2)), u2 = v3cross(f2, r2);
+      pts.push(v3add(cz, v3add(v3mul(r2, Math.cos(a)*RAD), v3mul(u2, Math.sin(a)*RAD)))); }
+    P(pts, Math.abs(Math.sin(a)) < 0.2 ? 0.75 : 0.3); }
+  for (let k = 0; k < 26; k++){ const zz = z0 + 1 + ((k*3.1 + t*34) % 70), w = Math.sin(zz*0.7 + t*6)*0.5;
+    const cz = path(zz), f2 = v3norm(v3sub(path(zz + 1), path(zz - 1))), r2 = v3norm(v3cross([0, 1, 0], f2)), u2 = v3cross(f2, r2), a = Math.PI*1.5 + w*0.5;
+    const p0 = v3add(cz, v3add(v3mul(r2, Math.cos(a)*RAD*0.97), v3mul(u2, Math.sin(a)*RAD*0.97)));
+    P([p0, v3add(p0, v3mul(f2, 1.6))], 0.8 + 0.5*Math.sin(t*9 + k)); }
+  // --- spray off the walls, thrown harder on the bends and on kicks
+  if (Math.random() < dt*(40 + Math.abs(curve)*600 + (kickEdge ? 400 : 0))){ const a = Math.PI*1.5 + sideShift*1.1 + rnd(-0.4, 0.4);
+    const p0 = v3add(here, v3add(v3mul(rt, Math.cos(a)*RAD*0.9), v3mul(upv, Math.sin(a)*RAD*0.9)));
+    for (let k = 0; k < 3; k++) s.sp.push({p:v3add(p0, v3mul(fwd, rnd(0, 3))), v:v3add(v3mul(fwd, rnd(4, 9)), v3add(v3mul(rt, rnd(-3, 3)), v3mul(upv, rnd(1, 5)))), a:0, L:rnd(0.25, 0.6)}); }
+  s.sp = s.sp.filter(p => { p.a += dt; if (p.a > p.L) return false; p.v[1] -= 9*dt; p.p = v3add(p.p, v3mul(p.v, dt)); P([p.p, v3add(p.p, v3mul(p.v, 0.03))], 1.4*(1 - p.a/p.L)); return true; });
+  // --- the lido around it, visible on the open stretches
+  if (!enclosed(z0)){
+    for (let x = -60; x <= 60; x += 6) P([[x, 0, z0 - 20], [x, 0, z0 + 120]], 0.1);
+    { const px0 = PX(z0 + 45) - 16; P([[px0, 0.05, z0 + 22], [px0 + 26, 0.05, z0 + 22], [px0 + 26, 0.05, z0 + 66], [px0, 0.05, z0 + 66], [px0, 0.05, z0 + 22]], 0.5);
+      for (let k = 1; k < 6; k++) P([[px0 + k*4.3, 0.06, z0 + 22], [px0 + k*4.3, 0.06, z0 + 66]], 0.12);
+      for (let k = 0; k < 7; k++){ const lx = px0 - 4, lz = z0 + 26 + k*5.5; P([[lx, 0.4, lz], [lx + 2.2, 0.5, lz], [lx + 2.6, 0.9, lz]], 0.4); P([[lx, 0, lz], [lx, 0.4, lz]], 0.3); P([[lx + 2.2, 0, lz], [lx + 2.2, 0.5, lz]], 0.3); } }
+    for (let j = 0; j < 9; j++){ const hx = PX(z0 + 40) + (hash2(j, 2) - 0.5)*90, hz = z0 + 10 + hash2(j, 3)*110, h = 5 + hash2(j, 4)*4;
+      if (Math.abs(hx - PX(hz)) < 9) continue; P([[hx, 0, hz], [hx + Math.sin(j)*0.6, h, hz]], 0.45);
+      for (let k = 0; k < 7; k++){ const a = k/7*TAU, top = [hx + Math.sin(j)*0.6, h, hz]; P([top, [top[0] + Math.cos(a)*2.6, h - 1.2 - Math.abs(Math.sin(a))*0.8, hz + Math.sin(a)*2.6], [top[0] + Math.cos(a)*3.4, h - 2.6, hz + Math.sin(a)*3.4]], 0.4); } }
+    for (let j = 0; j < 2; j++){ const oz = z0 + 40 + j*60, ox = PX(oz) + (j % 2 ? 16 : -17), oy = 14 + j*3, pts = [];
+      for (let k = 0; k <= 36; k++){ const a = k/36*TAU*1.5; pts.push([ox + Math.cos(a)*6 + a*0.6, oy - a*1.1, oz + Math.sin(a)*6]); }
+      P(pts, 0.35); P(pts.map(q => [q[0] + 0.9, q[1] + 0.3, q[2]]), 0.25); }
+    { const tz = z0 + 62, tx = PX(tz) - 10, nm = vtxt(10), sc = Math.min(0.75, 7.5/(nm.length*6));
+      boxW(P, tx - 3, tx + 3, 0, 24, tz - 3, tz + 3, 0.4);
+      for (let y = 3; y < 24; y += 3) P([[tx - 3, y, tz - 3], [tx + 3, y, tz - 3]], 0.2);
+      P([[tx - 5, 25, tz - 3.1], [tx + 5, 25, tz - 3.1], [tx + 5, 28.5, tz - 3.1], [tx - 5, 28.5, tz - 3.1], [tx - 5, 25, tz - 3.1]], 0.7);
+      textW(P, nm, tx - nm.length*6*sc/2, 26, tz - 3.2, sc, 1.3 + c.pulse*0.4); }
+    { const sv = scr([PX(z0) - 40, 34, z0 + 150]); if (sv && sv[0]) o.push({p:ring2(sv[0][0], sv[0][1], 9*F/sv[1], 16), i:0.8, q:1}); } }
+  else for (let z = Math.floor(z0/5)*5; z < z0 + 40; z += 5){ if (Math.floor(z/5) % 3) continue;
+    const cz = path(z), q = scr(v3add(cz, [0, RAD*0.8, 0])); if (q && q[0]) o.push({p:ring2(q[0][0], q[0][1], 0.5*F/q[1], 8), i:1.6, q:1}); }
+  // --- the splash at the bottom, then back to the top of the tower
+  if (s.splash > 0){ s.splash = Math.max(0, s.splash - dt*0.55);
+    const n = Math.floor(14*s.splash); for (let k = 0; k < n; k++){ const a = rnd(0, TAU), r = rnd(0.2, 3)*(1.3 - s.splash);
+      const p0 = v3add(v3add(here, v3mul(fwd, rnd(1, 7))), v3add(v3mul(rt, Math.cos(a)*r), v3mul(upv, Math.sin(a)*r + 0.4)));
+      P([p0, v3add(p0, [rnd(-0.2, 0.2), rnd(0.2, 0.7), rnd(-0.2, 0.2)])], 0.8*s.splash); }
+    const q = scr(v3add(here, v3mul(fwd, 4))); if (q && q[0]) o.push({p:ring2(q[0][0], q[0][1], (1.2 - s.splash)*5*F/q[1], 18), i:0.9*s.splash, q:1}); }
+  if (drop) for (let k = 0; k < 16; k++) s.sp.push({p:v3add(here, v3mul(fwd, rnd(0, 5))), v:[rnd(-5, 5), rnd(2, 9), rnd(-5, 5)], a:0, L:rnd(0.3, 0.8)});
+  return o; } });
+
 // ============================================================ kaleidoscope (global, Shift+C)
 // Clip every polyline to one wedge of angle PI/n, then mirror and rotate that wedge round the circle: 2n copies of
 // 1/2n of the picture, so the line count stays about the same whatever n is. The source slowly turns underneath.
 const KALEIDO = [0, 4, 6, 8];
 const HUD_BANKS = 16;   // bank slots shown in the HUD list (empty ones wait for new effects); ` only cycles banks that have effects
-const VERSION = 'v1.6 · 2026-10-08';   // bump on every publish so a venue can tell whether it is on the latest
+const VERSION = 'v1.7 · 2026-10-08';   // bump on every publish so a venue can tell whether it is on the latest
 function clipHalf(pts, f){ const res = []; let cur = [];
   for (let k = 0; k < pts.length; k++){ const p = pts[k], d = f(p);
     if (k > 0){ const q = pts[k-1], dq = f(q);
