@@ -7022,6 +7022,90 @@ FX.push({ name:'SHOWDOWN', persist:0.17, draw(c, s){
       for (let f2 = 0; f2 < 4; f2++) P([[hx - 0.03 + f2*0.02, rest, hz - 0.01], [hx - 0.03 + f2*0.02, rest - 0.005, hz + 0.05]], 0.5); } }
   return o; } });
 
+// FRY UP: breakfast made on a hob, looking down over the pan. An egg is cracked on the rim and dropped in - the
+// white spreads, the yolk sits proud and wobbles on the beat - bacon curls and spits, a sausage is turned, beans
+// blip in a pot and toast pops out of the toaster. Blue flame licks round the pan, steam curls up through the lamp
+// light, the kettle rumbles. Then it is all slid onto a plate, with the VECTOR TEXT round the rim, and a mug of tea
+// lands beside it. A drop flips the pan: everything up in the air and caught.
+FX.push({ name:'FRY UP', persist:0.17, draw(c, s){
+  const o = [], F = 1.5, dt = Math.min(c.dt, 0.05), t = c.t, b = c.beat, rnd = (a, b2) => a + Math.random()*(b2 - a);
+  const HOB = 0.9, PAN = [-0.12, HOB + 0.04, 0];
+  if (s.cyc === undefined){ s.cyc = -1; s.lastK = 0; s.flip = 0; s.pops = []; s.eggs = []; }
+  const kickEdge = c.kick > 0.85 && s.lastK <= 0.85; s.lastK = c.kick;
+  const drop = c.audio && kickEdge && AU.surge > 3;
+  if (drop && s.flip <= 0) s.flip = 1.3; s.flip = Math.max(0, s.flip - dt);
+  const RN = 32, cyc = Math.floor(b/RN), u = b - cyc*RN; if (cyc !== s.cyc){ s.cyc = cyc; s.eggs = []; }
+  const crack = u > 2 && u < 5, plated = u > 24;
+  if (u > 4.2 && s.eggs.length === 0) s.eggs.push({p:[PAN[0] - 0.05, 0, 0.02], a:0}, {p:[PAN[0] + 0.08, 0, -0.06], a:0});
+  for (const e of s.eggs) e.a += dt;
+  const flipUp = s.flip > 0 ? Math.sin(clamp((1.3 - s.flip)/0.9, 0, 1)*Math.PI) : 0;
+  // --- camera: over the hob looking down, pushing in on the egg, lifting to the plate
+  const eT = crack ? [PAN[0] + 0.02, HOB + 0.42, 0.34] : plated ? [0.34, HOB + 0.52, 0.52] : [PAN[0] + 0.06, HOB + 0.58, 0.46];
+  const tT = crack ? [PAN[0], HOB + 0.06, 0] : plated ? [0.4, HOB + 0.02, 0.04] : [PAN[0] + 0.02, HOB + 0.02, 0];
+  if (!s.cE){ s.cE = eT; s.cT = tT; }
+  const kc = 1 - Math.exp(-dt*2); s.cE = v3add(s.cE, v3mul(v3sub(eT, s.cE), kc)); s.cT = v3add(s.cT, v3mul(v3sub(tT, s.cT), kc));
+  const V = lookCam(s.cE, s.cT, Math.sin(t*0.4)*0.02), Pf = fogDraw(o, V, F, 9), P = (pts, i) => Pf(pts, i, true);
+  const scr = p => { const q = V(p); return q[2] > 0.04 ? [proj(q, 0, F), q[2]] : null; };
+  const ring = (x, y, z, r, i, n = 16, ry = r) => P([...Array(n + 1)].map((_, k) => { const a = k/n*TAU; return [x + Math.cos(a)*r, y, z + Math.sin(a)*ry]; }), i);
+  // --- hob top, burners, a splash of flame under the pan
+  P([[-0.75, HOB, -0.5], [0.75, HOB, -0.5], [0.75, HOB, 0.5], [-0.75, HOB, 0.5], [-0.75, HOB, -0.5]], 0.5);
+  for (const [bx, bz] of [[-0.12, 0], [0.3, -0.22], [0.34, 0.26], [-0.44, -0.3]]){ ring(bx, HOB + 0.002, bz, 0.13, 0.3); ring(bx, HOB + 0.002, bz, 0.05, 0.25);
+    for (let k = 0; k < 8; k++){ const a = k/8*TAU; P([[bx + Math.cos(a)*0.05, HOB + 0.003, bz + Math.sin(a)*0.05], [bx + Math.cos(a)*0.13, HOB + 0.003, bz + Math.sin(a)*0.13]], 0.2); } }
+  for (let k = 0; k < 10; k++){ const a = k/10*TAU, h = 0.03 + 0.025*vnoise(t*7 + k*3, k) + c.bass*0.015;
+    P([[PAN[0] + Math.cos(a)*0.09, HOB + 0.005, Math.sin(a)*0.09], [PAN[0] + Math.cos(a)*0.085, HOB + 0.005 + h, Math.sin(a)*0.085], [PAN[0] + Math.cos(a)*0.08, HOB + 0.005 + h*0.5, Math.sin(a)*0.08]], 1.1); }
+  // --- the pan: rim, body, handle, with everything in it lifting on a flip
+  { const py = PAN[1] + flipUp*0.22, tilt = flipUp*0.5;
+    ring(PAN[0], py, 0, 0.19, 0.9, 20); ring(PAN[0], py - 0.035, 0, 0.17, 0.5, 20);
+    for (let k = 0; k < 20; k += 2){ const a = k/20*TAU; P([[PAN[0] + Math.cos(a)*0.19, py, Math.sin(a)*0.19], [PAN[0] + Math.cos(a)*0.17, py - 0.035, Math.sin(a)*0.17]], 0.4); }
+    P([[PAN[0] - 0.19, py + 0.005, 0], [PAN[0] - 0.42, py + 0.04, 0.02]], 0.7); P([[PAN[0] - 0.19, py + 0.005, 0.02], [PAN[0] - 0.42, py + 0.04, 0.04]], 0.5);
+    const W = q => [PAN[0] + q[0]*Math.cos(tilt) - 0, py - 0.03 + q[1] + q[0]*Math.sin(tilt)*0.6 + flipUp*0.1, q[2]];
+    // eggs: white spreading, yolk proud and wobbling
+    for (const e of s.eggs){ const sp = clamp(e.a*1.6, 0, 1), r = 0.045 + sp*0.045, wob = Math.sin(b*Math.PI*2 + e.p[0]*9)*0.004*sp;
+      P([...Array(19)].map((_, k) => { const a = k/18*TAU; return W([e.p[0] - PAN[0] + Math.cos(a)*r*(1 + 0.18*Math.sin(a*3 + e.p[2]*20)), 0.004, e.p[2] + Math.sin(a)*r*(1 + 0.18*Math.cos(a*4))]); }), 0.8);
+      P([...Array(13)].map((_, k) => { const a = k/12*TAU; return W([e.p[0] - PAN[0] + Math.cos(a)*0.022, 0.012 + wob, e.p[2] + Math.sin(a)*0.022]); }), 1.5);
+      P([...Array(9)].map((_, k) => { const a = k/8*TAU; return W([e.p[0] - PAN[0] + Math.cos(a)*0.013, 0.019 + wob, e.p[2] + Math.sin(a)*0.013]); }), 1.9); }
+    // bacon curling, a sausage turning
+    for (let k = 0; k < 2; k++){ const bx = 0.04 + k*0.055, curl = 0.35 + 0.25*Math.sin(t*0.8 + k);
+      P([...Array(9)].map((_, m) => { const v = m/8; return W([bx + Math.sin(v*3 + curl)*0.03, 0.006 + Math.sin(v*Math.PI)*0.012, -0.11 + v*0.16]); }), 0.9);
+      P([...Array(9)].map((_, m) => { const v = m/8; return W([bx + 0.022 + Math.sin(v*3 + curl)*0.03, 0.006 + Math.sin(v*Math.PI)*0.012, -0.11 + v*0.16]); }), 0.6); }
+    { const sr = t*1.2, sx = -0.03; for (const dz of [0]){ P([...Array(13)].map((_, k) => { const a = k/12*TAU; return W([sx + Math.cos(a)*0.016, 0.016 + Math.sin(a)*0.016, dz + 0.1]); }), 0.8);
+        P([...Array(13)].map((_, k) => { const a = k/12*TAU; return W([sx + 0.1 + Math.cos(a)*0.016, 0.016 + Math.sin(a)*0.016, dz + 0.1]); }), 0.8);
+        for (let k = 0; k < 6; k++){ const a = k/6*TAU + sr; P([W([sx, 0.016 + Math.sin(a)*0.016, dz + 0.1 + Math.cos(a)*0.016]), W([sx + 0.1, 0.016 + Math.sin(a)*0.016, dz + 0.1 + Math.cos(a)*0.016])], 0.5); } } }
+    if (Math.random() < dt*26) s.pops.push({p:W([rnd(-0.12, 0.12), 0.02, rnd(-0.12, 0.12)]), v:[rnd(-0.2, 0.2), rnd(0.3, 0.9), rnd(-0.2, 0.2)], a:0}); }
+  // --- the egg being cracked on the rim
+  if (crack){ const ph = (u - 2)/3, ex = PAN[0] + 0.24 - ph*0.22, ey = HOB + 0.3 - ph*0.18, open2 = clamp((ph - 0.5)*3, 0, 1);
+    for (const sd of [-1, 1]) P([...Array(10)].map((_, k) => { const a = k/9*Math.PI; return [ex + Math.cos(a)*0.035, ey + Math.sin(a)*0.045*sd + sd*open2*0.02, 0.02 + sd*open2*0.03]; }), 0.9);
+    if (open2 > 0.1){ const dy = ey - 0.04 - open2*0.12; P([[ex, ey - 0.02, 0.02], [ex + 0.004, dy, 0.02]], 1.1);
+      P([...Array(9)].map((_, k) => { const a = k/8*TAU; return [ex + Math.cos(a)*0.018*open2, dy + Math.sin(a)*0.014*open2, 0.02]; }), 1.4); } }
+  s.pops = s.pops.filter(p => { p.a += dt; if (p.a > 0.45) return false; p.v[1] -= 2.2*dt; p.p = v3add(p.p, v3mul(p.v, dt));
+    const q = scr(p.p); if (q && q[0]) o.push({p:ring2(q[0][0], q[0][1], 0.008*F/q[1], 5), i:1.1*(1 - p.a/0.45), q:1}); return true; });
+  // --- beans blipping in a pot, toaster, kettle steaming
+  { const bx = 0.3, bz = -0.22; ring(bx, HOB + 0.07, bz, 0.07, 0.6); ring(bx, HOB + 0.005, bz, 0.07, 0.4);
+    for (let k = 0; k < 7; k++){ const a = k/7*TAU + t*0.4, r = 0.04*hash2(k, 2), blip = Math.max(0, Math.sin(t*3 + k*2.1) - 0.75)*0.05;
+      ring(bx + Math.cos(a)*r, HOB + 0.06 + blip, bz + Math.sin(a)*r, 0.012, 0.9, 7); }
+    P([[bx + 0.07, HOB + 0.07, bz], [bx + 0.13, HOB + 0.08, bz]], 0.5); }
+  { const tx = -0.48, tz = 0.3, pop = Math.max(0, Math.sin((b % 16)/16*Math.PI*2 - 1.2))*0.1;
+    boxW(P, tx - 0.1, tx + 0.1, HOB, HOB + 0.13, tz - 0.07, tz + 0.07, 0.5);
+    for (const dz of [-0.025, 0.025]) P([[tx - 0.06, HOB + 0.13 + pop, tz + dz], [tx + 0.06, HOB + 0.13 + pop, tz + dz], [tx + 0.06, HOB + 0.21 + pop, tz + dz], [tx - 0.06, HOB + 0.21 + pop, tz + dz], [tx - 0.06, HOB + 0.13 + pop, tz + dz]], pop > 0.01 ? 0.9 : 0.4); }
+  { const kx = 0.34, kz = 0.26; ring(kx, HOB + 0.005, kz, 0.085, 0.5); ring(kx, HOB + 0.17, kz, 0.06, 0.5);
+    for (let k = 0; k < 8; k += 1){ const a = k/8*TAU; P([[kx + Math.cos(a)*0.085, HOB + 0.005, kz + Math.sin(a)*0.085], [kx + Math.cos(a)*0.06, HOB + 0.17, kz + Math.sin(a)*0.06]], 0.35); }
+    P([[kx + 0.06, HOB + 0.12, kz], [kx + 0.14, HOB + 0.15, kz]], 0.5);
+    for (let k = 0; k < 5; k++){ const sy = HOB + 0.19 + ((t*0.2 + k*0.09) % 0.45), pts = [];
+      for (let m = 0; m <= 5; m++) pts.push([kx + 0.02 + Math.sin(t*1.4 + k + m*0.9)*0.02, sy + m*0.03, kz + Math.cos(t*1.1 + k + m*0.7)*0.02]); P(pts, 0.3); } }
+  // --- the plate, with the name round the rim, and a mug of tea
+  if (plated){ const px = 0.42, pz = 0.04, ap = clamp((u - 24)/2.5, 0, 1);
+    ring(px, HOB + 0.012, pz, 0.17*ap, 0.8, 22); ring(px, HOB + 0.014, pz, 0.13*ap, 0.4, 20);
+    { const nm = vtxt(14), R2 = 0.15*ap; [...nm].forEach((ch, k) => { const g = GLY[ch]; if (!g) return; const a = -Math.PI*0.75 + k/Math.max(1, nm.length - 1)*Math.PI*1.5, sc = 0.0055;
+        for (const line of g) P(line.map(([gx, gy]) => { const uu = (gx - 2)*sc, vv = gy*sc; return [px + Math.cos(a)*(R2 + vv) - Math.sin(a)*uu, HOB + 0.016, pz + Math.sin(a)*(R2 + vv) + Math.cos(a)*uu]; }), 1.0); }); }
+    if (ap > 0.5){ for (const e of s.eggs) P([...Array(15)].map((_, k) => { const a = k/14*TAU; return [px - 0.04 + Math.cos(a)*0.05, HOB + 0.016, pz + Math.sin(a)*0.05]; }), 0.7);
+      for (let k = 0; k < 2; k++) P([...Array(9)].map((_, m) => { const v = m/8; return [px + 0.03 + Math.sin(v*3)*0.02, HOB + 0.018, pz - 0.07 + v*0.1]; }), 0.8);
+      ring(px + 0.02, HOB + 0.02, pz + 0.08, 0.03, 0.7, 10); }
+    const mx = px + 0.26; ring(mx, HOB + 0.005, pz + 0.02, 0.045, 0.6); ring(mx, HOB + 0.1, pz + 0.02, 0.045, 0.7);
+    for (let k = 0; k < 8; k += 1){ const a = k/8*TAU; P([[mx + Math.cos(a)*0.045, HOB + 0.005, pz + 0.02 + Math.sin(a)*0.045], [mx + Math.cos(a)*0.045, HOB + 0.1, pz + 0.02 + Math.sin(a)*0.045]], 0.35); }
+    P([...Array(9)].map((_, k) => { const a = -Math.PI/2 + k/8*Math.PI; return [mx + 0.045 + Math.cos(a)*0.03, HOB + 0.055 + Math.sin(a)*0.03, pz + 0.02]; }), 0.6);
+    ring(mx, HOB + 0.085, pz + 0.02, 0.038, 0.9, 12); }
+  return o; } });
+
 // ============================================================ kaleidoscope (global, Shift+C)
 // Clip every polyline to one wedge of angle PI/n, then mirror and rotate that wedge round the circle: 2n copies of
 // 1/2n of the picture, so the line count stays about the same whatever n is. The source slowly turns underneath.
