@@ -7185,6 +7185,81 @@ FX.push({ name:'PUPPET SHOW', persist:0.17, draw(c, s){
     const q = scr(p.p); if (q && q[0]){ const r = 0.05*F/q[1]; o.push({p:[[q[0][0] - Math.cos(p.r)*r, q[0][1] - Math.sin(p.r)*r], [q[0][0] + Math.cos(p.r)*r, q[0][1] + Math.sin(p.r)*r]], i:1.0, q:1}); } return true; });
   return o; } });
 
+// ODYSSEY: the look of those early-eighties space cartoons - a chrome galley with a swan prow and a solar sail,
+// gliding through the broken columns of a temple that floats in space. Ringed planets and a striped sun hang behind,
+// the sail breathes with the bass, engine trails stream off the stern, and the ruins drift past: toppled pillars,
+// a cracked pediment, a giant stone face half buried. Every so often a one-eyed colossus of rock opens its eye and
+// the ship banks hard round it. The sail carries the VECTOR TEXT. A drop fires the bow lance and the eye shuts.
+FX.push({ name:'ODYSSEY', persist:0.2, draw(c, s){
+  const o = [], F = 1.45, dt = Math.min(c.dt, 0.05), t = c.t, b = c.beat, rnd = (a, b2) => a + Math.random()*(b2 - a);
+  if (s.z === undefined){ s.z = 0; s.lastK = 0; s.lance = 0; s.shot = 0; s.shotB = -1; }
+  const kickEdge = c.kick > 0.85 && s.lastK <= 0.85; s.lastK = c.kick;
+  const drop = c.audio && kickEdge && AU.surge > 3;
+  if (drop) s.lance = 1.4; s.lance = Math.max(0, s.lance - dt);
+  s.z += (16 + Math.min(c.bass, 1.2)*8)*dt;
+  // --- the ship flies a lazy curve; a colossus looms every so often and it banks round
+  const SX = z => Math.sin(z*0.012)*9 + Math.sin(z*0.031)*3.5, SY = z => 2 + Math.sin(z*0.018 + 1)*3;
+  const colZ = Math.ceil((s.z + 60)/360)*360, near = clamp(1 - Math.abs(colZ - s.z - 90)/120, 0, 1);
+  const ship = [SX(s.z) - near*7, SY(s.z), s.z], ahead = [SX(s.z + 12) - near*7, SY(s.z + 12), s.z + 12];
+  const fwd = v3norm(v3sub(ahead, ship)), bank = clamp((SX(s.z + 14) - 2*SX(s.z) + SX(s.z - 14))*-0.25 - near*0.5, -0.8, 0.8);
+  if (Math.floor(b/16) !== s.shotB){ s.shotB = Math.floor(b/16); s.shot = (s.shot + 1) % 3; }
+  const eT = s.shot === 0 ? v3add(ship, [9, 3.2, -8]) : s.shot === 1 ? v3add(ship, [-7, 2.2, -12]) : v3add(ship, [3.5, -4.5, 7]);
+  const tT = s.shot === 2 ? v3add(ship, v3mul(fwd, 1.5)) : ship;
+  if (!s.cE){ s.cE = eT; s.cT = tT; }
+  const kc = 1 - Math.exp(-dt*1.2); s.cE = v3add(s.cE, v3mul(v3sub(eT, s.cE), kc)); s.cT = v3add(s.cT, v3mul(v3sub(tT, s.cT), kc));
+  const V = lookCam(s.cE, s.cT, bank*0.3), Pf = fogDraw(o, V, F, 230), P = (pts, i) => Pf(pts, i, true), PF0 = fogDraw(o, V, F, 4000), PF = (pts, i) => PF0(pts, i, true);
+  const scr = p => { const q = V(p); return q[2] > 0.3 ? [proj(q, 0, F), q[2]] : null; };
+  // --- sky: a striped sun, two ringed planets, a scatter of stars
+  { const q = scr([SX(s.z) - 300, 90, s.z + 900]); if (q && q[0]){ const r = 80*F/q[1]; o.push({p:ring2(q[0][0], q[0][1], r, 22), i:0.9, q:1});
+      for (let k = 1; k < 7; k++){ const y = q[0][1] - r + k*r*0.26, hw = Math.sqrt(Math.max(0, r*r - (y - q[0][1])*(y - q[0][1]))); if (y < q[0][1]) o.push({p:[[q[0][0] - hw, y], [q[0][0] + hw, y]], i:0.5, q:1}); } } }
+  for (const [px, py, pz, pr, tilt] of [[220, 60, 620, 34, 0.5], [-180, -40, 760, 22, -0.3]]){
+    const cc = [SX(s.z) + px, py, s.z + pz];
+    PF([...Array(25)].map((_, k) => { const a = k/24*TAU; return [cc[0] + Math.cos(a)*pr, cc[1] + Math.sin(a)*pr, cc[2]]; }), 0.6);
+    for (const rr of [pr*1.6, pr*1.9]) PF([...Array(33)].map((_, k) => { const a = k/32*TAU; return v3add(cc, rot([Math.cos(a)*rr, 0, Math.sin(a)*rr], tilt, 0, 0.2)); }), 0.4); }
+  for (let k = 0; k < 70; k++){ const q = scr([SX(s.z) + (hash2(k, 1) - 0.5)*600, (hash2(k, 2) - 0.5)*300, s.z + 120 + ((k*37) % 400)]);
+    if (q && q[0]) o.push({p:[[q[0][0], q[0][1]], [q[0][0] + 0.003, q[0][1]]], i:0.45, q:1}); }
+  // --- the floating ruins
+  for (let j = Math.floor((s.z - 40)/28); j < (s.z + 230)/28; j++){ const zz = j*28, h = k => hash2(j, k);
+    for (const sd of [-1, 1]){ if (h(sd + 3) < 0.45) continue; const cx = SX(zz) + sd*(13 + h(1)*22), cy = SY(zz) + (h(2) - 0.5)*16, hgt = 6 + h(4)*10, lean = (h(5) - 0.5)*0.5;
+      const W = q => [cx + q[0]*Math.cos(lean) - q[1]*Math.sin(lean), cy + q[0]*Math.sin(lean) + q[1]*Math.cos(lean), zz + q[2]];
+      for (const yy of [0, hgt]) P([...Array(11)].map((_, k) => { const a = k/10*TAU; return W([Math.cos(a)*1.3, yy, Math.sin(a)*1.3]); }), 0.45);
+      for (let k = 0; k < 10; k += 1){ const a = k/10*TAU; P([W([Math.cos(a)*1.3, 0, Math.sin(a)*1.3]), W([Math.cos(a)*1.3, hgt, Math.sin(a)*1.3])], 0.3); }
+      P([W([-1.9, hgt, -1.9]), W([1.9, hgt, -1.9]), W([1.9, hgt, 1.9]), W([-1.9, hgt, 1.9]), W([-1.9, hgt, -1.9])], 0.4);
+      if (h(6) > 0.75) P([W([-3.4, hgt + 0.4, 0]), W([0, hgt + 3, 0]), W([3.4, hgt + 0.4, 0]), W([-3.4, hgt + 0.4, 0])], 0.5); } }
+  { const fz = Math.ceil((s.z + 40)/180)*180; if (fz - s.z < 230){ const fx = SX(fz) + 26, fy = SY(fz) - 12;
+      for (let r = 0; r <= 5; r++){ const v = r/5; P([...Array(13)].map((_, k) => { const a = k/12*TAU; return [fx + Math.cos(a)*7*Math.sin(v*Math.PI + 0.4), fy + 14 - v*16, fz + Math.sin(a)*6*Math.sin(v*Math.PI + 0.4)]; }), 0.3); }
+      for (const sd of [-1, 1]) P([...Array(9)].map((_, k) => { const a = k/8*TAU; return [fx + sd*2.6 + Math.cos(a)*1.4, fy + 6 + Math.sin(a)*0.9, fz - 5]; }), 0.5);
+      P([[fx - 3, fy + 1, fz - 5.5], [fx, fy + 0.2, fz - 6], [fx + 3, fy + 1, fz - 5.5]], 0.5); } }
+  // --- the colossus: a head of rock with one eye that opens
+  if (colZ - s.z < 200 && colZ - s.z > -40){ const cx = SX(colZ) + 26, cy = SY(colZ) + 4, cz = colZ, open2 = clamp(near*1.6, 0, 1)*(1 - s.lance*0.7);
+    for (let r = 0; r <= 6; r++){ const v = r/6, yy = cy + 16 - v*32, rr = Math.sin(v*Math.PI)*15;
+      P([...Array(15)].map((_, k) => { const a = k/14*TAU; return [cx + Math.cos(a)*rr, yy, cz + Math.sin(a)*rr*0.8]; }), 0.3); }
+    for (let k = 0; k < 10; k++){ const a = k/10*TAU, pts = []; for (let r = 0; r <= 6; r++){ const v = r/6; pts.push([cx + Math.cos(a)*Math.sin(v*Math.PI)*15, cy + 16 - v*32, cz + Math.sin(a)*Math.sin(v*Math.PI)*12]); } P(pts, 0.25); }
+    P([...Array(21)].map((_, k) => { const a = k/20*TAU; return [cx + Math.cos(a)*6, cy + 4 + Math.sin(a)*4.5*open2, cz - 11]; }), 1.0);
+    if (open2 > 0.1){ P([...Array(15)].map((_, k) => { const a = k/14*TAU; return [cx + Math.cos(a)*2.6*open2, cy + 4 + Math.sin(a)*2.6*open2, cz - 12]; }), 1.7);
+      const q = scr([cx, cy + 4, cz - 12.5]); if (q && q[0]) o.push({p:ring2(q[0][0], q[0][1], 2.2*open2*F/q[1], 12), i:1.5*open2, q:1}); } }
+  // --- the galley: hull, swan prow, oars of light, solar sail with the name, engine trails
+  { const W = q => v3add(ship, rot(q, 0, Math.atan2(fwd[0], fwd[2]), bank));
+    const HL = 7.5; P([W([0, 0, HL]), W([-1.6, 0.6, 1]), W([-1.5, 0.5, -HL*0.8]), W([0, 0.2, -HL]), W([1.5, 0.5, -HL*0.8]), W([1.6, 0.6, 1]), W([0, 0, HL])], 0.95);
+    P([W([0, 1.5, 2.5]), W([-1.5, 1.3, 0.5]), W([-1.4, 1.2, -HL*0.7]), W([0, 1.1, -HL*0.85]), W([1.4, 1.2, -HL*0.7]), W([1.5, 1.3, 0.5]), W([0, 1.5, 2.5])], 0.6);
+    for (const sd of [-1, 1]) for (const zz of [1, -2, -5]) P([W([sd*1.55, 0.6, zz]), W([sd*1.45, 1.25, zz])], 0.4);
+    { const pts = []; for (let k = 0; k <= 9; k++){ const v = k/9; pts.push(W([0, 0.2 + v*3.4 - Math.sin(v*2.2)*0.5, HL - 0.4 + Math.sin(v*2.6)*1.6])); } P(pts, 1.0);
+      P([pts[7], W([0.5, 3.2, HL + 1.4]), W([0, 2.9, HL + 2.2]), W([-0.5, 3.2, HL + 1.4]), pts[7]], 0.9);
+      P([W([0, 3.0, HL + 2.1]), W([0, 2.7, HL + 3.2])], 0.8); }
+    { const sw = 0.12 + Math.min(c.bass, 1)*0.22, nm = vtxt(10), sc = Math.min(0.42, 4.4/(nm.length*6));
+      P([W([0, 1.4, 1.5]), W([0, 7.6, 0.6])], 0.7);
+      const sail = (uu, vv) => W([0.1 + Math.sin(vv*2.6)*sw*3, 1.9 + vv*5.2, uu*4.6 - 2 + Math.sin(vv*2)*0.6]);
+      for (let r = 0; r <= 5; r++) P([...Array(9)].map((_, k) => sail(k/8, r/5)), r === 0 || r === 5 ? 0.8 : 0.3);
+      for (let k = 0; k <= 8; k += 2) P([...Array(6)].map((_, r) => sail(k/8, r/5)), 0.4);
+      [...nm].forEach((ch, k) => { const g = GLY[ch]; if (!g) return; for (const line of g) P(line.map(([gx, gy]) => sail(0.12 + ((gx + k*6)*sc)/5.4, 0.3 + gy*sc/5.2)), 1.2); }); }
+    for (const sd of [-1, 1]) for (let k = 0; k < 3; k++){ const ox = sd*1.7, oz = 0.5 - k*2.4, ph = Math.sin(t*2.4 + k*0.8 + (sd > 0 ? 0 : 1))*0.35;
+      P([W([ox, 0.9, oz]), W([ox + sd*(2.6 + ph), 0.2 - ph*0.8, oz - 1])], 0.55); }
+    for (const sd of [-1, 1]){ const ep = W([sd*1.1, 0.5, -HL]); const q = scr(ep); if (q && q[0]) o.push({p:ring2(q[0][0], q[0][1], 0.7*F/q[1], 8), i:1.4, q:1});
+      const pts = []; for (let k = 0; k <= 8; k++){ const v = k/8; pts.push(v3add(ep, v3mul(fwd, -v*26 - 2))); } P(pts, 0.5*(1 - 0.5*Math.sin(t*6))); }
+    if (s.lance > 0.02){ const tip = W([0, 2.9, HL + 3.2]), beam = []; for (let k = 0; k <= 6; k++) beam.push(v3add(tip, v3mul(fwd, k*30*(1.4 - s.lance))));
+      P(beam, 2.0*clamp(s.lance, 0, 1)); } }
+  return o; } });
+
 // ============================================================ kaleidoscope (global, Shift+C)
 // Clip every polyline to one wedge of angle PI/n, then mirror and rotate that wedge round the circle: 2n copies of
 // 1/2n of the picture, so the line count stays about the same whatever n is. The source slowly turns underneath.
