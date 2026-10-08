@@ -6785,6 +6785,87 @@ FX.push({ name:'RODA', persist:0.17, draw(c, s){
     const q = scr(p.p); if (q && q[0]) o.push({p:ring2(q[0][0], q[0][1], 0.02*F/q[1], 5), i:0.7*(1 - p.a/0.7), q:1}); return true; });
   return o; } });
 
+// ICE: a skater alone on a rink at night. Long crossover strides carve bright arcs that stay cut into the ice, so
+// the whole floor slowly fills with the figures they have traced. Every eight beats they set up and go: a scratch
+// spin that winds tighter and tighter, a layback, or a jump - three turns in the air and a landing that throws a
+// spray of ice. Rink boards and a low barrier ring it, a few people lean on the rail, strings of bulbs sway above
+// and the VECTOR TEXT is painted into the centre of the ice. A drop is a big jump with the camera swinging under it.
+FX.push({ name:'ICE', persist:0.19, draw(c, s){
+  const o = [], F = 1.5, dt = Math.min(c.dt, 0.05), t = c.t, b = c.beat, rnd = (a, b2) => a + Math.random()*(b2 - a);
+  if (s.p === undefined){ s.p = [0, 0, 3]; s.dir = 0; s.trail = []; s.spray = []; s.lastK = 0; s.big = 0; s.mv = 0; s.nb = -1; s.spin = 0; }
+  const kickEdge = c.kick > 0.85 && s.lastK <= 0.85; s.lastK = c.kick;
+  const drop = c.audio && kickEdge && AU.surge > 3;
+  if (drop && s.big <= 0) s.big = 2.2;
+  s.big = Math.max(0, s.big - dt);
+  const RN = 8, u = b % RN;
+  if (Math.floor(b/RN) !== s.nb){ s.nb = Math.floor(b/RN); s.mv = Math.floor(hash2(s.nb, 3)*3); }
+  const MV = s.big > 0 ? 2 : s.mv;   // 0 spin, 1 layback, 2 jump
+  const doing = u > 4;
+  // --- gliding: the skater curves round the rink, and every stride cuts a line into the ice
+  const speed = doing && MV === 2 ? 7.5 : doing ? 1.2 : 5.4;
+  s.dir += (Math.sin(t*0.37)*1.2 + Math.sin(t*0.8)*0.6)*dt*(doing && MV !== 2 ? 0.2 : 1);
+  const vdir = [Math.cos(s.dir), 0, Math.sin(s.dir)];
+  s.p = v3add(s.p, v3mul(vdir, speed*dt));
+  const RINK = 11; { const r = Math.hypot(s.p[0], s.p[2]); if (r > RINK - 1.2){ const inward = Math.atan2(-s.p[2], -s.p[0]); s.dir += Math.sin(inward - s.dir)*dt*3.2; } }
+  const stride = Math.sin(b*Math.PI*2), lean = clamp(Math.sin(t*0.37)*0.5, -0.5, 0.5);
+  if (!doing || MV !== 2) s.trail.push({p:[s.p[0] + Math.sin(stride)*0.12, 0.012, s.p[2] + Math.cos(stride)*0.12], a:0});
+  s.trail = s.trail.filter(q => { q.a += dt; return q.a < 26; });
+  if (s.trail.length > 900) s.trail.splice(0, s.trail.length - 900);
+  // --- the trick
+  const tp = clamp((u - 4)/3.4, 0, 1);
+  const spinRate = MV === 0 ? (4 + tp*26) : MV === 1 ? 7 : 0;
+  s.spin += spinRate*dt;
+  const air = MV === 2 ? Math.sin(clamp((u - 4.6)/2.2, 0, 1)*Math.PI)*1.5*(s.big > 0 ? 1.35 : 1) : 0;
+  const airSpin = MV === 2 ? clamp((u - 4.6)/2.2, 0, 1)*TAU*3 : 0;
+  const landing = MV === 2 && u > 6.6 && u < 7.1;
+  if (landing && Math.random() < dt*120) for (let k = 0; k < 3; k++) s.spray.push({p:[s.p[0], 0.02, s.p[2]], v:[rnd(-2.5, 2.5), rnd(0.6, 2.4), rnd(-2.5, 2.5)], a:0});
+  s.spray = s.spray.filter(q => { q.a += dt; if (q.a > 0.7) return false; q.v[1] -= 6*dt; q.p = v3add(q.p, v3mul(q.v, dt)); return true; });
+  // --- camera: low beside them, swinging under on a jump, tight in on a spin
+  const ang = s.dir + Math.PI*0.75 + Math.sin(t*0.2)*0.5, R = doing && MV !== 2 ? 2.7 : 4.2;
+  const eT = [s.p[0] + Math.cos(ang)*R, air > 0.3 ? 0.5 : 1.45, s.p[2] + Math.sin(ang)*R];
+  const tT = [s.p[0], 0.9 + air*0.8, s.p[2]];
+  if (!s.cE){ s.cE = eT; s.cT = tT; }
+  const kc = 1 - Math.exp(-dt*2.6); s.cE = v3add(s.cE, v3mul(v3sub(eT, s.cE), kc)); s.cT = v3add(s.cT, v3mul(v3sub(tT, s.cT), kc));
+  const V = lookCam(s.cE, s.cT, Math.sin(t*0.3)*0.04 + lean*0.1), Pf = fogDraw(o, V, F, 42), P = (pts, i) => Pf(pts, i, true);
+  const scr = p => { const q = V(p); return q[2] > 0.1 ? [proj(q, 0, F), q[2]] : null; };
+  // --- rink: ice, cut lines, painted name in the middle, boards, rail, bulbs, onlookers
+  for (let r = 1; r <= 5; r++) P([...Array(49)].map((_, k) => { const a = k/48*TAU; return [Math.cos(a)*RINK*r/5, 0.002, Math.sin(a)*RINK*r/5]; }), r === 5 ? 0.45 : 0.07);
+  { const nm = vtxt(10), sc = Math.min(1.5, 13/(nm.length*6));
+    [...nm].forEach((ch, k) => { const g = GLY[ch]; if (!g) return; for (const line of g) P(line.map(([gx, gy]) => [-nm.length*6*sc/2 + (gx + k*6)*sc, 0.004, -gy*sc + 2.5]), 0.5); }); }
+  { let run = null; for (const q of s.trail){ const i = 0.9*(1 - q.a/26);
+      if (run && Math.hypot(q.p[0] - run[run.length - 1][0], q.p[2] - run[run.length - 1][2]) < 0.6) run.push(q.p); else { if (run && run.length > 1) P(run, 0.5); run = [q.p]; } }
+    if (run && run.length > 1) P(run, 0.55); }
+  for (let k = 0; k < 48; k++){ const a = k/48*TAU, a2 = (k + 1)/48*TAU;
+    P([[Math.cos(a)*RINK, 0, Math.sin(a)*RINK], [Math.cos(a2)*RINK, 0, Math.sin(a2)*RINK], [Math.cos(a2)*RINK, 1.05, Math.sin(a2)*RINK], [Math.cos(a)*RINK, 1.05, Math.sin(a)*RINK], [Math.cos(a)*RINK, 0, Math.sin(a)*RINK]], 0.3);
+    if (k % 4 === 0) P([[Math.cos(a)*RINK, 1.05, Math.sin(a)*RINK], [Math.cos(a)*RINK, 1.6, Math.sin(a)*RINK]], 0.25); }
+  P([...Array(49)].map((_, k) => { const a = k/48*TAU; return [Math.cos(a)*RINK, 1.6, Math.sin(a)*RINK]; }), 0.35);
+  for (let k = 0; k < 5; k++){ const a = k/5*TAU + 0.4, px = Math.cos(a)*(RINK + 0.8), pz = Math.sin(a)*(RINK + 0.8);
+    chunkyPerson(o, V, F, (pts, i) => P(pts, i*0.5), [px, 0, pz], Math.atan2(-pz, -px), {reachR:[px*0.93, 1.6, pz*0.93], reachL:[px*0.95, 1.05, pz*0.95]}); }
+  for (let k = 0; k < 16; k++){ const a = k/16*TAU, sw = Math.sin(t*0.9 + k)*0.1, bp = [Math.cos(a)*(RINK - 1)*0.95 + sw, 4.4 + Math.sin(a*2)*0.5, Math.sin(a)*(RINK - 1)*0.95];
+    const q = scr(bp); if (q && q[0]) o.push({p:ring2(q[0][0], q[0][1], 0.1*F/q[1], 6), i:0.9, q:1});
+    const a2 = (k + 1)/16*TAU, bp2 = [Math.cos(a2)*(RINK - 1)*0.95, 4.4 + Math.sin(a2*2)*0.5, Math.sin(a2)*(RINK - 1)*0.95];
+    P([bp, [(bp[0] + bp2[0])/2, (bp[1] + bp2[1])/2 - 0.5, (bp[2] + bp2[2])/2], bp2], 0.18); }
+  // --- the skater
+  { const yaw = s.dir + s.spin + airSpin, bodyLean = MV === 1 && doing ? -0.9 : lean*0.5;
+    const W = q => v3add([s.p[0], air, s.p[2]], rot(rot(q, bodyLean, 0, 0), 0, -yaw, 0));
+    ellMesh(o, V, F, W([0, 1.1, 0]), 0.17, 0.3, 0.15, q => rot(rot(q, bodyLean, 0, 0), 0, -yaw, 0), 4, 8, 0.9, 0.18);
+    ellMesh(o, V, F, W([0.02, 1.58, 0]), 0.13, 0.14, 0.13, q => rot(rot(q, bodyLean, 0, 0), 0, -yaw, 0), 3, 8, 1.1, 0.18);
+    const tight = MV === 0 ? clamp(tp*1.4, 0, 1) : 0;
+    for (const sd of [-1, 1]){ const sh = [0, 1.38, sd*0.2];
+      const out = MV === 0 ? (1 - tight) : MV === 1 ? 1 : (air > 0.2 ? 0.25 : 0.9);
+      const el = [0.1*out, 1.38 + (MV === 1 ? 0.25 : 0.1)*out, sd*(0.2 + 0.26*out)], hn = [0.16*out, 1.42 + (MV === 1 ? 0.5 : 0.08)*out + tight*0.25, sd*(0.2 + 0.55*out)];
+      P([W(sh), W(el), W(hn)], 1.0);
+      const hip = [0, 0.84, sd*0.12];
+      let kn = [stride*sd*0.25, 0.46, sd*0.14], ft = [stride*sd*0.5, 0.03, sd*0.16];
+      if (doing && MV === 0 && sd > 0){ kn = [0.12, 0.5, 0.3]; ft = [0.05, 0.75 + tight*0.35, 0.5 - tight*0.3]; }
+      if (doing && MV === 1 && sd > 0){ kn = [-0.35, 0.75, 0.2]; ft = [-0.85, 1.0, 0.25]; }
+      if (MV === 2 && air > 0.2){ kn = [0.18*sd, 0.5, sd*0.14]; ft = [0.3*sd, 0.2, sd*0.16]; }
+      P([W(hip), W(kn), W(ft)], 1.0);
+      P([W(v3add(ft, [-0.12, -0.05, 0])), W(v3add(ft, [0.16, -0.05, 0]))], 1.2);
+      P([W(v3add(ft, [-0.1, -0.09, 0])), W(v3add(ft, [0.14, -0.09, 0]))], 0.8); } }
+  for (const q of s.spray){ const sv = scr(q.p); if (sv && sv[0]) o.push({p:ring2(sv[0][0], sv[0][1], 0.03*F/sv[1], 5), i:1.3*(1 - q.a/0.7), q:1}); }
+  return o; } });
+
 // ============================================================ kaleidoscope (global, Shift+C)
 // Clip every polyline to one wedge of angle PI/n, then mirror and rotate that wedge round the circle: 2n copies of
 // 1/2n of the picture, so the line count stays about the same whatever n is. The source slowly turns underneath.
