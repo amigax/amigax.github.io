@@ -5973,7 +5973,18 @@ function resetAll(){
 const held = new Set();
 const ctx = {t:0, dt:0, sp:1, beat:0, beatI:0, bp:0, pulse:0, kick:0, bass:0, mid:0, high:0, audio:false, stereo:false, waveL:null, waveR:null, text:'', asp:1};
 
-// Autopilot running order (effect indices); each gets AUTO_BEATS before the next is cued.
+// Autopilot pool (effect indices); each gets AUTO_BEATS before the next is cued.
+// CHANGED 2026-10-08: it used to step through this list in order and loop, so the running order never varied and the
+// same pairs always followed each other (DJ then SUSHI CHEF, every single time). Now it deals from a shuffled bag:
+// every effect plays once per pass in a fresh random order, so nothing repeats until the whole set has been round,
+// and a new shuffle never starts with the effect that just played. Pass `true` to autoNext for the first pick.
+let autoBag = [], autoLast = -1;
+function autoPick(){
+  if (!autoBag.length){ autoBag = AUTO_ORDER.slice();
+    for (let i = autoBag.length - 1; i > 0; i--){ const j = Math.floor(Math.random()*(i + 1)); [autoBag[i], autoBag[j]] = [autoBag[j], autoBag[i]]; }
+    if (autoBag.length > 1 && autoBag[autoBag.length - 1] === autoLast){ const j = Math.floor(Math.random()*(autoBag.length - 1)); [autoBag[autoBag.length - 1], autoBag[j]] = [autoBag[j], autoBag[autoBag.length - 1]]; } }
+  autoLast = autoBag.pop(); return autoLast;
+}
 const AUTO_ORDER = [5, 4, 1, 10, 20, 32, 0, 18, 12, 21, 38, 3, 11, 22, 33, 13, 19, 23, 34, 8, 14, 24, 35, 2, 17, 25, 36, 6, 15, 26, 37, 9, 16, 27, 39, 28, 29, 30, 31, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 7], AUTO_BEATS = 16;
 // S.auto: 0 = off, 1 = effects only, 2 = full (effects + knob moves + colour/strobe/transition choices).
 const AUTO_MODES = ['OFF', 'FX ONLY', 'FULL'];
@@ -6012,10 +6023,10 @@ function autopilot(){
   const kickEdge = AU.kick > 0.8 && AP.lastK <= 0.8; AP.lastK = AU.kick;
   const drop = ctx.audio && kickEdge && AU.surge > AUTO_DROP_DB && S.time - (S.cueAt || 0) >= AUTO_MIN_SECS;
   if (b >= S.autoNext || drop){
-    S.autoIdx = (S.autoIdx + 1) % AUTO_ORDER.length;
+    const nx = autoPick();
     if (full && !drop) autoTransition();
     if (full) S.kal = Math.random() < 0.08 ? 1 + Math.floor(Math.random()*3) : 0;   // now and then, a kaleidoscope section (was 0.18 until 2026-09-22: too often)
-    cue(AUTO_ORDER[S.autoIdx], drop); }
+    cue(nx, drop); }
   // CHANGED 2026-09-22: leaving full autopilot used to just drop its moves, so a crush/fold it had raised froze wherever
   // it was (looking "off" but still on). Now, if autopilot was the last to move them, they glide home over 2 beats.
   if (!full){ AP.moves = []; autoCrushHome(b); return; }
