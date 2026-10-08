@@ -6481,12 +6481,89 @@ FX.push({ name:'BREAKERS', persist:0.17, draw(c, s){
       reachR:[px*0.78 + Math.cos(a)*-0.1, 1.15 + clap*0.12, pz*0.78 - 0.08 - clap*0.06], reachL:[px*0.78 + Math.cos(a)*-0.1, 1.15 + clap*0.12, pz*0.78 + 0.08 + clap*0.06]}); }
   return o; } });
 
+// ARCADE: a cabinet in a dark arcade with someone playing it. The marquee across the top carries the VECTOR TEXT,
+// the control panel has a stick and glowing buttons that press on the beat, and the screen plays a real little
+// vector game: a ship holding the bottom while rocks drift in and split when shot. The player's hands work the stick
+// and buttons, they lean in on the action and thump the panel when they lose a life. The camera drifts between a
+// wide of the room (rows of other cabinets flickering, a change machine, a carpet of light) and a push right into
+// the screen until the game fills the frame. A drop empties the screen in a flash and the attract mode starts again.
+FX.push({ name:'ARCADE', persist:0.18, draw(c, s){
+  const o = [], F = 1.5, dt = Math.min(c.dt, 0.05), t = c.t, b = c.beat, rnd = (a, b2) => a + Math.random()*(b2 - a);
+  if (!s.rocks){ s.rocks = []; s.shots = []; s.ship = 0; s.lastK = 0; s.flash = 0; s.score = 0; s.lives = 3; s.nb = -1; s.shot = 0; s.shotB = -1; }
+  const kickEdge = c.kick > 0.85 && s.lastK <= 0.85; s.lastK = c.kick;
+  const drop = c.audio && kickEdge && AU.surge > 3;
+  if (drop){ s.flash = 1; for (const r of s.rocks) r.dead = true; }
+  s.flash = Math.max(0, s.flash - dt*2.2);
+  // --- the game that plays on the screen, in its own little 2D space (x -1..1, y -1..1)
+  if (Math.floor(b*2) !== s.nb){ s.nb = Math.floor(b*2);
+    if (s.rocks.length < 7 && Math.random() < 0.8) s.rocks.push({p:[rnd(-0.9, 0.9), 1.1], v:[rnd(-0.12, 0.12), -rnd(0.1, 0.22)], r:rnd(0.1, 0.19), a:rnd(0, TAU), sp:rnd(-2, 2), n:3 + Math.floor(Math.random()*4)});
+    s.shots.push({p:[s.ship, -0.78], v:[0, 1.5], a:0}); }
+  s.ship += ((Math.sin(t*0.9) * 0.7 + Math.sin(t*0.37)*0.2) - s.ship)*dt*3;
+  s.rocks = s.rocks.filter(r => { if (r.dead) return false; r.p = [r.p[0] + r.v[0]*dt, r.p[1] + r.v[1]*dt]; r.a += r.sp*dt;
+    if (r.p[0] < -1.05 || r.p[0] > 1.05) r.v[0] *= -1; return r.p[1] > -1.1; });
+  s.shots = s.shots.filter(sh => { sh.a += dt; sh.p = [sh.p[0] + sh.v[0]*dt, sh.p[1] + sh.v[1]*dt];
+    for (const r of s.rocks){ if (r.dead) continue; const d = Math.hypot(sh.p[0] - r.p[0], sh.p[1] - r.p[1]);
+      if (d < r.r){ r.dead = true; s.score += 20; if (r.r > 0.12) for (let k = 0; k < 2; k++) s.rocks.push({p:r.p.slice(), v:[rnd(-0.3, 0.3), rnd(-0.25, 0.05)], r:r.r*0.55, a:rnd(0, TAU), sp:rnd(-3, 3), n:3 + Math.floor(Math.random()*3)}); return false; } }
+    return sh.a < 1.4 && sh.p[1] < 1.05; });
+  // --- camera: wide on the room, over the player's shoulder, or pushed into the glass
+  if (Math.floor(b/16) !== s.shotB){ s.shotB = Math.floor(b/16); s.shot = (s.shot + 1) % 3; }
+  const SCR = [0, 1.45, -0.42];
+  const eT = s.shot === 0 ? [1.9, 1.75, 2.5] : s.shot === 1 ? [0.42, 1.78, 1.25] : [0.05, 1.46, 0.28];
+  const tT = s.shot === 0 ? [0, 1.3, -0.2] : s.shot === 1 ? [0, 1.44, -0.3] : [0, 1.45, -0.42];
+  if (!s.cE){ s.cE = eT; s.cT = tT; }
+  const kc = 1 - Math.exp(-dt*1.6); s.cE = v3add(s.cE, v3mul(v3sub(eT, s.cE), kc)); s.cT = v3add(s.cT, v3mul(v3sub(tT, s.cT), kc));
+  const V = lookCam(s.cE, s.cT), Pf = fogDraw(o, V, F, 26), P = (pts, i) => Pf(pts, i, true);
+  const scr = p => { const q = V(p); return q[2] > 0.06 ? [proj(q, 0, F), q[2]] : null; };
+  // --- the arcade room: dark floor with a lit carpet pattern, other cabinets, a change machine
+  for (let x = -7; x <= 7; x += 1.2) P([[x, 0, -6], [x, 0, 6]], 0.1);
+  for (let z = -6; z <= 6; z += 1.2) P([[-7, 0, z], [7, 0, z]], 0.1);
+  for (let k = 0; k < 14; k++){ const sd = k % 2 ? 1 : -1, cx = sd*(2.6 + Math.floor(k/2)*0.95), cz = -2.2 - Math.floor(k/2)*1.5;
+    if (Math.floor(k/2) === 0 && sd < 0) continue; boxW(P, cx - 0.4, cx + 0.4, 0, 1.75, cz - 0.4, cz + 0.4, 0.22);
+    const lit = 0.3 + 0.7*((Math.floor(t*3 + k) % 4) === 0 ? 1 : 0.2);
+    P([[cx - 0.33, 1.1, cz - 0.41], [cx + 0.33, 1.1, cz - 0.41], [cx + 0.33, 1.5, cz - 0.41], [cx - 0.33, 1.5, cz - 0.41], [cx - 0.33, 1.1, cz - 0.41]], 0.5*lit);
+    P([[cx - 0.36, 1.78, cz - 0.41], [cx + 0.36, 1.78, cz - 0.41], [cx + 0.36, 2.0, cz - 0.41], [cx - 0.36, 2.0, cz - 0.41], [cx - 0.36, 1.78, cz - 0.41]], 0.6*lit); }
+  { const mx = -3.4; boxW(P, mx - 0.45, mx + 0.45, 0, 1.6, -5.2, -4.6, 0.3); P([[mx - 0.3, 1.0, -4.59], [mx + 0.3, 1.0, -4.59], [mx + 0.3, 1.3, -4.59], [mx - 0.3, 1.3, -4.59], [mx - 0.3, 1.0, -4.59]], 0.5); }
+  // --- our cabinet: body, marquee with the house name, bezel, control panel, coin door
+  { const W2 = 0.46, H = 1.86;
+    boxW(P, -W2, W2, 0, H, -0.75, -0.1, 0.55);
+    P([[-W2, 1.02, -0.1], [-W2, 1.18, 0.16], [-W2, 1.62, 0.16], [-W2, H, -0.1]], 0.55); P([[W2, 1.02, -0.1], [W2, 1.18, 0.16], [W2, 1.62, 0.16], [W2, H, -0.1]], 0.55);
+    P([[-W2, 1.18, 0.16], [W2, 1.18, 0.16]], 0.5); P([[-W2, 1.62, 0.16], [W2, 1.62, 0.16]], 0.5);
+    P([[-W2, 1.02, -0.1], [W2, 1.02, -0.1]], 0.5);
+    { const nm = vtxt(12), sc = Math.min(0.09, 0.74/(nm.length*6)), my = H - 0.2;
+      P([[-W2 + 0.03, my - 0.08, -0.12], [W2 - 0.03, my - 0.08, -0.12], [W2 - 0.03, my + 0.16, -0.12], [-W2 + 0.03, my + 0.16, -0.12], [-W2 + 0.03, my - 0.08, -0.12]], 0.8);
+      [...nm].forEach((ch, k) => { const g = GLY[ch]; if (!g) return; for (const line of g) P(line.map(([gx, gy]) => [nm.length*6*sc/2 - (gx + k*6)*sc, my - 0.05 + gy*sc, -0.13]), 1.3 + c.pulse*0.4); }); }
+    P([[-0.36, 1.2, -0.38], [0.36, 1.2, -0.38], [0.36, 1.7, -0.45], [-0.36, 1.7, -0.45], [-0.36, 1.2, -0.38]], 0.7);
+    P([[-0.3, 1.0, 0.14], [0.3, 1.0, 0.14], [0.3, 1.02, -0.06], [-0.3, 1.02, -0.06], [-0.3, 1.0, 0.14]], 0.5);
+    for (let k = 0; k < 4; k++){ const bx = -0.02 + k*0.09, on = hash2(k, Math.floor(b*2)) < 0.45;
+      P([...Array(9)].map((_, m) => { const a = m/8*TAU; return [bx + Math.cos(a)*0.032, 1.012 + (on ? 0 : 0.012), 0.04 + Math.sin(a)*0.032]; }), on ? 1.5 : 0.6); }
+    { const lean = Math.sin(b*Math.PI)*0.1, sx = -0.22; P([[sx, 1.01, 0.04], [sx + lean*0.1, 1.13, 0.04 + lean*0.06]], 0.8);
+      P([...Array(9)].map((_, m) => { const a = m/8*TAU; return [sx + lean*0.1 + Math.cos(a)*0.035, 1.15, 0.04 + lean*0.06 + Math.sin(a)*0.035]; }), 0.9); }
+    boxW(P, -0.12, 0.12, 0.45, 0.62, -0.12, -0.08, 0.4); }
+  // --- what is on the screen: the attract/score band and the game itself
+  { const sw = 0.33, sh2 = 0.24, sx0 = SCR[0], sy0 = SCR[1], sz0 = SCR[2] + 0.02, map = (x, y) => [sx0 - x*sw, sy0 + y*sh2, sz0 + y*0.022];   // screen faces +z: mirror x so text reads
+    P([map(-1, -1), map(1, -1), map(1, 1), map(-1, 1), map(-1, -1)], 0.7);
+    const gi = 1 + s.flash*1.5;
+    P([map(s.ship, -0.86), map(s.ship - 0.075, -0.97), map(s.ship, -0.93), map(s.ship + 0.075, -0.97), map(s.ship, -0.86)], 1.3*gi);
+    for (const sh of s.shots) P([map(sh.p[0], sh.p[1]), map(sh.p[0], sh.p[1] - 0.06)], 1.5*gi);
+    for (const r of s.rocks){ const pts = []; for (let k = 0; k <= r.n*2; k++){ const a = r.a + k/(r.n*2)*TAU, rr = r.r*(0.75 + 0.3*((k % 2) ? 1 : 0.6));
+        pts.push(map(r.p[0] + Math.cos(a)*rr, r.p[1] + Math.sin(a)*rr*1.3)); } P(pts, 1.0*gi); }
+    { const txt = String(s.score).padStart(6, '0'), tsc = 0.012; [...txt].forEach((ch, k) => { const g = GLY[ch]; if (!g) return;
+        for (const line of g) P(line.map(([gx, gy]) => map(-0.95 + (gx + k*6)*tsc*2.2, 0.98 - 0.1 + gy*tsc*1.6)), 0.9*gi); });
+      for (let k = 0; k < s.lives; k++) P([map(0.6 + k*0.12, 0.9), map(0.56 + k*0.12, 0.82), map(0.64 + k*0.12, 0.82), map(0.6 + k*0.12, 0.9)], 0.9*gi); }
+    if (s.flash > 0.1){ const q = scr(map(0, 0)); if (q && q[0]) o.push({p:ring2(q[0][0], q[0][1], (1.1 - s.flash)*2.4*F/q[1], 16), i:1.6*s.flash, q:1}); }
+    const q0 = scr(map(0, 0)); if (q0 && q0[0]) o.push({p:ring2(q0[0][0], q0[0][1], 0.02*F/q0[1], 6), i:0.3 + s.flash, q:1}); }
+  // --- the player, leaning in, hands on the stick and buttons
+  { const lean = 0.06 + Math.max(0, Math.sin(b*Math.PI))*0.05 + s.flash*0.1, px = 0.0, pz = 0.62;
+    chunkyPerson(o, V, F, P, [px, 0, pz + lean*0.3], -Math.PI/2, {reachL:[-0.22 + Math.sin(b*Math.PI)*0.03, 1.16, 0.06], reachR:[0.07 + (hash2(Math.floor(b*2), 1) - 0.5)*0.06, 1.05, 0.05]});
+    for (let k = 0; k < 2; k++){ const fx = px + (k ? 0.5 : -0.52); chunkyPerson(o, V, F, P, [fx, 0, pz + 0.55], -Math.PI/2 + (k ? -0.3 : 0.3), {}); } }
+  return o; } });
+
 // ============================================================ kaleidoscope (global, Shift+C)
 // Clip every polyline to one wedge of angle PI/n, then mirror and rotate that wedge round the circle: 2n copies of
 // 1/2n of the picture, so the line count stays about the same whatever n is. The source slowly turns underneath.
 const KALEIDO = [0, 4, 6, 8];
 const HUD_BANKS = 16;   // bank slots shown in the HUD list (empty ones wait for new effects); ` only cycles banks that have effects
-const VERSION = 'v1.13 · 2026-10-08';   // bump on every publish so a venue can tell whether it is on the latest
+const VERSION = 'v1.14 · 2026-10-08';   // bump on every publish so a venue can tell whether it is on the latest
 function clipHalf(pts, f){ const res = []; let cur = [];
   for (let k = 0; k < pts.length; k++){ const p = pts[k], d = f(p);
     if (k > 0){ const q = pts[k-1], dq = f(q);
