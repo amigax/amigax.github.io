@@ -6403,12 +6403,90 @@ FX.push({ name:'CAT / DOG', persist:0.2, draw(c, s){
     [...nm].forEach((ch, k) => { const g = GLY[ch]; if (!g) return; for (const line of g) P(line.map(([gx, gy]) => W([-nm.length*6*sc/2 + (gx + k*6)*sc, cy - 0.6 + gy*sc, 0.12])), 1.1); }); void tg; }
   return o; } });
 
+// BREAKERS: a cypher on a street corner. A ring of onlookers claps on the beat while one dancer at a time takes the
+// middle: toprock steps, then down into six-step footwork, a freeze held on the downbeat, a windmill spinning on the
+// shoulders, a back spin, and on a drop a headspin that goes round and round. When a round ends the dancer rolls
+// back into the ring and the next one steps out. A boombox sits on the kerb with its levels jumping, lamp-light
+// pools on the floor, and the shop shutter behind is tagged with the VECTOR TEXT.
+FX.push({ name:'BREAKERS', persist:0.17, draw(c, s){
+  const o = [], F = 1.5, dt = Math.min(c.dt, 0.05), t = c.t, b = c.beat, rnd = (a, b2) => a + Math.random()*(b2 - a);
+  if (s.round === undefined){ s.round = -1; s.who = 0; s.lastK = 0; s.spin = 0; s.head = 0; }
+  const kickEdge = c.kick > 0.85 && s.lastK <= 0.85; s.lastK = c.kick;
+  const drop = c.audio && kickEdge && AU.surge > 3;
+  const RN = 16, round = Math.floor(b/RN), u = b - round*RN;
+  if (round !== s.round){ s.round = round; s.who = (s.who + 1 + Math.floor(Math.random()*2)) % 7; s.head = 0; }
+  if (drop) s.head = 1.6; s.head = Math.max(0, s.head - dt*0.55);
+  // --- the move for this part of the round
+  const move = s.head > 0 ? 'head' : u < 3 ? 'toprock' : u < 7 ? 'sixstep' : u < 8.5 ? 'freeze' : u < 12 ? 'windmill' : u < 14 ? 'backspin' : 'toprock';
+  s.spin += dt*(move === 'windmill' ? 7 : move === 'backspin' ? 10 : move === 'head' ? 13 : 0);
+  // --- camera: low and circling the cypher, dropping to the floor for the spins
+  const low = move === 'windmill' || move === 'backspin' || move === 'head';
+  const ca = t*0.28 + Math.sin(t*0.13)*0.8, R = low ? 4.6 : 5.6;
+  const eT = [Math.cos(ca)*R, low ? 0.55 : 1.5 + Math.sin(t*0.3)*0.3, Math.sin(ca)*R], tT = [0, low ? 0.5 : 1.0, 0];
+  if (!s.cE){ s.cE = eT; s.cT = tT; }
+  const kc = 1 - Math.exp(-dt*2); s.cE = v3add(s.cE, v3mul(v3sub(eT, s.cE), kc)); s.cT = v3add(s.cT, v3mul(v3sub(tT, s.cT), kc));
+  const V = lookCam(s.cE, s.cT, Math.sin(t*0.4)*0.05), Pf = fogDraw(o, V, F, 30), P = (pts, i) => Pf(pts, i, true);
+  const scr = p => { const q = V(p); return q[2] > 0.1 ? [proj(q, 0, F), q[2]] : null; };
+  // --- street: paving, lamp pools, kerb, shutter with a tag, boombox
+  for (let x = -9; x <= 9; x += 1.5) P([[x, 0, -9], [x, 0, 9]], 0.12);
+  for (let z = -9; z <= 9; z += 1.5) P([[-9, 0, z], [9, 0, z]], 0.12);
+  for (const [lx, lz] of [[-5, -4], [6, 3]]){ P([[lx, 0, lz], [lx, 4.6, lz], [lx - 1.1, 4.9, lz]], 0.4);
+    P([...Array(9)].map((_, k) => { const a = k/8*TAU; return [lx - 1.3 + Math.cos(a)*0.22, 4.82 + Math.sin(a)*0.12, lz]; }), 0.8);
+    P([...Array(19)].map((_, k) => { const a = k/18*TAU; return [lx - 1.3 + Math.cos(a)*2.6, 0.01, lz + Math.sin(a)*2.6]; }), 0.18); }
+  { const SZ = -6.5; P([[-9, 0, SZ], [9, 0, SZ], [9, 4.2, SZ], [-9, 4.2, SZ], [-9, 0, SZ]], 0.4);
+    for (let x = -8.6; x < 9; x += 0.42) P([[x, 0.1, SZ + 0.02], [x, 3.4, SZ + 0.02]], 0.12);
+    for (let y = 0.4; y < 3.4; y += 0.5) P([[-8.6, y, SZ + 0.02], [8.6, y, SZ + 0.02]], 0.1);
+    const nm = vtxt(10), sc = Math.min(0.5, 7/(nm.length*6));
+    // the shutter faces +z, so mirror the tag or it reads backwards from the street
+    [...nm].forEach((ch, k) => { const g = GLY[ch]; if (!g) return; const sk = 0.35;
+      for (const line of g) P(line.map(([gx, gy]) => [nm.length*6*sc/2 - (gx + k*6)*sc - gy*sc*sk, 1.1 + gy*sc*1.25, SZ + 0.05]), 1.1 + c.pulse*0.3); });
+    P([[-9, 4.2, SZ], [-9, 4.6, SZ + 0.6], [9, 4.6, SZ + 0.6], [9, 4.2, SZ]], 0.3); }
+  { const bx = 3.4, bz = -4.6; boxW(P, bx - 0.9, bx + 0.9, 0, 0.62, bz - 0.3, bz + 0.3, 0.6);
+    for (const sd of [-1, 1]) P([...Array(13)].map((_, k) => { const a = k/12*TAU; return [bx + sd*0.5 + Math.cos(a)*0.24, 0.31 + Math.sin(a)*0.24, bz - 0.31]; }), 0.7);
+    for (let k = 0; k < 7; k++){ const lv = [c.bass, c.bass, c.mid, c.mid, c.high, c.high, c.mid][k], hh = clamp(0.06 + lv*0.3 + vnoise(t*6 + k, k)*0.08, 0.03, 0.4);
+      P([[bx - 0.14 + k*0.045, 0.14, bz - 0.31], [bx - 0.14 + k*0.045, 0.14 + hh, bz - 0.31]], 1.2); }
+    P([[bx - 0.75, 0.62, bz], [bx - 0.4, 0.95, bz], [bx + 0.4, 0.95, bz], [bx + 0.75, 0.62, bz]], 0.5); }
+  // --- a b-boy. Local frame: +x forward, the whole body can be tipped over for floor moves
+  const dancer = (pos, yaw, mv, ph, sp, scl) => { const tip = mv === 'windmill' ? Math.PI*0.5 : mv === 'backspin' ? Math.PI*0.52 : mv === 'head' ? Math.PI : mv === 'freeze' ? 1.1 : 0;
+    const spinY = (mv === 'windmill' || mv === 'backspin' || mv === 'head') ? sp : 0, hover = mv === 'head' ? 1.42 : (mv === 'windmill' || mv === 'backspin') ? 0.42 : 0;
+    const W = q => v3add(pos, v3add(rot(rot(v3mul(q, scl), tip, 0, 0), 0, yaw + spinY, 0), [0, hover, 0]));
+    const st = Math.sin(ph*TAU), st2 = Math.sin(ph*TAU + Math.PI);
+    let hipY = 0.86, L = {};
+    if (mv === 'toprock'){ L = {kL:[0.1 + st*0.25, 0.44, -0.16], fL:[0.18 + st*0.5, Math.max(0, st)*0.22, -0.2], kR:[0.1 + st2*0.25, 0.44, 0.16], fR:[0.18 + st2*0.5, Math.max(0, st2)*0.22, 0.2],
+        eL:[0.15, 1.18 - st*0.1, -0.42], hL:[0.3 + st*0.2, 1.0, -0.6], eR:[0.15, 1.18 - st2*0.1, 0.42], hR:[0.3 + st2*0.2, 1.0, 0.6]}; }
+    else if (mv === 'sixstep'){ hipY = 0.5; const a = ph*TAU;
+      L = {kL:[0.3 + Math.cos(a)*0.3, 0.26, -0.3 + Math.sin(a)*0.3], fL:[0.55 + Math.cos(a)*0.55, 0.04, -0.45 + Math.sin(a)*0.55], kR:[0.25 + Math.cos(a + 2)*0.3, 0.3, 0.3 + Math.sin(a + 2)*0.3], fR:[0.5 + Math.cos(a + 2)*0.5, 0.04, 0.45 + Math.sin(a + 2)*0.5],
+        eL:[-0.2, 0.3, -0.35], hL:[-0.45, 0.02, -0.4], eR:[-0.15, 0.34, 0.3], hR:[-0.4, 0.02, 0.42]}; }
+    else if (mv === 'freeze'){ hipY = 0.8; L = {kL:[0.5, 0.5, -0.1], fL:[0.95, 0.75, -0.15], kR:[0.2, 0.3, 0.3], fR:[0.45, 0.05, 0.4], eL:[-0.3, 0.45, -0.25], hL:[-0.55, 0.02, -0.3], eR:[-0.1, 0.9, 0.3], hR:[0.1, 1.2, 0.45]}; }
+    else { const a = ph*TAU*0.5; hipY = 0.72;
+      L = {kL:[0.45 + Math.cos(a)*0.2, 0.55 + Math.sin(a)*0.5, -0.3], fL:[0.9 + Math.cos(a)*0.4, 0.8 + Math.sin(a)*0.9, -0.45], kR:[0.4 + Math.cos(a + Math.PI)*0.2, 0.5 + Math.sin(a + Math.PI)*0.5, 0.3], fR:[0.85 + Math.cos(a + Math.PI)*0.4, 0.75 + Math.sin(a + Math.PI)*0.9, 0.45],
+        eL:[-0.25, 0.4, -0.32], hL:[-0.5, 0.08, -0.36], eR:[-0.2, 0.42, 0.32], hR:[-0.45, 0.08, 0.36]}; }
+    const hip = [0, hipY, 0], chest = [0.02, hipY + 0.42, 0], head = [0.05, hipY + 0.78, 0];
+    ellMesh(o, V, F, W(chest), 0.2, 0.26, 0.19, q => rot(rot(q, tip, 0, 0), 0, yaw + spinY, 0), 4, 8, 0.55, 0.12);
+    ellMesh(o, V, F, W(head), 0.15, 0.16, 0.15, q => rot(rot(q, tip, 0, 0), 0, yaw + spinY, 0), 3, 8, 0.65, 0.12);
+    P([W([head[0] - 0.02, head[1] + 0.1, -0.15]), W([head[0] + 0.14, head[1] + 0.12, 0]), W([head[0] - 0.02, head[1] + 0.1, 0.15])], 0.8);
+    P([W(hip), W(chest)], 0.6);
+    for (const [k1, k2, sd] of [['kL', 'fL', -1], ['kR', 'fR', 1]]) P([W([0, hipY - 0.02, sd*0.13]), W(L[k1]), W(L[k2])], 0.7);
+    for (const [k1, k2, sd] of [['eL', 'hL', -1], ['eR', 'hR', 1]]){ P([W([0, hipY + 0.52, sd*0.22]), W(L[k1]), W(L[k2])], 0.7);
+      P(ringW(0, 0, 0, 0.07, 6).map(q => W(v3add(L[k2], [q[0], q[2], 0]))), 0.6); }
+    for (const [kk, sd] of [['fL', -1], ['fR', 1]]) P([W(v3add(L[kk], [-0.06, -0.04, sd*0.05])), W(v3add(L[kk], [0.16, -0.04, sd*0.05])), W(v3add(L[kk], [0.16, -0.04, -sd*0.03])), W(v3add(L[kk], [-0.06, -0.04, -sd*0.03]))], 0.6); };
+  const ph = (b*1.5) % 1;
+  dancer([0, 0, 0], t*0.2, move, ph, s.spin, 1);
+  if (move === 'head' || move === 'windmill' || move === 'backspin'){ const q = scr([0, 0.02, 0]);
+    if (q && q[0]) for (let k = 1; k <= 2; k++) o.push({p:ring2(q[0][0], q[0][1], (0.4 + k*0.5 + (s.spin % 1))*F/q[1], 14), i:0.5, q:1}); }
+  // --- the ring of onlookers, clapping and bobbing on the beat
+  for (let k = 0; k < 7; k++){ if (k === s.who) continue; const a = k/7*TAU + 0.3, R2 = 3.5 + (k % 2)*0.4, px = Math.cos(a)*R2, pz = Math.sin(a)*R2;
+    const bob = Math.abs(Math.sin(b*Math.PI + k))*0.07, clap = Math.max(0, Math.sin(b*Math.PI*2 + k*0.3));
+    chunkyPerson(o, V, F, P, [px, bob, pz], Math.atan2(-(0 - pz), 0 - px), {walk:undefined,
+      reachR:[px*0.78 + Math.cos(a)*-0.1, 1.15 + clap*0.12, pz*0.78 - 0.08 - clap*0.06], reachL:[px*0.78 + Math.cos(a)*-0.1, 1.15 + clap*0.12, pz*0.78 + 0.08 + clap*0.06]}); }
+  return o; } });
+
 // ============================================================ kaleidoscope (global, Shift+C)
 // Clip every polyline to one wedge of angle PI/n, then mirror and rotate that wedge round the circle: 2n copies of
 // 1/2n of the picture, so the line count stays about the same whatever n is. The source slowly turns underneath.
 const KALEIDO = [0, 4, 6, 8];
 const HUD_BANKS = 16;   // bank slots shown in the HUD list (empty ones wait for new effects); ` only cycles banks that have effects
-const VERSION = 'v1.12 · 2026-10-08';   // bump on every publish so a venue can tell whether it is on the latest
+const VERSION = 'v1.13 · 2026-10-08';   // bump on every publish so a venue can tell whether it is on the latest
 function clipHalf(pts, f){ const res = []; let cur = [];
   for (let k = 0; k < pts.length; k++){ const p = pts[k], d = f(p);
     if (k > 0){ const q = pts[k-1], dq = f(q);
