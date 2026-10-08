@@ -6866,6 +6866,85 @@ FX.push({ name:'ICE', persist:0.19, draw(c, s){
   for (const q of s.spray){ const sv = scr(q.p); if (sv && sv[0]) o.push({p:ring2(sv[0][0], sv[0][1], 0.03*F/sv[1], 5), i:1.3*(1 - q.a/0.7), q:1}); }
   return o; } });
 
+// STARFIGHTER: a cockpit view of the kind of vector space battle the old arcade cabinets ran, with our own ships.
+// Three stages loop: a swarm of angular fighters wheeling in at you and breaking off; a run between the towers of a
+// huge hull with turrets spitting bolts; then the trench itself, walls flashing past and a target vent at the end.
+// Your own cannons answer on the beat from the frame corners, hits burst into shards, the shield bar on the glass
+// takes knocks and the targeting box snaps to whatever is nearest. A drop fires the torpedoes at the vent.
+FX.push({ name:'STARFIGHTER', persist:0.2, draw(c, s){
+  const o = [], F = 1.5, dt = Math.min(c.dt, 0.05), t = c.t, b = c.beat, rnd = (a, b2) => a + Math.random()*(b2 - a);
+  if (s.z === undefined){ s.z = 0; s.en = []; s.bolts = []; s.shards = []; s.lastK = 0; s.shield = 1; s.torp = 0; s.hit = 0; s.score = 0; s.nb = -1; }
+  const kickEdge = c.kick > 0.85 && s.lastK <= 0.85; s.lastK = c.kick;
+  const drop = c.audio && kickEdge && AU.surge > 3;
+  const STAGE = Math.floor(b/32) % 3, u = b % 32;
+  s.z += (26 + Math.min(c.bass, 1.2)*12)*dt;
+  const sway = [Math.sin(t*0.6)*1.6 + Math.sin(t*0.23)*2.2, Math.sin(t*0.47)*0.9, 0];
+  const eye = [sway[0], sway[1], s.z], roll = -Math.cos(t*0.6)*0.18 + Math.sin(t*0.9)*0.05;
+  const V = lookCam(eye, [sway[0]*0.5, sway[1]*0.4, s.z + 30], roll), Pf = fogDraw(o, V, F, 260), P = (pts, i) => Pf(pts, i, true);
+  const scr = p => { const q = V(p); return q[2] > 0.4 ? [proj(q, 0, F), q[2]] : null; };
+  // --- stars, and the stage you are flying through
+  for (let k = 0; k < 90; k++){ const a = hash2(k, 1)*TAU, r = 40 + hash2(k, 2)*120, zz = s.z + 80 + ((k*53) % 200);
+    const q = scr([Math.cos(a)*r, Math.sin(a)*r*0.6, zz]); if (q && q[0]) o.push({p:[[q[0][0], q[0][1]], [q[0][0] + 0.003, q[0][1]]], i:0.5, q:1}); }
+  if (STAGE === 1){ for (let j = Math.floor((s.z - 20)/26); j < (s.z + 230)/26; j++){ const zz = j*26, h = 16 + hash2(j, 4)*26, w = 5 + hash2(j, 5)*5;
+      for (const sd of [-1, 1]){ const x = sd*(13 + hash2(j, 6)*6); boxW(P, x - w, x + w, -h*0.5, h*0.5, zz - w, zz + w, 0.3);
+        for (let y = -h*0.4; y < h*0.5; y += 4) P([[x - w, y, zz - w], [x + w, y, zz - w]], 0.12);
+        if (hash2(j, 7) > 0.6){ const tp = [x - sd*w, h*0.5 + 1.5, zz], q = scr(tp); if (q && q[0]) o.push({p:ring2(q[0][0], q[0][1], 0.6*F/q[1], 7), i:1.1, q:1});
+          if (Math.random() < dt*1.2) s.bolts.push({p:tp.slice(), v:v3mul(v3norm(v3sub(eye, tp)), 90), a:0, foe:true}); } } }
+    for (const sd of [-1, 1]) P([[sd*7, -20, s.z - 20], [sd*7, -20, s.z + 240]], 0.25); }
+  else if (STAGE === 2){ const TW = 6.5, TD = 9;
+    for (let j = Math.floor((s.z - 20)/5); j < (s.z + 200)/5; j++){ const zz = j*5;
+      for (const sd of [-1, 1]){ P([[sd*TW, -TD, zz], [sd*TW, TD, zz]], hash2(j, 1) > 0.7 ? 0.5 : 0.2);
+        if (hash2(j, 2) > 0.55) P([[sd*TW, -TD + hash2(j, 3)*TD, zz], [sd*TW*0.72, -TD + hash2(j, 3)*TD, zz + 2.5]], 0.3); }
+      P([[-TW, -TD, zz], [TW, -TD, zz]], hash2(j, 4) > 0.8 ? 0.45 : 0.15);
+      if (hash2(j, 9) > 0.93){ const tp = [rnd(-TW*0.8, TW*0.8), -TD + 1, zz]; if (Math.random() < dt*2.5) s.bolts.push({p:tp, v:v3mul(v3norm(v3sub(eye, tp)), 80), a:0, foe:true}); } }
+    { const vz = Math.ceil((s.z + 120)/420)*420; if (vz - s.z < 240){ const q = scr([0, -TD + 2.2, vz]);
+        if (q && q[0]){ const r = 1.6*F/q[1]; o.push({p:[[q[0][0] - r, q[0][1] - r*0.6], [q[0][0] + r, q[0][1] - r*0.6], [q[0][0] + r, q[0][1] + r*0.6], [q[0][0] - r, q[0][1] + r*0.6], [q[0][0] - r, q[0][1] - r*0.6]], i:1.4, q:1});
+          if (s.torp > 0) o.push({p:ring2(q[0][0], q[0][1], r*(2.4 - s.torp*1.6), 14), i:1.6*s.torp, q:1}); } } } }
+  // --- enemy fighters: an angular hull, wings and engine glow; they wheel in and break off
+  if (STAGE === 0 && Math.floor(b*2) !== s.nb){ s.nb = Math.floor(b*2);
+    if (s.en.length < 9) for (let k = 0; k < 2; k++) s.en.push({p:[rnd(-30, 30), rnd(-14, 14), s.z + rnd(150, 230)], ph:rnd(0, TAU), sp:rnd(34, 50), rl:rnd(-2, 2), hp:1}); }
+  for (const e of s.en){ e.p[2] -= e.sp*dt; e.p[0] += Math.sin(t*1.6 + e.ph)*9*dt; e.p[1] += Math.cos(t*1.3 + e.ph)*5*dt; }
+  s.en = s.en.filter(e => e.hp > 0 && e.p[2] > s.z - 24);
+  for (const e of s.en){ const d = e.p, rl = t*e.rl + e.ph, W = q => v3add(d, rot(q, 0, 0, rl));
+    P([W([0, 0, 2.2]), W([-1.1, 0, -1.4]), W([0, 0.5, -1.0]), W([1.1, 0, -1.4]), W([0, 0, 2.2])], 0.9);
+    for (const sd of [-1, 1]) P([W([sd*1.1, 0, -1.4]), W([sd*2.5, 1.7, -1.9]), W([sd*2.5, -1.7, -1.9]), W([sd*1.1, 0, -1.4])], 0.75);
+    const q = scr(W([0, 0, -1.6])); if (q && q[0]) o.push({p:ring2(q[0][0], q[0][1], 0.35*F/q[1], 6), i:1.3, q:1});
+    if (Math.random() < dt*0.8) s.bolts.push({p:W([0, 0, 2.2]), v:v3mul(v3norm(v3sub(eye, d)), 95), a:0, foe:true}); }
+  // --- your cannons fire on the beat from the corners of the frame; the nearest target gets the box
+  let tgt = null, td = 1e9; for (const e of s.en){ const q = scr(e.p); if (!q || !q[0]) continue; const dd = Math.hypot(q[0][0], q[0][1]);
+    if (dd < td){ td = dd; tgt = {e, q:q[0], z:q[1]}; } }
+  if (Math.floor(b*2) !== s.fb){ s.fb = Math.floor(b*2);
+    for (const sd of [-1, 1]){ const from = v3add(eye, [sd*2.6, -1.2, 1.5]), to = tgt ? tgt.e.p : [sway[0], sway[1], s.z + 200];
+      s.bolts.push({p:from, v:v3mul(v3norm(v3sub(to, from)), 190), a:0, foe:false}); } }
+  s.bolts = s.bolts.filter(bo => { bo.a += dt; if (bo.a > 1.6) return false; bo.p = v3add(bo.p, v3mul(bo.v, dt));
+    if (!bo.foe){ for (const e of s.en){ if (e.hp <= 0) continue; if (Math.hypot(bo.p[0] - e.p[0], bo.p[1] - e.p[1], bo.p[2] - e.p[2]) < 3.2){ e.hp = 0; s.score += 50;
+        for (let k = 0; k < 10; k++) s.shards.push({p:e.p.slice(), v:[rnd(-9, 9), rnd(-9, 9), rnd(-9, 9)], a:0}); return false; } } }
+    else if (bo.p[2] < s.z + 1.5 && bo.p[2] > s.z - 1.5){ if (Math.hypot(bo.p[0] - eye[0], bo.p[1] - eye[1]) < 2.4){ s.shield = Math.max(0, s.shield - 0.12); s.hit = 1; return false; } }
+    P([bo.p, v3sub(bo.p, v3mul(bo.v, 0.035))], bo.foe ? 1.3 : 1.7); return true; });
+  s.shards = s.shards.filter(sh => { sh.a += dt; if (sh.a > 0.7) return false; sh.p = v3add(sh.p, v3mul(sh.v, dt));
+    P([sh.p, v3add(sh.p, v3mul(sh.v, 0.04))], 1.5*(1 - sh.a/0.7)); return true; });
+  s.shield = Math.min(1, s.shield + dt*0.07); s.hit = Math.max(0, s.hit - dt*2.5);
+  if (drop) s.torp = 1; s.torp = Math.max(0, s.torp - dt*0.5);
+  if (s.torp > 0.01){ for (const sd of [-1, 1]){ const fp = v3add(eye, [sd*1.6, -1.4, 2 + (1 - s.torp)*200]);
+      const q = scr(fp); if (q && q[0]) o.push({p:ring2(q[0][0], q[0][1], 0.5*F/q[1], 8), i:1.8, q:1}); } }
+  // --- the cockpit: frame, cannon stubs, shield bar, target box and score
+  { const A = c.asp, fr = [[-A*0.98, -0.98], [A*0.98, -0.98], [A*0.98, 0.98], [-A*0.98, 0.98]];
+    o.push({p:[fr[0], [fr[0][0] + 0.3, -0.98], [fr[0][0] + 0.45, -0.8]], i:0.7, q:1});
+    o.push({p:[fr[1], [fr[1][0] - 0.3, -0.98], [fr[1][0] - 0.45, -0.8]], i:0.7, q:1});
+    for (const sd of [-1, 1]) o.push({p:[[sd*A*0.72, -0.98], [sd*A*0.62, -0.72], [sd*A*0.58, -0.5]], i:0.8, q:1});
+    o.push({p:[[-0.1, 0], [0.1, 0]], i:0.9, q:1}); o.push({p:[[0, -0.1], [0, 0.1]], i:0.9, q:1});
+    o.push({p:ring2(0, 0, 0.055, 12), i:0.6, q:1});
+    if (tgt){ const r = 0.06 + 1.2/tgt.z; const bx = [[tgt.q[0] - r, tgt.q[1] - r], [tgt.q[0] + r, tgt.q[1] - r], [tgt.q[0] + r, tgt.q[1] + r], [tgt.q[0] - r, tgt.q[1] + r]];
+      for (let k = 0; k < 4; k++){ const a = bx[k], b2 = bx[(k + 1) % 4]; o.push({p:[a, [a[0] + (b2[0] - a[0])*0.3, a[1] + (b2[1] - a[1])*0.3]], i:1.4, q:1});
+        o.push({p:[b2, [b2[0] + (a[0] - b2[0])*0.3, b2[1] + (a[1] - b2[1])*0.3]], i:1.4, q:1}); } }
+    const bw = A*0.5; o.push({p:[[-bw, -0.86], [bw, -0.86]], i:0.4, q:1});
+    o.push({p:[[-bw, -0.88], [-bw + 2*bw*s.shield, -0.88]], i:s.shield < 0.35 ? 1.6 : 1.0, q:1});
+    text2(o, 'SHIELD', -bw, -0.82, 0.009, 0.6);
+    const sct = String(s.score).padStart(6, '0'); text2(o, sct, A*0.9 - 6*6*0.011, 0.9, 0.011, 1.0);
+    const nm = vtxt(10); text2(o, nm, -A*0.9, 0.9, 0.011, 0.9);
+    if (s.hit > 0.05) o.push({p:[[-A, -1], [A, -1], [A, 1], [-A, 1], [-A, -1]], i:2.4*s.hit, q:1}); }
+  return o; } });
+
 // ============================================================ kaleidoscope (global, Shift+C)
 // Clip every polyline to one wedge of angle PI/n, then mirror and rotate that wedge round the circle: 2n copies of
 // 1/2n of the picture, so the line count stays about the same whatever n is. The source slowly turns underneath.
