@@ -20,6 +20,8 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 #fxrow::-webkit-scrollbar{width:7px}
 #fxrow::-webkit-scrollbar-thumb{background:rgba(141,255,190,.35);border-radius:4px}
 #fxrow::-webkit-scrollbar-track{background:transparent}
+#fxrow [data-fx],#fxrow [data-bk]{cursor:pointer}
+#fxrow [data-fx]:hover,#fxrow [data-bk]:hover{color:var(--hot);text-shadow:0 0 8px #fff}
 #help{color:var(--dim)}
 #msg{position:absolute;left:50%;bottom:18%;transform:translateX(-50%);font-size:16px;letter-spacing:.2em;opacity:0;transition:opacity .4s;white-space:pre;text-align:center}
 .on{color:var(--hot);text-shadow:0 0 8px #fff}
@@ -6268,7 +6270,7 @@ FX.push({ name:'PIZZA RUN', persist:0.17, draw(c, s){
 // 1/2n of the picture, so the line count stays about the same whatever n is. The source slowly turns underneath.
 const KALEIDO = [0, 4, 6, 8];
 const HUD_BANKS = 16;   // bank slots shown in the HUD list (empty ones wait for new effects); ` only cycles banks that have effects
-const VERSION = 'v1.9 · 2026-10-08';   // bump on every publish so a venue can tell whether it is on the latest
+const VERSION = 'v1.10 · 2026-10-08';   // bump on every publish so a venue can tell whether it is on the latest
 function clipHalf(pts, f){ const res = []; let cur = [];
   for (let k = 0; k < pts.length; k++){ const p = pts[k], d = f(p);
     if (k > 0){ const q = pts[k-1], dq = f(q);
@@ -6965,13 +6967,13 @@ function drawHud(){
   for (let b0 = 0; b0 < nb; b0 += 2){ if (b0) rows.push('');
   rows.push(`<span class="bkblk" data-b="${b0}">`);
   for (let row = -1; row < 10; row++){ let line = '';
-    for (let b = b0; b < Math.min(nb, b0 + 2); b++){ const act = b === S.bank; let txt = '', cls = act ? '' : 'd dim';
-      if (row < 0){ txt = `BANK ${b + 1}${act ? ' ◀' : ''}`; cls = act ? 'on' : 'd'; }
+    for (let b = b0; b < Math.min(nb, b0 + 2); b++){ const act = b === S.bank; let txt = '', cls = act ? '' : 'd dim', at = '';
+      if (row < 0){ txt = `BANK ${b + 1}${act ? ' ◀' : ''}`; cls = act ? 'on' : 'd'; at = ` data-bk="${b}"`; }
       else { const i = b*10 + row;
-        if (i < FX.length){ const d = decks.findIndex(D => D.fx === i); txt = `${(row + 1) % 10} ${FX[i].name}`;
+        if (i < FX.length){ const d = decks.findIndex(D => D.fx === i); txt = `${(row + 1) % 10} ${FX[i].name}`; at = ` data-fx="${i}"`;
           if (d === onAir) cls = 'on'; else if (d >= 0) cls = 'cue'; }
         else { txt = `${(row + 1) % 10} ·`; cls = 'd dim'; } }
-      line += `<span class="${cls}">${txt.padEnd(COLW)}</span>`; }
+      line += `<span class="${cls}"${at}>${txt.padEnd(COLW)}</span>`; }
     rows.push(line); }
   rows.push('</span>'); }
   const fxEl = $('fxrow'), html = rows.join('\n') + '\n<span class="d">` switches bank · scroll for more</span>';
@@ -7061,6 +7063,11 @@ addEventListener('keydown', e => {
 });
 const guideEl = $('guide');
 const showGuide = on => { guideEl.classList.toggle('on', on); try { localStorage.setItem('feroxSeen', '1'); } catch(e){} };
+$('fxrow').addEventListener('click', e => { const el = e.target.closest('[data-fx],[data-bk]'); if (!el) return;
+  ensureAC();
+  if (el.dataset.bk !== undefined){ S.bank = +el.dataset.bk; flash('BANK ' + (S.bank + 1)); }
+  else { const i = +el.dataset.fx; S.bank = Math.floor(i/10); cue(i, e.shiftKey); }
+  drawHud(); });
 $('gver').textContent = VERSION;
 $('gbtn').addEventListener('click', () => showGuide(!guideEl.classList.contains('on')));
 $('gclose').addEventListener('click', () => showGuide(false));
