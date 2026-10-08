@@ -6265,12 +6265,74 @@ FX.push({ name:'PIZZA RUN', persist:0.17, draw(c, s){
     if (u >= 2 && u < 10){ for (let k = 0; k < 4; k++){ const q = scr([pizPos[0] + rnd(-0.3, 0.3), cy + 0.08 + rnd(0, 0.3), pizPos[2] + rnd(-0.3, 0.3)]); if (q && q[0]) o.push({p:ring2(q[0][0], q[0][1], 0.03*F/q[1], 6), i:0.5, q:1}); } } }
   return o; } });
 
+// ZEPPELINS: a fleet of airships cruising over a city at dusk, the house name down the side of every hull. Each one
+// is a ribbed envelope with tail fins, a gondola slung underneath and engine pods whose props blur round; mooring
+// lines trail from the nose and the name is spelled out in lit panels along the flank, flickering on the beat.
+// The camera flies with the fleet, sometimes alongside a hull, sometimes under the keel looking up, sometimes wide
+// with the towers below and searchlights sweeping. On a drop the formation banks together and the panels flash.
+FX.push({ name:'ZEPPELINS', persist:0.18, draw(c, s){
+  const o = [], F = 1.4, dt = Math.min(c.dt, 0.05), t = c.t, b = c.beat, rnd = (a, b2) => a + Math.random()*(b2 - a);
+  if (s.z === undefined){ s.z = 0; s.lastK = 0; s.bankT = 0; s.shot = 0; s.shotB = -1; }
+  const kickEdge = c.kick > 0.85 && s.lastK <= 0.85; s.lastK = c.kick;
+  const drop = c.audio && kickEdge && AU.surge > 3;
+  if (drop) s.bankT = 1; s.bankT = Math.max(0, s.bankT - dt*0.5);
+  s.z += (11 + Math.min(c.bass, 1.2)*5)*dt;
+  const roll = Math.sin(t*0.25)*0.06 + s.bankT*0.35;
+  // the fleet: a lead ship and four others stepped back and out
+  const SHIPS = [[0, 0, 0], [-34, -7, -46], [31, 6, -62], [-14, 12, -104], [26, -11, -120]];
+  const shipPos = k => { const o2 = SHIPS[k]; return [o2[0] + Math.sin(t*0.21 + k)*2.4, 54 + o2[1] + Math.sin(t*0.3 + k*2)*1.6, s.z + o2[2]]; };
+  if (Math.floor(b/16) !== s.shotB){ s.shotB = Math.floor(b/16); s.shot = (s.shot + 1 + Math.floor(Math.random()*2)) % 3; }
+  const lead = shipPos(0);
+  const eT = s.shot === 0 ? [lead[0] + 44, lead[1] + 6, lead[2] - 30] : s.shot === 1 ? [lead[0] + 6, lead[1] - 26, lead[2] - 18] : [lead[0] - 70, lead[1] + 26, lead[2] - 80];
+  const tT = s.shot === 2 ? [lead[0], lead[1] - 10, lead[2] + 10] : [lead[0], lead[1], lead[2]];
+  if (!s.cE){ s.cE = eT; s.cT = tT; }
+  const kc = 1 - Math.exp(-dt*1.1); s.cE = v3add(s.cE, v3mul(v3sub(eT, s.cE), kc)); s.cT = v3add(s.cT, v3mul(v3sub(tT, s.cT), kc));
+  const V = lookCam(s.cE, s.cT, roll*0.5), Pf = fogDraw(o, V, F, 320), P = (pts, i) => Pf(pts, i, true), PF0 = fogDraw(o, V, F, 2200), PF = (pts, i) => PF0(pts, i, true);
+  const scr = p => { const q = V(p); return q[2] > 0.3 ? [proj(q, 0, F), q[2]] : null; };
+  // --- the city below at dusk, searchlights, a low sun
+  { const GY = 0; for (let x = -400; x <= 400; x += 50) P([[x, GY, s.z - 300], [x, GY, s.z + 220]], 0.1);
+    for (let zz = Math.floor((s.z - 300)/50)*50; zz < s.z + 220; zz += 50) P([[-400, GY, zz], [400, GY, zz]], 0.1);
+    for (let j = 0; j < 46; j++){ const hx = ((j*83) % 760) - 380, hz = Math.floor((s.z - 260 + ((j*137) % 480))/1)*1, h = 14 + hash2(j, 1)*62, w = 7 + hash2(j, 2)*8;
+      boxW(P, hx - w, hx + w, GY, h, hz - w, hz + w, 0.3);
+      for (let y = 12; y < h; y += 11) if (hash2(j, y) > 0.45) P([[hx - w, y, hz - w], [hx + w, y, hz - w]], 0.16);
+      if (hash2(j, 9) > 0.86){ const q = scr([hx, h + 3, hz]); if (q && q[0]) o.push({p:ring2(q[0][0], q[0][1], 0.5*F/q[1], 6), i:1.2*(0.4 + 0.6*Math.abs(Math.sin(t*2 + j))), q:1}); } }
+    for (let k = 0; k < 3; k++){ const sx = -200 + k*190, sz = s.z - 120 + k*70, a = Math.sin(t*0.23 + k*2)*0.7, L = 230;
+      const dir = [Math.sin(a)*0.5, 1, Math.cos(a)*0.35];
+      P([[sx, GY + 2, sz], [sx + dir[0]*L, GY + dir[1]*L, sz + dir[2]*L]], 0.5); P([[sx, GY + 2, sz], [sx + dir[0]*L*1.02 + 8, GY + dir[1]*L, sz + dir[2]*L*1.02]], 0.3); }
+    PF([[-900, 2, s.z + 900], [900, 2, s.z + 900]], 0.3);
+    { const q = scr([-260, 30, s.z + 820]); if (q && q[0]){ const r = 46*F/q[1]; o.push({p:ring2(q[0][0], q[0][1], r, 20), i:0.8, q:1});
+      for (let k = 1; k < 6; k++){ const y = q[0][1] - r + k*r*0.3, hw = Math.sqrt(Math.max(0, r*r - (y - q[0][1])*(y - q[0][1]))); if (y < q[0][1]) o.push({p:[[q[0][0] - hw, y], [q[0][0] + hw, y]], i:0.45, q:1}); } } } }
+  // --- an airship: ribbed envelope, fins, gondola, engine pods, lit name panels down the flank
+  const ship = (p, k, bright) => { const L = 46, R = 8.2, rl = roll*(k ? 0.6 : 1) + Math.sin(t*0.4 + k)*0.03;
+    const W = q => v3add(p, rot(q, 0, 0, rl)), prof = x => R*Math.pow(Math.max(0, 1 - Math.pow(Math.abs(x)/(L/2), 2.4)), 0.42);
+    for (let i = -6; i <= 6; i++){ const x = i*L/13, r = prof(x); if (r < 0.4) continue; P([...Array(15)].map((_, m) => { const a = m/14*TAU; return W([x, Math.sin(a)*r, Math.cos(a)*r]); }), 0.35*bright); }
+    for (let m = 0; m < 10; m++){ const a = m/10*TAU, pts = []; for (let i = -7; i <= 7; i++){ const x = i*L/14, r = prof(x); pts.push(W([x, Math.sin(a)*r, Math.cos(a)*r])); } P(pts, (m % 5 === 0 ? 0.7 : 0.4)*bright); }
+    for (const [ay, az] of [[1, 0], [-1, 0], [0, 1], [0, -1]]){ const x0 = -L/2 + 3.5, fr = prof(x0 + 1);
+      P([W([x0 + 7, ay*fr*0.9, az*fr*0.9]), W([x0 - 1.5, ay*(fr + 6), az*(fr + 6)]), W([x0 - 4.5, ay*(fr + 6), az*(fr + 6)]), W([x0 - 2, ay*fr*0.8, az*fr*0.8])], 0.6*bright); }
+    { const gx = -2, gz = -R*0.92; P([W([gx - 5, gz - 2.6, 0]), W([gx + 6, gz - 2.6, 0])], 0);
+      boxW((pts, i) => P(pts.map(q => W([q[0], q[1], q[2]])), i), gx - 5.5, gx + 6.5, -R - 3.4, -R - 0.6, -1.9, 1.9, 0.75*bright);
+      for (let m = 0; m < 6; m++){ const wx = gx - 4 + m*1.8; P([W([wx, -R - 2.9, -1.95]), W([wx + 1.1, -R - 2.9, -1.95]), W([wx + 1.1, -R - 1.6, -1.95]), W([wx, -R - 1.6, -1.95]), W([wx, -R - 2.9, -1.95])], 0.9*bright); }
+      P([W([gx + 6.5, -R - 2.4, 0]), W([gx + 8.6, -R - 1.9, 0])], 0.6*bright); }
+    for (const sd of [-1, 1]){ const ex = 4, ez = sd*(R + 2.2); boxW((pts, i) => P(pts.map(q => W(q)), i), ex - 2.2, ex + 1.6, -R*0.55, -R*0.1, ez - 1.1, ez + 1.1, 0.6*bright);
+      const pa = t*22 + k; for (let m = 0; m < 3; m++){ const a = pa + m/3*TAU; P([W([ex + 1.8, -R*0.32 + Math.sin(a)*2.4, ez + Math.cos(a)*2.4]), W([ex + 1.8, -R*0.32 - Math.sin(a)*2.4, ez - Math.cos(a)*2.4])], 0.45*bright); }
+      P([...Array(13)].map((_, m) => { const a = m/12*TAU; return W([ex + 1.9, -R*0.32 + Math.sin(a)*2.4, ez + Math.cos(a)*2.4]); }), 0.25*bright); }
+    { const nm = vtxt(12), sc = Math.min(3.4, 30/(nm.length*6)), lit = 0.8 + 0.6*Math.abs(Math.sin(b*Math.PI)) + s.bankT;
+      for (const sd of [s.cE[2] > p[2] ? 1 : -1]){ const zz = sd*(R*0.52);   // only letter the flank facing the camera, or both show through
+        [...nm].forEach((ch, n) => { const g = GLY[ch]; if (!g) return; const bx = -nm.length*6*sc/2 + n*6*sc;
+          P([W([bx - 0.4, -2.6*sc, zz*1.08]), W([bx + 4.4*sc, -2.6*sc, zz*1.08]), W([bx + 4.4*sc, 6.6*sc, zz*1.08]), W([bx - 0.4, 6.6*sc, zz*1.08]), W([bx - 0.4, -2.6*sc, zz*1.08])], 0.3*bright);
+          for (const line of g) P(line.map(([gx2, gy2]) => W([(sd > 0 ? bx + gx2*sc : -bx - gx2*sc), gy2*sc, zz*1.09])), lit*bright); }); } }
+    if (k === 0) for (let m = 0; m < 3; m++){ const a = m/3*TAU; P([W([L/2 - 1, Math.sin(a)*1.2, Math.cos(a)*1.2]), W([L/2 + 9 + Math.sin(t*2 + m)*1.5, Math.sin(a)*2.4 - 2, Math.cos(a)*2.4 + Math.cos(t*1.7 + m)*1.5])], 0.4*bright); }
+    const q = scr(W([L/2 + 1, 0, 0])); if (q && q[0]) o.push({p:ring2(q[0][0], q[0][1], 0.6*F/q[1], 6), i:1.3, q:1});
+    const q2 = scr(W([-L/2 - 1, 0, 0])); if (q2 && q2[0]) o.push({p:ring2(q2[0][0], q2[0][1], 0.5*F/q2[1], 6), i:1.0*(Math.floor(t*2) % 2 ? 1 : 0.2), q:1}); };
+  SHIPS.forEach((_, k) => ship(shipPos(k), k, k === 0 ? 1 : 0.75));
+  return o; } });
+
 // ============================================================ kaleidoscope (global, Shift+C)
 // Clip every polyline to one wedge of angle PI/n, then mirror and rotate that wedge round the circle: 2n copies of
 // 1/2n of the picture, so the line count stays about the same whatever n is. The source slowly turns underneath.
 const KALEIDO = [0, 4, 6, 8];
 const HUD_BANKS = 16;   // bank slots shown in the HUD list (empty ones wait for new effects); ` only cycles banks that have effects
-const VERSION = 'v1.10 · 2026-10-08';   // bump on every publish so a venue can tell whether it is on the latest
+const VERSION = 'v1.11 · 2026-10-08';   // bump on every publish so a venue can tell whether it is on the latest
 function clipHalf(pts, f){ const res = []; let cur = [];
   for (let k = 0; k < pts.length; k++){ const p = pts[k], d = f(p);
     if (k > 0){ const q = pts[k-1], dq = f(q);
