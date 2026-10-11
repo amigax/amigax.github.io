@@ -7401,7 +7401,7 @@ FX.push({ name:'POLICE BOX', persist:0.22, draw(c, s){
 // 1/2n of the picture, so the line count stays about the same whatever n is. The source slowly turns underneath.
 const KALEIDO = [0, 4, 6, 8];
 const HUD_BANKS = 16;   // bank slots shown in the HUD list (empty ones wait for new effects); ` only cycles banks that have effects
-const VERSION = 'v1.26 · 2026-10-08';   // bump on every publish so a venue can tell whether it is on the latest
+const VERSION = 'v1.27 · 2026-10-11';   // bump on every publish so a venue can tell whether it is on the latest
 function clipHalf(pts, f){ const res = []; let cur = [];
   for (let k = 0; k < pts.length; k++){ const p = pts[k], d = f(p);
     if (k > 0){ const q = pts[k-1], dq = f(q);
@@ -7558,7 +7558,12 @@ function autopilot(){
   if (b >= S.autoNext || drop){
     const nx = autoPick();
     if (full && !drop) autoTransition();
-    if (full) S.kal = Math.random() < 0.08 ? 1 + Math.floor(Math.random()*3) : 0;   // now and then, a kaleidoscope section (was 0.18 until 2026-09-22: too often)
+    // CHANGED 2026-10-11: the kaleidoscope used to be a 0.08 random roll on every effect change (0.18 before
+    // 2026-09-22), so it landed about once every 100 s whatever the music did and rooms read it as a glitch.
+    // Now it only arrives on a drop, at most once a minute, and always clears at the next change - so it reads
+    // as a deliberate hit on a big moment. Shift+C still puts it on by hand whenever you want it.
+    if (full) S.kal = (drop && S.time - (AP.kalAt || -999) > 60 && Math.random() < 0.6) ? 1 + Math.floor(Math.random()*3) : 0;
+    if (S.kal) AP.kalAt = S.time;
     cue(nx, drop); }
   // CHANGED 2026-09-22: leaving full autopilot used to just drop its moves, so a crush/fold it had raised froze wherever
   // it was (looking "off" but still on). Now, if autopilot was the last to move them, they glide home over 2 beats.
